@@ -36,6 +36,11 @@ class BuildCommand extends Command<int> {
       help: 'Verbose output',
       negatable: false,
     );
+    argParser.addFlag(
+      'skip-search',
+      help: 'Skip search index generation',
+      negatable: false,
+    );
   }
 
   @override
@@ -48,6 +53,7 @@ class BuildCommand extends Command<int> {
     final outputDir = args['output'] as String;
     final clean = args['clean'] as bool;
     final verbose = args['verbose'] as bool;
+    final skipSearch = args['skip-search'] as bool;
 
     stdout.writeln('🔨 Building Stardust site...');
     stdout.writeln('');
@@ -82,9 +88,25 @@ class BuildCommand extends Command<int> {
     try {
       final pageCount = await generator.generate();
 
+      // Run Pagefind if search is enabled
+      if (!skipSearch &&
+          config.search.enabled &&
+          config.search.provider == 'pagefind') {
+        stdout.writeln('');
+        stdout.writeln('🔍 Building search index...');
+        final searchResult = await _runPagefind(outputDir, verbose);
+        if (!searchResult) {
+          stderr.writeln(
+              '⚠️  Search index generation skipped (pagefind not found)');
+          stderr.writeln(
+              '   Install pagefind: https://pagefind.app/docs/installation/');
+        }
+      }
+
       stopwatch.stop();
       stdout.writeln('');
-      stdout.writeln('✅ Built $pageCount pages in ${stopwatch.elapsedMilliseconds}ms');
+      stdout.writeln(
+          '✅ Built $pageCount pages in ${stopwatch.elapsedMilliseconds}ms');
       stdout.writeln('   Output: ${p.absolute(outputDir)}');
       stdout.writeln('');
 
@@ -94,5 +116,38 @@ class BuildCommand extends Command<int> {
       if (verbose) stderr.writeln(stackTrace);
       return 1;
     }
+  }
+
+  /// Run Pagefind to generate search index
+  Future<bool> _runPagefind(String outputDir, bool verbose) async {
+    // Try different ways to run pagefind
+    final commands = [
+      ['pagefind', '--site', outputDir],
+      ['npx', 'pagefind', '--site', outputDir],
+      ['pnpx', 'pagefind', '--site', outputDir],
+    ];
+
+    for (final command in commands) {
+      try {
+        final result = await Process.run(
+          command.first,
+          command.skip(1).toList(),
+          runInShell: true,
+        );
+
+        if (result.exitCode == 0) {
+          if (verbose) {
+            stdout.writeln(result.stdout);
+          }
+          stdout.writeln('   ✓ Search index created');
+          return true;
+        }
+      } catch (_) {
+        // Command not found, try next
+        continue;
+      }
+    }
+
+    return false;
   }
 }

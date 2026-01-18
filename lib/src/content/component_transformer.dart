@@ -118,10 +118,10 @@ $content
   };
 
   String _transformTabs(String content) => _transformComponent(
-      content,
-      'Tabs',
-      _buildTabs,
-    );
+        content,
+        'Tabs',
+        _buildTabs,
+      );
 
   String _buildTabs(Map<String, String> attributes, String content) {
     // Extract individual <Tab> components
@@ -170,10 +170,10 @@ $tabPanels  </div>
   }
 
   String _transformCodeGroup(String content) => _transformComponent(
-      content,
-      'CodeGroup',
-      _buildCodeGroup,
-    );
+        content,
+        'CodeGroup',
+        _buildCodeGroup,
+      );
 
   String _buildCodeGroup(Map<String, String> attributes, String content) {
     // Extract individual <Code> components
@@ -294,10 +294,10 @@ $content
   }
 
   String _transformSteps(String content) => _transformComponent(
-      content,
-      'Steps',
-      _buildSteps,
-    );
+        content,
+        'Steps',
+        _buildSteps,
+      );
 
   String _buildSteps(Map<String, String> attributes, String content) {
     final steps = _extractChildComponents(content, 'Step');
@@ -422,10 +422,10 @@ $cardContent</div>
   }
 
   String _transformColumns(String content) => _transformComponent(
-      content,
-      'Columns',
-      _buildColumns,
-    );
+        content,
+        'Columns',
+        _buildColumns,
+      );
 
   String _buildColumns(Map<String, String> attributes, String content) {
     final columns = _extractChildComponents(content, 'Column');
@@ -465,10 +465,10 @@ $columnsHtml</div>
   }
 
   String _transformTiles(String content) => _transformComponent(
-      content,
-      'Tiles',
-      _buildTiles,
-    );
+        content,
+        'Tiles',
+        _buildTiles,
+      );
 
   String _buildTiles(Map<String, String> attributes, String content) {
     final columns = attributes['columns'] ?? '3';
@@ -533,10 +533,10 @@ $tileContent</div>
   }
 
   String _transformPanel(String content) => _transformComponent(
-      content,
-      'Panel',
-      _buildPanel,
-    );
+        content,
+        'Panel',
+        _buildPanel,
+      );
 
   String _buildPanel(Map<String, String> attributes, String content) {
     final title = attributes['title'];
@@ -576,10 +576,10 @@ $content
   }
 
   String _transformBadge(String content) => _transformComponent(
-      content,
-      'Badge',
-      _buildBadge,
-    );
+        content,
+        'Badge',
+        _buildBadge,
+      );
 
   String _buildBadge(Map<String, String> attributes, String content) {
     final variant = attributes['variant'] ?? 'default';
@@ -602,10 +602,10 @@ $content
   }
 
   String _transformIcon(String content) => _transformComponent(
-      content,
-      'Icon',
-      _buildIcon,
-    );
+        content,
+        'Icon',
+        _buildIcon,
+      );
 
   String _buildIcon(Map<String, String> attributes, String content) {
     final name = attributes['name'] ?? content.trim();
@@ -711,10 +711,10 @@ $content
   }
 
   String _transformImage(String content) => _transformComponent(
-      content,
-      'Image',
-      _buildImage,
-    );
+        content,
+        'Image',
+        _buildImage,
+      );
 
   String _buildImage(Map<String, String> attributes, String content) {
     final src = attributes['src'] ?? '';
@@ -939,10 +939,10 @@ $treeContent  </ul>
   }
 
   String _transformMermaid(String content) => _transformComponent(
-      content,
-      'Mermaid',
-      _buildMermaid,
-    );
+        content,
+        'Mermaid',
+        _buildMermaid,
+      );
 
   String _buildMermaid(Map<String, String> attributes, String content) {
     final caption = attributes['caption'];
@@ -973,10 +973,10 @@ $treeContent  </ul>
   }
 
   String _transformTooltip(String content) => _transformComponent(
-      content,
-      'Tooltip',
-      _buildTooltip,
-    );
+        content,
+        'Tooltip',
+        _buildTooltip,
+      );
 
   String _buildTooltip(Map<String, String> attributes, String content) {
     final tip = attributes['content'] ?? attributes['tip'] ?? '';
@@ -992,10 +992,10 @@ $treeContent  </ul>
   }
 
   String _transformYouTube(String content) => _transformComponent(
-      content,
-      'YouTube',
-      _buildYouTube,
-    );
+        content,
+        'YouTube',
+        _buildYouTube,
+      );
 
   String _buildYouTube(Map<String, String> attributes, String content) {
     final id = attributes['id'] ?? content.trim();
@@ -1053,10 +1053,10 @@ $treeContent  </ul>
   }
 
   String _transformVimeo(String content) => _transformComponent(
-      content,
-      'Vimeo',
-      _buildVimeo,
-    );
+        content,
+        'Vimeo',
+        _buildVimeo,
+      );
 
   String _buildVimeo(Map<String, String> attributes, String content) {
     final id = attributes['id'] ?? content.trim();
@@ -1098,10 +1098,10 @@ $treeContent  </ul>
   }
 
   String _transformVideo(String content) => _transformComponent(
-      content,
-      'Video',
-      _buildVideo,
-    );
+        content,
+        'Video',
+        _buildVideo,
+      );
 
   String _buildVideo(Map<String, String> attributes, String content) {
     final src = attributes['src'] ?? content.trim();
@@ -1134,10 +1134,10 @@ $treeContent  </ul>
   }
 
   String _transformZapp(String content) => _transformComponent(
-      content,
-      'Zapp',
-      _buildZapp,
-    );
+        content,
+        'Zapp',
+        _buildZapp,
+      );
 
   String _buildZapp(Map<String, String> attributes, String content) {
     final id = attributes['id'] ?? content.trim();
@@ -1166,10 +1166,10 @@ $treeContent  </ul>
   }
 
   String _transformCodePen(String content) => _transformComponent(
-      content,
-      'CodePen',
-      _buildCodePen,
-    );
+        content,
+        'CodePen',
+        _buildCodePen,
+      );
 
   String _buildCodePen(Map<String, String> attributes, String content) {
     final id = attributes['id'] ?? '';
@@ -1203,10 +1203,10 @@ $treeContent  </ul>
   }
 
   String _transformStackBlitz(String content) => _transformComponent(
-      content,
-      'StackBlitz',
-      _buildStackBlitz,
-    );
+        content,
+        'StackBlitz',
+        _buildStackBlitz,
+      );
 
   String _buildStackBlitz(Map<String, String> attributes, String content) {
     final id = attributes['id'] ?? content.trim();
@@ -1243,10 +1243,10 @@ $treeContent  </ul>
   }
 
   String _transformField(String content) => _transformComponent(
-      content,
-      'Field',
-      _buildField,
-    );
+        content,
+        'Field',
+        _buildField,
+      );
 
   String _buildField(Map<String, String> attributes, String content) {
     final name = attributes['name'] ?? '';
@@ -1287,10 +1287,10 @@ $content
   }
 
   String _transformResponseField(String content) => _transformComponent(
-      content,
-      'ResponseField',
-      _buildResponseField,
-    );
+        content,
+        'ResponseField',
+        _buildResponseField,
+      );
 
   String _buildResponseField(Map<String, String> attributes, String content) {
     final name = attributes['name'] ?? '';
@@ -1318,10 +1318,10 @@ $content
   }
 
   String _transformParamField(String content) => _transformComponent(
-      content,
-      'ParamField',
-      _buildParamField,
-    );
+        content,
+        'ParamField',
+        _buildParamField,
+      );
 
   String _buildParamField(Map<String, String> attributes, String content) {
     final name = attributes['name'] ?? '';
@@ -1361,10 +1361,10 @@ $content
   }
 
   String _transformApiEndpoint(String content) => _transformComponent(
-      content,
-      'Api',
-      _buildApiEndpoint,
-    );
+        content,
+        'Api',
+        _buildApiEndpoint,
+      );
 
   String _buildApiEndpoint(Map<String, String> attributes, String content) {
     final method = (attributes['method'] ?? 'GET').toUpperCase();
@@ -1398,10 +1398,10 @@ $content
   }
 
   String _transformFrame(String content) => _transformComponent(
-      content,
-      'Frame',
-      _buildFrame,
-    );
+        content,
+        'Frame',
+        _buildFrame,
+      );
 
   String _buildFrame(Map<String, String> attributes, String content) {
     final type = attributes['type'] ?? 'browser';
@@ -1450,10 +1450,10 @@ $content
   }
 
   String _transformUpdate(String content) => _transformComponent(
-      content,
-      'Update',
-      _buildUpdate,
-    );
+        content,
+        'Update',
+        _buildUpdate,
+      );
 
   String _buildUpdate(Map<String, String> attributes, String content) {
     final label = attributes['label'] ?? 'Update';

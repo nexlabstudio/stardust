@@ -163,7 +163,8 @@ $copyButton
         RegExp(r'<h([1-6])[^>]*id="([^"]+)"[^>]*>(.*?)</h\1>', dotAll: true);
 
     for (final match in headingPattern.allMatches(html)) {
-      final (levelStr, id, rawText) = (match.group(1), match.group(2), match.group(3));
+      final (levelStr, id, rawText) =
+          (match.group(1), match.group(2), match.group(3));
       if (levelStr == null || id == null || rawText == null) continue;
 
       final level = int.parse(levelStr);
@@ -176,19 +177,20 @@ $copyButton
     return toc;
   }
 
-  String _stripHtml(String html) => html.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+  String _stripHtml(String html) =>
+      html.replaceAll(RegExp(r'<[^>]*>'), '').trim();
 
   String _decodeHtmlEntities(String text) => text
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&quot;', '"')
-        .replaceAll('&#39;', "'");
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&amp;', '&')
+      .replaceAll('&quot;', '"')
+      .replaceAll('&#39;', "'");
 
   String _encodeHtml(String text) => text
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
 }
