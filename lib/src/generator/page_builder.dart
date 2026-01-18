@@ -57,6 +57,15 @@ class PageBuilder {
   String _buildMeta(Page page) {
     final buffer = StringBuffer();
 
+    if (config.url case final url?) {
+      final baseUrl = switch (url) {
+        final u when u.endsWith('/') => u.substring(0, u.length - 1),
+        _ => url,
+      };
+      final pagePath = switch (page.path) { '/' => '', final p => p };
+      buffer.writeln('  <link rel="canonical" href="$baseUrl$pagePath">');
+    }
+
     if (page.description case final description?) {
       buffer.writeln('  <meta name="description" content="${_escapeHtml(description)}">');
     }
@@ -66,13 +75,21 @@ class PageBuilder {
       buffer.writeln('  <meta property="og:description" content="${_escapeHtml(description)}">');
     }
     buffer.writeln('  <meta property="og:type" content="article">');
-    if (config.seo.ogImage != null) {
-      buffer.writeln('  <meta property="og:image" content="${config.seo.ogImage}">');
+    if (config.url case final url?) {
+      final baseUrl = switch (url) {
+        final u when u.endsWith('/') => u.substring(0, u.length - 1),
+        _ => url,
+      };
+      final pagePath = switch (page.path) { '/' => '', final p => p };
+      buffer.writeln('  <meta property="og:url" content="$baseUrl$pagePath">');
+    }
+    if (config.seo.ogImage case final ogImage?) {
+      buffer.writeln('  <meta property="og:image" content="$ogImage">');
     }
 
     buffer.writeln('  <meta name="twitter:card" content="${config.seo.twitterCard}">');
-    if (config.seo.twitterHandle != null) {
-      buffer.writeln('  <meta name="twitter:site" content="${config.seo.twitterHandle}">');
+    if (config.seo.twitterHandle case final handle?) {
+      buffer.writeln('  <meta name="twitter:site" content="$handle">');
     }
 
     return buffer.toString();
