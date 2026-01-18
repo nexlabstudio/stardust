@@ -3,6 +3,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 import '../../config/config_loader.dart';
 import '../../generator/site_generator.dart';
+import '../../search/pagefind_runner.dart';
 
 /// Build static documentation site
 class BuildCommand extends Command<int> {
@@ -36,6 +37,11 @@ class BuildCommand extends Command<int> {
       help: 'Verbose output',
       negatable: false,
     );
+    argParser.addFlag(
+      'skip-search',
+      help: 'Skip search index generation',
+      negatable: false,
+    );
   }
 
   @override
@@ -48,6 +54,7 @@ class BuildCommand extends Command<int> {
     final outputDir = args['output'] as String;
     final clean = args['clean'] as bool;
     final verbose = args['verbose'] as bool;
+    final skipSearch = args['skip-search'] as bool;
 
     stdout.writeln('🔨 Building Stardust site...');
     stdout.writeln('');
@@ -82,9 +89,24 @@ class BuildCommand extends Command<int> {
     try {
       final pageCount = await generator.generate();
 
+      // Run Pagefind if search is enabled
+      if (!skipSearch &&
+          config.search.enabled &&
+          config.search.provider == 'pagefind') {
+        stdout.writeln('');
+        stdout.writeln('🔍 Building search index...');
+        await PagefindRunner.run(
+          outputDir,
+          verbose: verbose,
+          onLog: stdout.writeln,
+          onError: stderr.writeln,
+        );
+      }
+
       stopwatch.stop();
       stdout.writeln('');
-      stdout.writeln('✅ Built $pageCount pages in ${stopwatch.elapsedMilliseconds}ms');
+      stdout.writeln(
+          '✅ Built $pageCount pages in ${stopwatch.elapsedMilliseconds}ms');
       stdout.writeln('   Output: ${p.absolute(outputDir)}');
       stdout.writeln('');
 

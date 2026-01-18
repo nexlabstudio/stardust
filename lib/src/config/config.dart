@@ -114,11 +114,11 @@ class NavItem {
   });
 
   factory NavItem.fromYaml(Map yaml) => NavItem(
-      label: yaml['label'] as String,
-      href: yaml['href'] as String,
-      external: yaml['external'] as bool? ?? false,
-      icon: yaml['icon'] as String?,
-    );
+        label: yaml['label'] as String,
+        href: yaml['href'] as String,
+        external: yaml['external'] as bool? ?? false,
+        icon: yaml['icon'] as String?,
+      );
 }
 
 class SidebarGroup {
@@ -137,14 +137,15 @@ class SidebarGroup {
   });
 
   factory SidebarGroup.fromYaml(Map yaml) => SidebarGroup(
-      group: yaml['group'] as String,
-      icon: yaml['icon'] as String?,
-      collapsed: yaml['collapsed'] as bool? ?? false,
-      pages: (yaml['pages'] as List?)?.map(SidebarPage.fromYaml).toList() ?? [],
-      autogenerate: yaml['autogenerate'] != null
-          ? AutogenerateConfig.fromYaml(yaml['autogenerate'] as Map)
-          : null,
-    );
+        group: yaml['group'] as String,
+        icon: yaml['icon'] as String?,
+        collapsed: yaml['collapsed'] as bool? ?? false,
+        pages:
+            (yaml['pages'] as List?)?.map(SidebarPage.fromYaml).toList() ?? [],
+        autogenerate: yaml['autogenerate'] != null
+            ? AutogenerateConfig.fromYaml(yaml['autogenerate'] as Map)
+            : null,
+      );
 }
 
 class SidebarPage {
@@ -183,9 +184,9 @@ class AutogenerateConfig {
   });
 
   factory AutogenerateConfig.fromYaml(Map yaml) => AutogenerateConfig(
-      dir: yaml['dir'] as String,
-      order: yaml['order'] as String? ?? 'filename',
-    );
+        dir: yaml['dir'] as String,
+        order: yaml['order'] as String? ?? 'filename',
+      );
 }
 
 class TocConfig {
@@ -282,9 +283,9 @@ class BackgroundColors {
   });
 
   factory BackgroundColors.fromYaml(Map yaml) => BackgroundColors(
-      light: yaml['light'] as String? ?? '#ffffff',
-      dark: yaml['dark'] as String? ?? '#0f172a',
-    );
+        light: yaml['light'] as String? ?? '#ffffff',
+        dark: yaml['dark'] as String? ?? '#0f172a',
+      );
 }
 
 class TextColors {
@@ -297,9 +298,9 @@ class TextColors {
   });
 
   factory TextColors.fromYaml(Map yaml) => TextColors(
-      light: yaml['light'] as String? ?? '#1e293b',
-      dark: yaml['dark'] as String? ?? '#e2e8f0',
-    );
+        light: yaml['light'] as String? ?? '#1e293b',
+        dark: yaml['dark'] as String? ?? '#e2e8f0',
+      );
 }
 
 class DarkModeConfig {
@@ -343,7 +344,8 @@ class CustomThemeConfig {
 
   const CustomThemeConfig({this.css});
 
-  factory CustomThemeConfig.fromYaml(Map yaml) => CustomThemeConfig(css: yaml['css'] as String?);
+  factory CustomThemeConfig.fromYaml(Map yaml) =>
+      CustomThemeConfig(css: yaml['css'] as String?);
 }
 
 class CodeConfig {
@@ -436,9 +438,9 @@ class CalloutConfig {
   });
 
   factory CalloutConfig.fromYaml(Map yaml) => CalloutConfig(
-      icon: yaml['icon'] as String,
-      color: yaml['color'] as String,
-    );
+        icon: yaml['icon'] as String,
+        color: yaml['color'] as String,
+      );
 }
 
 class SearchConfig {
@@ -482,10 +484,10 @@ class AlgoliaConfig {
   });
 
   factory AlgoliaConfig.fromYaml(Map yaml) => AlgoliaConfig(
-      appId: yaml['appId'] as String,
-      apiKey: yaml['apiKey'] as String,
-      indexName: yaml['indexName'] as String,
-    );
+        appId: yaml['appId'] as String,
+        apiKey: yaml['apiKey'] as String,
+        indexName: yaml['indexName'] as String,
+      );
 }
 
 class SeoConfig {
@@ -591,11 +593,11 @@ class AnnouncementConfig {
   });
 
   factory AnnouncementConfig.fromYaml(Map yaml) => AnnouncementConfig(
-      text: yaml['text'] as String,
-      link: yaml['link'] as String?,
-      dismissible: yaml['dismissible'] as bool? ?? true,
-      style: yaml['style'] as String? ?? 'info',
-    );
+        text: yaml['text'] as String,
+        link: yaml['link'] as String?,
+        dismissible: yaml['dismissible'] as bool? ?? true,
+        style: yaml['style'] as String? ?? 'info',
+      );
 }
 
 class FooterConfig {
@@ -629,12 +631,12 @@ class FooterLinkGroup {
   });
 
   factory FooterLinkGroup.fromYaml(Map yaml) => FooterLinkGroup(
-      group: yaml['group'] as String,
-      items: (yaml['items'] as List?)
-              ?.map((e) => FooterLink.fromYaml(e as Map))
-              .toList() ??
-          [],
-    );
+        group: yaml['group'] as String,
+        items: (yaml['items'] as List?)
+                ?.map((e) => FooterLink.fromYaml(e as Map))
+                .toList() ??
+            [],
+      );
 }
 
 class FooterLink {
@@ -647,9 +649,9 @@ class FooterLink {
   });
 
   factory FooterLink.fromYaml(Map yaml) => FooterLink(
-      label: yaml['label'] as String,
-      href: yaml['href'] as String,
-    );
+        label: yaml['label'] as String,
+        href: yaml['href'] as String,
+      );
 }
 
 class VersionsConfig {
@@ -696,11 +698,11 @@ class VersionEntry {
   });
 
   factory VersionEntry.fromYaml(Map yaml) => VersionEntry(
-      version: yaml['version'] as String,
-      label: yaml['label'] as String?,
-      path: yaml['path'] as String,
-      banner: yaml['banner'] as String?,
-    );
+        version: yaml['version'] as String,
+        label: yaml['label'] as String?,
+        path: yaml['path'] as String,
+        banner: yaml['banner'] as String?,
+      );
 }
 
 class I18nConfig {
@@ -739,10 +741,10 @@ class LocaleConfig {
   });
 
   factory LocaleConfig.fromYaml(Map yaml) => LocaleConfig(
-      code: yaml['code'] as String,
-      label: yaml['label'] as String,
-      dir: yaml['dir'] as String? ?? 'ltr',
-    );
+        code: yaml['code'] as String,
+        label: yaml['label'] as String,
+        dir: yaml['dir'] as String? ?? 'ltr',
+      );
 }
 
 class IntegrationsConfig {
@@ -793,12 +795,12 @@ class EditLinkConfig {
   });
 
   factory EditLinkConfig.fromYaml(Map yaml) => EditLinkConfig(
-      enabled: yaml['enabled'] as bool? ?? false,
-      repo: yaml['repo'] as String?,
-      branch: yaml['branch'] as String? ?? 'main',
-      path: yaml['path'] as String? ?? 'docs/',
-      text: yaml['text'] as String? ?? 'Edit this page on GitHub',
-    );
+        enabled: yaml['enabled'] as bool? ?? false,
+        repo: yaml['repo'] as String?,
+        branch: yaml['branch'] as String? ?? 'main',
+        path: yaml['path'] as String? ?? 'docs/',
+        text: yaml['text'] as String? ?? 'Edit this page on GitHub',
+      );
 }
 
 class LastUpdatedConfig {
@@ -813,10 +815,10 @@ class LastUpdatedConfig {
   });
 
   factory LastUpdatedConfig.fromYaml(Map yaml) => LastUpdatedConfig(
-      enabled: yaml['enabled'] as bool? ?? false,
-      format: yaml['format'] as String? ?? 'MMM d, yyyy',
-      text: yaml['text'] as String? ?? 'Last updated',
-    );
+        enabled: yaml['enabled'] as bool? ?? false,
+        format: yaml['format'] as String? ?? 'MMM d, yyyy',
+        text: yaml['text'] as String? ?? 'Last updated',
+      );
 }
 
 class AnalyticsConfig {
@@ -831,12 +833,12 @@ class AnalyticsConfig {
   });
 
   factory AnalyticsConfig.fromYaml(Map yaml) => AnalyticsConfig(
-      google: yaml['google'] as String?,
-      plausible: yaml['plausible'] as String?,
-      posthog: yaml['posthog'] != null
-          ? PosthogConfig.fromYaml(yaml['posthog'] as Map)
-          : null,
-    );
+        google: yaml['google'] as String?,
+        plausible: yaml['plausible'] as String?,
+        posthog: yaml['posthog'] != null
+            ? PosthogConfig.fromYaml(yaml['posthog'] as Map)
+            : null,
+      );
 }
 
 class PosthogConfig {
@@ -849,9 +851,9 @@ class PosthogConfig {
   });
 
   factory PosthogConfig.fromYaml(Map yaml) => PosthogConfig(
-      key: yaml['key'] as String,
-      host: yaml['host'] as String?,
-    );
+        key: yaml['key'] as String,
+        host: yaml['host'] as String?,
+      );
 }
 
 class CommentsConfig {
@@ -866,14 +868,14 @@ class CommentsConfig {
   });
 
   factory CommentsConfig.fromYaml(Map yaml) => CommentsConfig(
-      provider: yaml['provider'] as String?,
-      giscus: yaml['giscus'] != null
-          ? GiscusConfig.fromYaml(yaml['giscus'] as Map)
-          : null,
-      disqus: yaml['disqus'] != null
-          ? DisqusConfig.fromYaml(yaml['disqus'] as Map)
-          : null,
-    );
+        provider: yaml['provider'] as String?,
+        giscus: yaml['giscus'] != null
+            ? GiscusConfig.fromYaml(yaml['giscus'] as Map)
+            : null,
+        disqus: yaml['disqus'] != null
+            ? DisqusConfig.fromYaml(yaml['disqus'] as Map)
+            : null,
+      );
 }
 
 class GiscusConfig {
@@ -890,11 +892,11 @@ class GiscusConfig {
   });
 
   factory GiscusConfig.fromYaml(Map yaml) => GiscusConfig(
-      repo: yaml['repo'] as String?,
-      repoId: yaml['repoId'] as String?,
-      category: yaml['category'] as String?,
-      categoryId: yaml['categoryId'] as String?,
-    );
+        repo: yaml['repo'] as String?,
+        repoId: yaml['repoId'] as String?,
+        category: yaml['category'] as String?,
+        categoryId: yaml['categoryId'] as String?,
+      );
 }
 
 class DisqusConfig {
@@ -902,7 +904,8 @@ class DisqusConfig {
 
   const DisqusConfig({this.shortname});
 
-  factory DisqusConfig.fromYaml(Map yaml) => DisqusConfig(shortname: yaml['shortname'] as String?);
+  factory DisqusConfig.fromYaml(Map yaml) =>
+      DisqusConfig(shortname: yaml['shortname'] as String?);
 }
 
 class BuildConfig {
@@ -1034,10 +1037,10 @@ class RedirectConfig {
   });
 
   factory RedirectConfig.fromYaml(Map yaml) => RedirectConfig(
-      from: yaml['from'] as String,
-      to: yaml['to'] as String,
-      status: yaml['status'] as int? ?? 301,
-    );
+        from: yaml['from'] as String,
+        to: yaml['to'] as String,
+        status: yaml['status'] as int? ?? 301,
+      );
 }
 
 class DevConfig {

@@ -214,16 +214,15 @@ class DevCommand extends Command<int> {
   }
 
   Future<void> _openBrowser(String url) async {
+    final (cmd, args, shell) = switch (Platform.operatingSystem) {
+      'macos' => ('open', [url], false),
+      'linux' => ('xdg-open', [url], false),
+      'windows' => ('start', [url], true),
+      _ => (null, <String>[], false),
+    };
+    if (cmd == null) return;
     try {
-      if (Platform.isMacOS) {
-        await Process.run('open', [url]);
-      } else if (Platform.isLinux) {
-        await Process.run('xdg-open', [url]);
-      } else if (Platform.isWindows) {
-        await Process.run('start', [url], runInShell: true);
-      }
-    } catch (_) {
-      // Ignore browser open errors
-    }
+      await Process.run(cmd, args, runInShell: shell);
+    } catch (_) {}
   }
 }
