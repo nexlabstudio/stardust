@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://stardust.nexlab.studio/schemas/docs.json",
+  "$id": "https://stardust.nexlab.studio/schemas/stardust.json",
   "title": "Stardust Configuration",
   "description": "Configuration schema for Stardust documentation framework",
   "type": "object",

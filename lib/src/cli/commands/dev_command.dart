@@ -22,7 +22,7 @@ class DevCommand extends Command<int> {
       'config',
       abbr: 'c',
       help: 'Path to config file',
-      defaultsTo: 'docs.yaml',
+      defaultsTo: 'stardust.yaml',
     );
     argParser.addOption(
       'port',

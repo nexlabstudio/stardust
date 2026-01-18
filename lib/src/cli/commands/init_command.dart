@@ -57,12 +57,12 @@ class InitCommand extends Command<int> {
       await dir.create(recursive: true);
     }
 
-    // Create docs.yaml
+    // Create stardust.yaml
     await _createFile(
-      p.join(targetDir, 'docs.yaml'),
+      p.join(targetDir, 'stardust.yaml'),
       _docsYamlTemplate(projectName),
       force,
-      'docs.yaml',
+      'stardust.yaml',
     );
 
     // Create docs directory
@@ -279,7 +279,7 @@ my-docs/
 │   ├── index.md    # Home page
 │   └── ...
 ├── public/         # Static assets (images, etc.)
-├── docs.yaml       # Configuration
+├── stardust.yaml       # Configuration
 └── dist/           # Build output (generated)
 ```
 

@@ -90,7 +90,7 @@ class OpenApiCommand extends Command<int> {
       stdout.writeln('📁 Output: ${p.absolute(outputDir)}');
       stdout.writeln('');
       stdout.writeln('Next steps:');
-      stdout.writeln('  1. Add the generated pages to your docs.yaml sidebar');
+      stdout.writeln('  1. Add the generated pages to your stardust.yaml sidebar');
       stdout.writeln('  2. Run `stardust build` to generate your site');
       stdout.writeln('');
 

@@ -39,13 +39,13 @@ my-docs/
 │   ├── index.md    # Home page
 │   └── ...
 ├── public/         # Static assets (images, etc.)
-├── docs.yaml       # Configuration
+├── stardust.yaml       # Configuration
 └── dist/           # Build output (generated)
 ```
 
 ## Configuration
 
-Create a `docs.yaml` file in your project root:
+Create a `stardust.yaml` file in your project root:
 
 ```yaml
 name: My Project
@@ -162,7 +162,7 @@ Group multiple accordions:
     Run `dart pub get` to install all dependencies.
   </Step>
   <Step title="Configure your project">
-    Create a `docs.yaml` file with your configuration.
+    Create a `stardust.yaml` file with your configuration.
   </Step>
   <Step title="Start writing">
     Create markdown files in the `docs/` directory.
@@ -629,7 +629,7 @@ Options:
 Start the development server with hot reload.
 
 Options:
-- `-c, --config` — Path to config file (default: `docs.yaml`)
+- `-c, --config` — Path to config file (default: `stardust.yaml`)
 - `-p, --port` — Port to serve on (default: `4000`)
 - `--host` — Host to bind to (default: `localhost`)
 - `-o, --open` — Open browser automatically
@@ -639,7 +639,7 @@ Options:
 Build the static documentation site.
 
 Options:
-- `-c, --config` — Path to config file (default: `docs.yaml`)
+- `-c, --config` — Path to config file (default: `stardust.yaml`)
 - `-o, --output` — Output directory (default: `dist`)
 - `--clean` — Clean output directory before building (default: `true`)
 - `--skip-search` — Skip search index generation
@@ -658,7 +658,7 @@ Stardust includes full-text search powered by [Pagefind](https://pagefind.app/).
 
 ### Configuration
 
-Configure search in `docs.yaml`:
+Configure search in `stardust.yaml`:
 
 ```yaml
 search:
@@ -725,7 +725,7 @@ Stardust automatically generates `sitemap.xml` and `robots.txt` for search engin
 
 ### Sitemap
 
-To enable sitemap generation, set the `url` in your `docs.yaml`:
+To enable sitemap generation, set the `url` in your `stardust.yaml`:
 
 ```yaml
 url: https://your-docs.com
@@ -924,7 +924,7 @@ The user's email address.
    stardust openapi openapi.yaml -o docs/api
    ```
 
-2. **Add to sidebar** in `docs.yaml`:
+2. **Add to sidebar** in `stardust.yaml`:
    ```yaml
    sidebar:
      - group: API Reference

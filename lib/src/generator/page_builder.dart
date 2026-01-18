@@ -246,7 +246,6 @@ class PageBuilder {
       flex-direction: column;
     }
 
-    /* Header */
     .header {
       position: sticky;
       top: 0;
@@ -319,7 +318,6 @@ class PageBuilder {
       font-size: 0.75rem;
     }
 
-    /* Search Modal */
     .search-modal {
       position: fixed;
       inset: 0;
@@ -421,7 +419,6 @@ class PageBuilder {
       font-size: 0.6875rem;
     }
 
-    /* Pagefind UI overrides */
     .pagefind-ui {
       --pagefind-ui-scale: 1;
       --pagefind-ui-primary: var(--color-primary);
@@ -514,7 +511,6 @@ class PageBuilder {
       background: var(--color-bg-secondary);
     }
 
-    /* Main container */
     .main-container {
       flex: 1;
       max-width: 90rem;
@@ -525,7 +521,6 @@ class PageBuilder {
       gap: 1px;
     }
 
-    /* Sidebar */
     .sidebar {
       position: sticky;
       top: 4rem;
@@ -573,7 +568,6 @@ class PageBuilder {
       background: color-mix(in srgb, var(--color-primary) 10%, transparent);
     }
 
-    /* Content */
     .content {
       padding: 2rem 3rem;
       min-width: 0;
@@ -668,7 +662,6 @@ class PageBuilder {
       border-radius: var(--radius);
     }
 
-    /* Code blocks */
     .prose code {
       font-family: var(--font-mono);
       font-size: 0.875em;
@@ -729,9 +722,6 @@ class PageBuilder {
       line-height: 1.6;
     }
 
-    /* ==========================================
-       CALLOUTS
-       ========================================== */
     .callout {
       margin: 1.5rem 0;
       padding: 1rem 1.25rem;
@@ -756,7 +746,6 @@ class PageBuilder {
       margin-bottom: 0;
     }
 
-    /* Callout variants */
     .callout-info { --callout-color: #3b82f6; }
     .callout-warning { --callout-color: #f59e0b; }
     .callout-danger { --callout-color: #ef4444; }
@@ -764,9 +753,6 @@ class PageBuilder {
     .callout-note { --callout-color: #8b5cf6; }
     .callout-success { --callout-color: #10b981; }
 
-    /* ==========================================
-       TABS & CODE GROUPS
-       ========================================== */
     .tabs,
     .code-group {
       margin: 1.5rem 0;
@@ -830,7 +816,6 @@ class PageBuilder {
       display: none;
     }
 
-    /* Code group specific */
     .code-group .tab-button {
       font-family: var(--font-mono);
       font-size: 0.8125rem;
@@ -850,9 +835,6 @@ class PageBuilder {
       margin: 0;
     }
 
-    /* ==========================================
-       ACCORDION
-       ========================================== */
     .accordion {
       margin: 1rem 0;
       border: 1px solid var(--color-border);
@@ -930,9 +912,6 @@ class PageBuilder {
       margin-bottom: 0;
     }
 
-    /* ==========================================
-       STEPS
-       ========================================== */
     .steps {
       margin: 1.5rem 0;
       padding-left: 0;
@@ -1003,9 +982,6 @@ class PageBuilder {
       margin-bottom: 0;
     }
 
-    /* ==========================================
-       CARDS
-       ========================================== */
     .cards {
       display: grid;
       grid-template-columns: repeat(var(--cards-columns, 2), 1fr);
@@ -1071,7 +1047,6 @@ class PageBuilder {
       margin-bottom: 0;
     }
 
-    /* Empty states */
     .tabs-empty,
     .code-group-empty,
     .steps-empty,
@@ -1082,9 +1057,6 @@ class PageBuilder {
       font-style: italic;
     }
 
-    /* ==========================================
-       COLUMNS (Phase 3b)
-       ========================================== */
     .columns {
       display: flex;
       gap: var(--columns-gap, 1rem);
@@ -1110,9 +1082,6 @@ class PageBuilder {
       }
     }
 
-    /* ==========================================
-       TILES (Phase 3b)
-       ========================================== */
     .tiles {
       display: grid;
       grid-template-columns: repeat(var(--tiles-columns, 3), 1fr);
@@ -1179,9 +1148,6 @@ class PageBuilder {
       margin-bottom: 0;
     }
 
-    /* ==========================================
-       PANEL (Phase 3b)
-       ========================================== */
     .panel {
       margin: 1.5rem 0;
       border: 1px solid var(--color-border);
@@ -1219,7 +1185,6 @@ class PageBuilder {
       margin-bottom: 0;
     }
 
-    /* Panel variants */
     .panel-primary {
       border-color: var(--color-primary);
     }
@@ -1256,9 +1221,6 @@ class PageBuilder {
       border-bottom-color: #ef4444;
     }
 
-    /* ==========================================
-       BADGE (Phase 3b)
-       ========================================== */
     .badge {
       display: inline-flex;
       align-items: center;
@@ -1272,7 +1234,6 @@ class PageBuilder {
       font-size: 0.875em;
     }
 
-    /* Badge sizes */
     .badge-sm {
       padding: 0.125rem 0.5rem;
       font-size: 0.6875rem;
@@ -1288,7 +1249,6 @@ class PageBuilder {
       font-size: 0.8125rem;
     }
 
-    /* Badge variants */
     .badge-default {
       background: var(--color-bg-secondary);
       color: var(--color-text-secondary);
@@ -1325,9 +1285,6 @@ class PageBuilder {
       border: 1px solid color-mix(in srgb, #3b82f6 30%, transparent);
     }
 
-    /* ==========================================
-       ICON (Phase 3b)
-       ========================================== */
     .icon {
       display: inline-flex;
       align-items: center;
@@ -1348,7 +1305,6 @@ class PageBuilder {
       font-size: 0.875em;
     }
 
-    /* Lucide icons */
     [data-lucide] {
       display: inline-flex;
       align-items: center;
@@ -1361,9 +1317,6 @@ class PageBuilder {
       fill: none;
     }
 
-    /* ==========================================
-       IMAGE (Phase 3c)
-       ========================================== */
     .image-component {
       margin: 1.5rem 0;
     }
@@ -1411,7 +1364,6 @@ class PageBuilder {
       text-align: center;
     }
 
-    /* Image zoom modal */
     .image-zoom-overlay {
       position: fixed;
       inset: 0;
@@ -1440,9 +1392,6 @@ class PageBuilder {
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
-    /* ==========================================
-       TREE (Phase 3c)
-       ========================================== */
     .tree {
       margin: 1.5rem 0;
       padding: 1rem;
@@ -1518,9 +1467,6 @@ class PageBuilder {
       color: var(--color-text-secondary);
     }
 
-    /* ==========================================
-       MERMAID (Phase 3c)
-       ========================================== */
     .mermaid-figure {
       margin: 1.5rem 0;
     }
@@ -1546,9 +1492,6 @@ class PageBuilder {
       text-align: center;
     }
 
-    /* ==========================================
-       TOOLTIP (Phase 3c)
-       ========================================== */
     .tooltip {
       position: relative;
       text-decoration: underline;
@@ -1593,7 +1536,6 @@ class PageBuilder {
       visibility: visible;
     }
 
-    /* Tooltip positions */
     .tooltip-top::before {
       bottom: calc(100% + 8px);
       left: 50%;
@@ -1646,9 +1588,6 @@ class PageBuilder {
       border-right-color: var(--color-text);
     }
 
-    /* ==========================================
-       EMBEDS (Phase 3d)
-       ========================================== */
     .embed {
       margin: 1.5rem 0;
       border-radius: var(--radius);
@@ -1690,7 +1629,6 @@ class PageBuilder {
       text-align: center;
     }
 
-    /* Responsive embeds */
     @media (max-width: 640px) {
       .embed-zapp,
       .embed-stackblitz,
@@ -1699,9 +1637,6 @@ class PageBuilder {
       }
     }
 
-    /* ==========================================
-       API DOCS (Phase 3e)
-       ========================================== */
     .field {
       margin: 1rem 0;
       padding: 1rem;
@@ -1796,7 +1731,6 @@ class PageBuilder {
       margin-bottom: 0;
     }
 
-    /* API Endpoint */
     .api-endpoint {
       margin: 1.5rem 0;
       border: 1px solid var(--color-border);
@@ -1851,9 +1785,6 @@ class PageBuilder {
       padding: 1rem;
     }
 
-    /* ==========================================
-       FRAME (Phase 3f)
-       ========================================== */
     .frame {
       margin: 1.5rem 0;
       border-radius: var(--radius);
@@ -1914,7 +1845,6 @@ class PageBuilder {
       height: auto;
     }
 
-    /* Phone frame */
     .frame-phone {
       max-width: 375px;
       margin-left: auto;
@@ -1947,9 +1877,6 @@ class PageBuilder {
       border-radius: 3px;
     }
 
-    /* ==========================================
-       UPDATE (Phase 3f)
-       ========================================== */
     .update {
       margin: 1.5rem 0;
       padding-left: 1rem;
@@ -1990,7 +1917,6 @@ class PageBuilder {
       margin-bottom: 0;
     }
 
-    /* Update types */
     .update-feature { border-left-color: #22c55e; }
     .update-feature .update-label { color: #22c55e; }
 
@@ -2006,7 +1932,6 @@ class PageBuilder {
     .update-improvement { border-left-color: #8b5cf6; }
     .update-improvement .update-label { color: #8b5cf6; }
 
-    /* Table of contents */
     .toc {
       position: sticky;
       top: 4rem;
@@ -2054,7 +1979,6 @@ class PageBuilder {
       padding-left: 1.5rem;
     }
 
-    /* Edit link */
     .edit-link {
       margin-top: 2rem;
       padding-top: 1.5rem;
@@ -2079,7 +2003,6 @@ class PageBuilder {
       flex-shrink: 0;
     }
 
-    /* Page navigation */
     .page-nav {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -2119,7 +2042,6 @@ class PageBuilder {
       color: var(--color-text);
     }
 
-    /* Footer */
     .footer {
       border-top: 1px solid var(--color-border);
       padding: 1.5rem 2rem;
@@ -2174,7 +2096,6 @@ class PageBuilder {
       color: var(--color-primary);
     }
 
-    /* Header social links */
     .social-link {
       display: flex;
       align-items: center;
@@ -2215,7 +2136,6 @@ class PageBuilder {
       fill: #0175C2;
     }
 
-    /* Syntax highlighting - GitHub-like theme */
     .hljs-comment, .hljs-quote { color: #6e7781; }
     .hljs-keyword, .hljs-selector-tag { color: #cf222e; }
     .hljs-string, .hljs-attr { color: #0a3069; }
@@ -2236,7 +2156,6 @@ class PageBuilder {
     .dark .hljs-type, .dark .hljs-built_in { color: #79c0ff; }
     .dark .hljs-name, .dark .hljs-selector-id, .dark .hljs-selector-class { color: #7ee787; }
 
-    /* Responsive */
     @media (max-width: 1280px) {
       .main-container {
         grid-template-columns: 260px 1fr;
