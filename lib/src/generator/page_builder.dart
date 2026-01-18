@@ -2440,7 +2440,6 @@ class PageBuilder {
     return '''
   <link href="$basePath/_pagefind/pagefind-ui.css" rel="stylesheet">
   <style>
-    /* Pagefind customizations */
     :root {
       --pagefind-ui-scale: 1;
       --pagefind-ui-primary: var(--color-primary);
@@ -2485,7 +2484,6 @@ class PageBuilder {
     </div>
   </div>
   <script>
-    // Initialize Pagefind search
     (function() {
       const searchModal = document.getElementById('search-modal');
       const searchTrigger = document.getElementById('search-trigger');
@@ -2495,14 +2493,12 @@ class PageBuilder {
       let pagefindUI = null;
       let searchUnavailable = false;
 
-      // Pagefind uses ES modules which don't work with file:// protocol
       if (location.protocol === 'file:') {
         searchUnavailable = true;
         if (container) {
           container.innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--color-text-secondary);">Search requires a web server.<br><small>Run <code>stardust dev</code> or use a local server.</small></p>';
         }
       } else {
-        // Only load Pagefind when served via HTTP
         const script = document.createElement('script');
         script.src = '$basePath/_pagefind/pagefind-ui.js';
         script.onload = () => {};
@@ -2518,7 +2514,6 @@ class PageBuilder {
       function openSearch() {
         if (!searchModal) return;
 
-        // Initialize Pagefind UI on first open
         if (!pagefindUI && !searchUnavailable && typeof PagefindUI !== 'undefined') {
           pagefindUI = new PagefindUI({
             element: '#pagefind-container',
@@ -2538,7 +2533,6 @@ class PageBuilder {
         searchModal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
 
-        // Focus the search input
         setTimeout(() => {
           const input = searchModal.querySelector('.pagefind-ui__search-input');
           input?.focus();
@@ -2552,16 +2546,11 @@ class PageBuilder {
         document.body.style.overflow = '';
       }
 
-      // Open search
       searchTrigger?.addEventListener('click', openSearch);
-
-      // Close search
       searchBackdrop?.addEventListener('click', closeSearch);
       searchClose?.addEventListener('click', closeSearch);
-      
-      // Keyboard shortcuts
+
       document.addEventListener('keydown', (e) => {
-        // Open with hotkey
         if (e.key === '${config.search.hotkey}' && !e.ctrlKey && !e.metaKey) {
           const active = document.activeElement;
           if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
@@ -2569,13 +2558,11 @@ class PageBuilder {
             openSearch();
           }
         }
-        
-        // Close with Escape
+
         if (e.key === 'Escape' && searchModal?.classList.contains('active')) {
           closeSearch();
         }
 
-        // Cmd/Ctrl+K to open
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
           e.preventDefault();
           if (searchModal?.classList.contains('active')) {
@@ -2590,7 +2577,6 @@ class PageBuilder {
 ''';
     }
 
-    // Fallback for other providers or no provider
     return '';
   }
 
