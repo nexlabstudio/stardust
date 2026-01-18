@@ -3,6 +3,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 import '../../config/config_loader.dart';
 import '../../generator/site_generator.dart';
+import '../../search/pagefind_runner.dart';
 
 /// Build static documentation site
 class BuildCommand extends Command<int> {
@@ -94,13 +95,12 @@ class BuildCommand extends Command<int> {
           config.search.provider == 'pagefind') {
         stdout.writeln('');
         stdout.writeln('🔍 Building search index...');
-        final searchResult = await _runPagefind(outputDir, verbose);
-        if (!searchResult) {
-          stderr.writeln(
-              '⚠️  Search index generation skipped (pagefind not found)');
-          stderr.writeln(
-              '   Install pagefind: https://pagefind.app/docs/installation/');
-        }
+        await PagefindRunner.run(
+          outputDir,
+          verbose: verbose,
+          onLog: stdout.writeln,
+          onError: stderr.writeln,
+        );
       }
 
       stopwatch.stop();
@@ -116,38 +116,5 @@ class BuildCommand extends Command<int> {
       if (verbose) stderr.writeln(stackTrace);
       return 1;
     }
-  }
-
-  /// Run Pagefind to generate search index
-  Future<bool> _runPagefind(String outputDir, bool verbose) async {
-    // Try different ways to run pagefind
-    final commands = [
-      ['pagefind', '--site', outputDir],
-      ['npx', 'pagefind', '--site', outputDir],
-      ['pnpx', 'pagefind', '--site', outputDir],
-    ];
-
-    for (final command in commands) {
-      try {
-        final result = await Process.run(
-          command.first,
-          command.skip(1).toList(),
-          runInShell: true,
-        );
-
-        if (result.exitCode == 0) {
-          if (verbose) {
-            stdout.writeln(result.stdout);
-          }
-          stdout.writeln('   ✓ Search index created');
-          return true;
-        }
-      } catch (_) {
-        // Command not found, try next
-        continue;
-      }
-    }
-
-    return false;
   }
 }
