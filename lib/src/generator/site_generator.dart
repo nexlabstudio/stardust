@@ -275,6 +275,15 @@ class SiteGenerator {
       final url = '${config.url}${page.path}';
       buffer.writeln('  <url>');
       buffer.writeln('    <loc>$url</loc>');
+
+      final file = File(page.sourcePath);
+      if (file.existsSync()) {
+        final lastMod = file.lastModifiedSync();
+        final formatted =
+            '${lastMod.year}-${lastMod.month.toString().padLeft(2, '0')}-${lastMod.day.toString().padLeft(2, '0')}';
+        buffer.writeln('    <lastmod>$formatted</lastmod>');
+      }
+
       buffer.writeln(
           '    <changefreq>${config.build.sitemap.changefreq}</changefreq>');
       buffer
