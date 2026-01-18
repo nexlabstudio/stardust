@@ -47,17 +47,17 @@ class PageBuilder {
   String _buildMeta(Page page) {
     final buffer = StringBuffer();
 
-    if (page.description != null) {
+    if (page.description case final description?) {
       buffer.writeln(
-          '  <meta name="description" content="${_escapeHtml(page.description!)}">');
+          '  <meta name="description" content="${_escapeHtml(description)}">');
     }
 
     // Open Graph
     buffer.writeln(
         '  <meta property="og:title" content="${_escapeHtml(page.title)}">');
-    if (page.description != null) {
+    if (page.description case final description?) {
       buffer.writeln(
-          '  <meta property="og:description" content="${_escapeHtml(page.description!)}">');
+          '  <meta property="og:description" content="${_escapeHtml(description)}">');
     }
     buffer.writeln('  <meta property="og:type" content="article">');
     if (config.seo.ogImage != null) {
@@ -1982,22 +1982,22 @@ class PageBuilder {
     final buffer = StringBuffer();
     buffer.writeln('<nav class="page-nav">');
 
-    if (page.prev != null) {
+    if (page.prev case final prev?) {
       buffer.writeln('''
-        <a href="${page.prev!.path}" class="page-nav-link prev">
+        <a href="${prev.path}" class="page-nav-link prev">
           <span class="page-nav-label">← Previous</span>
-          <span class="page-nav-title">${page.prev!.title}</span>
+          <span class="page-nav-title">${prev.title}</span>
         </a>
 ''');
     } else {
       buffer.writeln('<div></div>');
     }
 
-    if (page.next != null) {
+    if (page.next case final next?) {
       buffer.writeln('''
-        <a href="${page.next!.path}" class="page-nav-link next">
+        <a href="${next.path}" class="page-nav-link next">
           <span class="page-nav-label">Next →</span>
-          <span class="page-nav-title">${page.next!.title}</span>
+          <span class="page-nav-title">${next.title}</span>
         </a>
 ''');
     } else {

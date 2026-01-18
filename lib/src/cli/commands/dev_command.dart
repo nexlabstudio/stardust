@@ -45,10 +45,13 @@ class DevCommand extends Command<int> {
 
   @override
   Future<int> run() async {
-    final configPath = argResults!['config'] as String;
-    final port = int.parse(argResults!['port'] as String);
-    final host = argResults!['host'] as String;
-    final openBrowser = argResults!['open'] as bool;
+    final args = argResults;
+    if (args == null) return 1;
+
+    final configPath = args['config'] as String;
+    final port = int.parse(args['port'] as String);
+    final host = args['host'] as String;
+    final openBrowser = args['open'] as bool;
 
     // Load config
     final configFile = File(configPath);
@@ -106,9 +109,8 @@ class DevCommand extends Command<int> {
 
     shelf.Response handleReload(shelf.Request request) {
       if (request.url.path == '__stardust_reload') {
-        reloadController = StreamController<void>.broadcast();
-
-        final stream = reloadController!.stream.map((_) => 'data: reload\n\n');
+        final controller = reloadController = StreamController<void>.broadcast();
+        final stream = controller.stream.map((_) => 'data: reload\n\n');
 
         return shelf.Response.ok(
           stream,

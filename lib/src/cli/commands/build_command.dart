@@ -40,11 +40,14 @@ class BuildCommand extends Command<int> {
 
   @override
   Future<int> run() async {
+    final args = argResults;
+    if (args == null) return 1;
+
     final stopwatch = Stopwatch()..start();
-    final configPath = argResults!['config'] as String;
-    final outputDir = argResults!['output'] as String;
-    final clean = argResults!['clean'] as bool;
-    final verbose = argResults!['verbose'] as bool;
+    final configPath = args['config'] as String;
+    final outputDir = args['output'] as String;
+    final clean = args['clean'] as bool;
+    final verbose = args['verbose'] as bool;
 
     print('🔨 Building Stardust site...');
     print('');

@@ -93,12 +93,12 @@ class MarkdownParser {
         RegExp(r'<pre><code class="language-(\w+)">([\s\S]*?)</code></pre>');
 
     return html.replaceAllMapped(codeBlockPattern, (match) {
-      final language = match.group(1)!;
-      final code = _decodeHtmlEntities(match.group(2)!);
+      final language = match.group(1) ?? '';
+      final code = _decodeHtmlEntities(match.group(2) ?? '');
 
       try {
         final highlighted = highlight.parse(code, language: language);
-        final highlightedHtml = _renderHighlight(highlighted.nodes!);
+        final highlightedHtml = _renderHighlight(highlighted.nodes ?? []);
 
         final copyButton = config.code.copyButton
             ? '<button class="copy-button" aria-label="Copy code">Copy</button>'
@@ -118,7 +118,7 @@ $copyButton
 </div>''';
       } catch (e) {
         // Fallback if highlighting fails
-        return match.group(0)!;
+        return match.group(0) ?? match.input;
       }
     });
   }
@@ -163,10 +163,12 @@ $copyButton
         RegExp(r'<h([1-6])[^>]*id="([^"]+)"[^>]*>(.*?)</h\1>', dotAll: true);
 
     for (final match in headingPattern.allMatches(html)) {
-      final level = int.parse(match.group(1)!);
+      final (levelStr, id, rawText) = (match.group(1), match.group(2), match.group(3));
+      if (levelStr == null || id == null || rawText == null) continue;
+
+      final level = int.parse(levelStr);
       if (level >= minDepth && level <= maxDepth) {
-        final id = match.group(2)!;
-        final text = _stripHtml(match.group(3)!);
+        final text = _stripHtml(rawText);
         toc.add(TocEntry(level: level, text: text, id: id));
       }
     }

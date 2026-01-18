@@ -26,12 +26,12 @@ class InitCommand extends Command<int> {
 
   @override
   Future<int> run() async {
-    final targetDir = argResults!.rest.isNotEmpty
-        ? argResults!.rest.first
-        : Directory.current.path;
+    final args = argResults;
+    if (args == null) return 1;
 
-    final projectName = argResults!['name'] as String? ?? p.basename(targetDir);
-    final force = argResults!['force'] as bool;
+    final targetDir = args.rest.isNotEmpty ? args.rest.first : Directory.current.path;
+    final projectName = args['name'] as String? ?? p.basename(targetDir);
+    final force = args['force'] as bool;
 
     print('✨ Creating Stardust project: $projectName');
     print('   Location: $targetDir');

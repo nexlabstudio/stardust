@@ -1044,9 +1044,8 @@ $treeContent  </ul>
     ];
 
     for (final pattern in patterns) {
-      final match = pattern.firstMatch(input);
-      if (match != null) {
-        return match.group(1)!;
+      if (pattern.firstMatch(input)?.group(1) case final id?) {
+        return id;
       }
     }
 
@@ -1091,9 +1090,8 @@ $treeContent  </ul>
     }
 
     final pattern = RegExp(r'vimeo\.com/(?:video/)?(\d+)');
-    final match = pattern.firstMatch(input);
-    if (match != null) {
-      return match.group(1)!;
+    if (pattern.firstMatch(input)?.group(1) case final id?) {
+      return id;
     }
 
     return input;
@@ -1568,10 +1566,11 @@ $content
     );
 
     for (final match in pattern.allMatches(attributesStr)) {
-      final name = match.group(1)!;
-      final value =
-          match.group(2) ?? match.group(3) ?? match.group(4) ?? 'true';
-      attributes[name] = value;
+      if (match.group(1) case final name?) {
+        final value =
+            match.group(2) ?? match.group(3) ?? match.group(4) ?? 'true';
+        attributes[name] = value;
+      }
     }
 
     return attributes;
