@@ -1,0 +1,223 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:args/command_runner.dart';
+import 'package:path/path.dart' as p;
+import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_static/shelf_static.dart';
+import 'package:watcher/watcher.dart';
+import '../../config/config_loader.dart';
+import '../../generator/site_generator.dart';
+
+/// Development server with hot reload
+class DevCommand extends Command<int> {
+  @override
+  final name = 'dev';
+
+  @override
+  final description = 'Start development server with hot reload';
+
+  DevCommand() {
+    argParser.addOption(
+      'config',
+      abbr: 'c',
+      help: 'Path to config file',
+      defaultsTo: 'docs.yaml',
+    );
+    argParser.addOption(
+      'port',
+      abbr: 'p',
+      help: 'Port to serve on',
+      defaultsTo: '4000',
+    );
+    argParser.addOption(
+      'host',
+      help: 'Host to bind to',
+      defaultsTo: 'localhost',
+    );
+    argParser.addFlag(
+      'open',
+      abbr: 'o',
+      help: 'Open browser automatically',
+      defaultsTo: false,
+    );
+  }
+
+  @override
+  Future<int> run() async {
+    final configPath = argResults!['config'] as String;
+    final port = int.parse(argResults!['port'] as String);
+    final host = argResults!['host'] as String;
+    final openBrowser = argResults!['open'] as bool;
+
+    // Load config
+    final configFile = File(configPath);
+    if (!configFile.existsSync()) {
+      print('❌ Config file not found: $configPath');
+      print('   Run `stardust init` to create a new project.');
+      return 1;
+    }
+
+    var config = await ConfigLoader.load(configPath);
+    const outputDir = '.stardust';
+
+    // Initial build
+    print('🔨 Building site...');
+    var generator = SiteGenerator(
+      config: config,
+      outputDir: outputDir,
+      onError: (message) => stderr.writeln(message),
+      onLog: (message) => stdout.writeln(message),
+    );
+    await generator.generate();
+
+    // Create static file handler with live reload injection
+    shelf.Handler createHandler() {
+      final staticHandler = createStaticHandler(
+        outputDir,
+        defaultDocument: 'index.html',
+      );
+
+      return (shelf.Request request) async {
+        final response = await staticHandler(request);
+
+        // Inject live reload script into HTML responses
+        if (response.headers['content-type']?.contains('text/html') ?? false) {
+          var body = await response.readAsString();
+          body = body.replaceFirst(
+            '</body>',
+            '''
+<script>
+  const es = new EventSource('/__stardust_reload');
+  es.onmessage = () => location.reload();
+  es.onerror = () => setTimeout(() => location.reload(), 1000);
+</script>
+</body>''',
+          );
+          return response.change(body: body);
+        }
+
+        return response;
+      };
+    }
+
+    // SSE endpoint for live reload
+    StreamController<void>? reloadController;
+
+    shelf.Response handleReload(shelf.Request request) {
+      if (request.url.path == '__stardust_reload') {
+        reloadController = StreamController<void>.broadcast();
+
+        final stream = reloadController!.stream.map((_) => 'data: reload\n\n');
+
+        return shelf.Response.ok(
+          stream,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        );
+      }
+      return shelf.Response.notFound('Not found');
+    }
+
+    // Combined handler
+    final handler = const shelf.Pipeline()
+        .addMiddleware(shelf.logRequests())
+        .addHandler((request) {
+      if (request.url.path == '__stardust_reload') {
+        return handleReload(request);
+      }
+      return createHandler()(request);
+    });
+
+    // Start server
+    final server = await shelf_io.serve(handler, host, port);
+    print('');
+    print('  ✨ Stardust dev server running');
+    print('');
+    print('  ➜ Local:   http://$host:$port/');
+    print('');
+    print('  Watching for changes...');
+    print('');
+
+    if (openBrowser) {
+      await _openBrowser('http://$host:$port/');
+    }
+
+    // Watch for changes
+    final contentDir = config.content.dir;
+    final watcher = DirectoryWatcher(contentDir);
+    final configWatcher = FileWatcher(configPath);
+
+    final subscriptions = <StreamSubscription>[];
+
+    // Debounce rebuilds
+    Timer? debounceTimer;
+
+    Future<void> rebuild({bool reloadConfig = false}) async {
+      debounceTimer?.cancel();
+      debounceTimer = Timer(const Duration(milliseconds: 100), () async {
+        print('🔄 Rebuilding...');
+
+        try {
+          if (reloadConfig) {
+            config = await ConfigLoader.load(configPath);
+            generator = SiteGenerator(
+              config: config,
+              outputDir: outputDir,
+            );
+          }
+
+          await generator.generate();
+          reloadController?.add(null);
+          print('✅ Done');
+        } catch (e) {
+          print('❌ Build error: $e');
+        }
+      });
+    }
+
+    subscriptions.add(watcher.events.listen((event) {
+      if (event.path.endsWith('.md') || event.path.endsWith('.mdx')) {
+        print('📝 ${p.basename(event.path)} changed');
+        rebuild();
+      }
+    }));
+
+    subscriptions.add(configWatcher.events.listen((event) {
+      print('⚙️  Config changed');
+      rebuild(reloadConfig: true);
+    }));
+
+    // Handle shutdown
+    ProcessSignal.sigint.watch().listen((_) async {
+      print('\n👋 Shutting down...');
+      for (final sub in subscriptions) {
+        await sub.cancel();
+      }
+      await server.close();
+      exit(0);
+    });
+
+    // Keep running
+    await Completer<void>().future;
+
+    return 0;
+  }
+
+  Future<void> _openBrowser(String url) async {
+    try {
+      if (Platform.isMacOS) {
+        await Process.run('open', [url]);
+      } else if (Platform.isLinux) {
+        await Process.run('xdg-open', [url]);
+      } else if (Platform.isWindows) {
+        await Process.run('start', [url], runInShell: true);
+      }
+    } catch (_) {
+      // Ignore browser open errors
+    }
+  }
+}
