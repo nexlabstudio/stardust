@@ -5,6 +5,7 @@ import 'package:args/command_runner.dart';
 import 'commands/build_command.dart';
 import 'commands/dev_command.dart';
 import 'commands/init_command.dart';
+import 'commands/openapi_command.dart';
 
 /// Main CLI runner for Stardust
 class StardustCliRunner extends CommandRunner<int> {
@@ -16,6 +17,7 @@ class StardustCliRunner extends CommandRunner<int> {
     addCommand(InitCommand());
     addCommand(BuildCommand());
     addCommand(DevCommand());
+    addCommand(OpenApiCommand());
 
     argParser.addFlag(
       'version',

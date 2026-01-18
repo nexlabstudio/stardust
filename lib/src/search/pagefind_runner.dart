@@ -4,14 +4,11 @@ import 'package:path/path.dart' as p;
 /// Manages Pagefind binary - downloads if needed and runs indexing
 class PagefindRunner {
   static const _version = '1.4.0';
-  static const _baseUrl =
-      'https://github.com/CloudCannon/pagefind/releases/download';
+  static const _baseUrl = 'https://github.com/CloudCannon/pagefind/releases/download';
 
   /// Get the cache directory for Stardust binaries
   static String get _cacheDir {
-    final home = Platform.environment['HOME'] ??
-        Platform.environment['USERPROFILE'] ??
-        '.';
+    final home = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '.';
     return p.join(home, '.stardust', 'bin');
   }
 
@@ -108,8 +105,7 @@ class PagefindRunner {
         final response = await request.close();
 
         if (response.statusCode != 200) {
-          onError?.call(
-              'Failed to download Pagefind: HTTP ${response.statusCode}');
+          onError?.call('Failed to download Pagefind: HTTP ${response.statusCode}');
           return false;
         }
 
@@ -147,8 +143,7 @@ class PagefindRunner {
     void Function(int received, int total)? onProgress,
   }) async {
     final isZip = url.endsWith('.zip');
-    final tempFile =
-        File(p.join(_cacheDir, isZip ? 'pagefind.zip' : 'pagefind.tar.gz'));
+    final tempFile = File(p.join(_cacheDir, isZip ? 'pagefind.zip' : 'pagefind.tar.gz'));
 
     try {
       final total = response.contentLength;
@@ -167,15 +162,7 @@ class PagefindRunner {
       if (isZip) {
         final result = await Process.run(
           'powershell',
-          [
-            '-Command',
-            'Expand-Archive',
-            '-Path',
-            tempFile.path,
-            '-DestinationPath',
-            _cacheDir,
-            '-Force'
-          ],
+          ['-Command', 'Expand-Archive', '-Path', tempFile.path, '-DestinationPath', _cacheDir, '-Force'],
         );
         if (result.exitCode != 0) {
           onError?.call('Failed to extract Pagefind: ${result.stderr}');

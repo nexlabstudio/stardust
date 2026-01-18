@@ -40,8 +40,7 @@ class MarkdownParser {
   final StardustConfig config;
   final ComponentTransformer _componentTransformer;
 
-  MarkdownParser({required this.config})
-      : _componentTransformer = ComponentTransformer(config: config.components);
+  MarkdownParser({required this.config}) : _componentTransformer = ComponentTransformer(config: config.components);
 
   /// Parse markdown content into HTML
   ParsedPage parse(String content, {String? defaultTitle}) {
@@ -89,8 +88,7 @@ class MarkdownParser {
   }
 
   String _applySyntaxHighlighting(String html) {
-    final codeBlockPattern =
-        RegExp(r'<pre><code class="language-(\w+)">([\s\S]*?)</code></pre>');
+    final codeBlockPattern = RegExp(r'<pre><code class="language-(\w+)">([\s\S]*?)</code></pre>');
 
     return html.replaceAllMapped(codeBlockPattern, (match) {
       final language = match.group(1) ?? '';
@@ -100,13 +98,11 @@ class MarkdownParser {
         final highlighted = highlight.parse(code, language: language);
         final highlightedHtml = _renderHighlight(highlighted.nodes ?? []);
 
-        final copyButton = config.code.copyButton
-            ? '<button class="copy-button" aria-label="Copy code">Copy</button>'
-            : '';
+        final copyButton =
+            config.code.copyButton ? '<button class="copy-button" aria-label="Copy code">Copy</button>' : '';
 
-        final lineNumbers = config.code.lineNumbers
-            ? '<div class="line-numbers">${_generateLineNumbers(code)}</div>'
-            : '';
+        final lineNumbers =
+            config.code.lineNumbers ? '<div class="line-numbers">${_generateLineNumbers(code)}</div>' : '';
 
         return '''
 <div class="code-block" data-language="$language">
@@ -156,15 +152,12 @@ $copyButton
     return buffer.toString();
   }
 
-  List<TocEntry> _extractToc(String html,
-      {int minDepth = 2, int maxDepth = 4}) {
+  List<TocEntry> _extractToc(String html, {int minDepth = 2, int maxDepth = 4}) {
     final toc = <TocEntry>[];
-    final headingPattern =
-        RegExp(r'<h([1-6])[^>]*id="([^"]+)"[^>]*>(.*?)</h\1>', dotAll: true);
+    final headingPattern = RegExp(r'<h([1-6])[^>]*id="([^"]+)"[^>]*>(.*?)</h\1>', dotAll: true);
 
     for (final match in headingPattern.allMatches(html)) {
-      final (levelStr, id, rawText) =
-          (match.group(1), match.group(2), match.group(3));
+      final (levelStr, id, rawText) = (match.group(1), match.group(2), match.group(3));
       if (levelStr == null || id == null || rawText == null) continue;
 
       final level = int.parse(levelStr);
@@ -177,8 +170,7 @@ $copyButton
     return toc;
   }
 
-  String _stripHtml(String html) =>
-      html.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+  String _stripHtml(String html) => html.replaceAll(RegExp(r'<[^>]*>'), '').trim();
 
   String _decodeHtmlEntities(String text) => text
       .replaceAll('&lt;', '<')

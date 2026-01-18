@@ -128,9 +128,7 @@ class DevCommand extends Command<int> {
     }
 
     // Combined handler
-    final handler = const shelf.Pipeline()
-        .addMiddleware(shelf.logRequests())
-        .addHandler((request) {
+    final handler = const shelf.Pipeline().addMiddleware(shelf.logRequests()).addHandler((request) {
       if (request.url.path == '__stardust_reload') {
         return handleReload(request);
       }

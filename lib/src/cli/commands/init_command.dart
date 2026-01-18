@@ -29,8 +29,7 @@ class InitCommand extends Command<int> {
     final args = argResults;
     if (args == null) return 1;
 
-    final targetDir =
-        args.rest.isNotEmpty ? args.rest.first : Directory.current.path;
+    final targetDir = args.rest.isNotEmpty ? args.rest.first : Directory.current.path;
     final projectName = args['name'] as String? ?? p.basename(targetDir);
     final force = args['force'] as bool;
 
@@ -51,8 +50,7 @@ class InitCommand extends Command<int> {
     return 0;
   }
 
-  Future<void> _createProject(
-      String targetDir, String projectName, bool force) async {
+  Future<void> _createProject(String targetDir, String projectName, bool force) async {
     final dir = Directory(targetDir);
 
     if (!dir.existsSync()) {
@@ -104,8 +102,7 @@ class InitCommand extends Command<int> {
     );
   }
 
-  Future<void> _createFile(
-      String path, String content, bool force, String displayName) async {
+  Future<void> _createFile(String path, String content, bool force, String displayName) async {
     final file = File(path);
 
     if (file.existsSync() && !force) {

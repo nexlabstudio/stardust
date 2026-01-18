@@ -58,27 +58,21 @@ class PageBuilder {
     final buffer = StringBuffer();
 
     if (page.description case final description?) {
-      buffer.writeln(
-          '  <meta name="description" content="${_escapeHtml(description)}">');
+      buffer.writeln('  <meta name="description" content="${_escapeHtml(description)}">');
     }
 
-    buffer.writeln(
-        '  <meta property="og:title" content="${_escapeHtml(page.title)}">');
+    buffer.writeln('  <meta property="og:title" content="${_escapeHtml(page.title)}">');
     if (page.description case final description?) {
-      buffer.writeln(
-          '  <meta property="og:description" content="${_escapeHtml(description)}">');
+      buffer.writeln('  <meta property="og:description" content="${_escapeHtml(description)}">');
     }
     buffer.writeln('  <meta property="og:type" content="article">');
     if (config.seo.ogImage != null) {
-      buffer.writeln(
-          '  <meta property="og:image" content="${config.seo.ogImage}">');
+      buffer.writeln('  <meta property="og:image" content="${config.seo.ogImage}">');
     }
 
-    buffer.writeln(
-        '  <meta name="twitter:card" content="${config.seo.twitterCard}">');
+    buffer.writeln('  <meta name="twitter:card" content="${config.seo.twitterCard}">');
     if (config.seo.twitterHandle != null) {
-      buffer.writeln(
-          '  <meta name="twitter:site" content="${config.seo.twitterHandle}">');
+      buffer.writeln('  <meta name="twitter:site" content="${config.seo.twitterHandle}">');
     }
 
     return buffer.toString();
@@ -2152,8 +2146,7 @@ class PageBuilder {
     final groups = sidebar.map((group) {
       final links = group.pages.map((page) {
         final pagePath = '/${page.slug}';
-        final isActive = pagePath == currentPath ||
-            (currentPath == '/' && page.slug == 'index');
+        final isActive = pagePath == currentPath || (currentPath == '/' && page.slug == 'index');
         final activeClass = isActive ? ' active' : '';
         final label = page.label ?? _titleCase(page.slug);
         return '<li><a href="$pagePath" class="sidebar-link$activeClass">$label</a></li>';
@@ -2182,8 +2175,8 @@ class PageBuilder {
     }
 
     final links = toc
-        .map((entry) =>
-            '<li><a href="#${entry.id}" class="toc-link" data-level="${entry.level}">${entry.text}</a></li>')
+        .map(
+            (entry) => '<li><a href="#${entry.id}" class="toc-link" data-level="${entry.level}">${entry.text}</a></li>')
         .join('\n          ');
 
     return '''
@@ -2214,14 +2207,12 @@ class PageBuilder {
         relativePath = relativePath.substring(1);
       }
     } else {
-      relativePath =
-          page.path == '/' ? 'index.md' : '${page.path.substring(1)}.md';
+      relativePath = page.path == '/' ? 'index.md' : '${page.path.substring(1)}.md';
     }
 
     final repo = editConfig.repo!;
     final branch = editConfig.branch;
-    final basePath =
-        editConfig.path.endsWith('/') ? editConfig.path : '${editConfig.path}/';
+    final basePath = editConfig.path.endsWith('/') ? editConfig.path : '${editConfig.path}/';
 
     final editUrl = '$repo/edit/$branch/$basePath$relativePath';
 
@@ -2269,8 +2260,7 @@ class PageBuilder {
   }
 
   String _buildFooter() {
-    final copyright =
-        config.footer.copyright ?? '© ${DateTime.now().year} ${config.name}';
+    final copyright = config.footer.copyright ?? '© ${DateTime.now().year} ${config.name}';
 
     return '''
     <footer class="footer">
@@ -2580,17 +2570,13 @@ class PageBuilder {
     return '';
   }
 
-  String _escapeHtml(String text) => text
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;');
+  String _escapeHtml(String text) =>
+      text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 
   String _titleCase(String text) => text
       .replaceAll('-', ' ')
       .replaceAll('_', ' ')
       .split(' ')
-      .map((word) =>
-          word.isEmpty ? word : word[0].toUpperCase() + word.substring(1))
+      .map((word) => word.isEmpty ? word : word[0].toUpperCase() + word.substring(1))
       .join(' ');
 }

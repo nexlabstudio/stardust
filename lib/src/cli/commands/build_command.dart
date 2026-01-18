@@ -90,9 +90,7 @@ class BuildCommand extends Command<int> {
       final pageCount = await generator.generate();
 
       // Run Pagefind if search is enabled
-      if (!skipSearch &&
-          config.search.enabled &&
-          config.search.provider == 'pagefind') {
+      if (!skipSearch && config.search.enabled && config.search.provider == 'pagefind') {
         stdout.writeln('');
         stdout.writeln('🔍 Building search index...');
         await PagefindRunner.run(
@@ -105,8 +103,7 @@ class BuildCommand extends Command<int> {
 
       stopwatch.stop();
       stdout.writeln('');
-      stdout.writeln(
-          '✅ Built $pageCount pages in ${stopwatch.elapsedMilliseconds}ms');
+      stdout.writeln('✅ Built $pageCount pages in ${stopwatch.elapsedMilliseconds}ms');
       stdout.writeln('   Output: ${p.absolute(outputDir)}');
       stdout.writeln('');
 

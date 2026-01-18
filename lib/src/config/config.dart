@@ -93,8 +93,7 @@ class ContentConfig {
     return ContentConfig(
       dir: yaml['dir'] as String? ?? 'docs/',
       index: yaml['index'] as String? ?? 'index.md',
-      include: (yaml['include'] as List?)?.cast<String>() ??
-          const ['*.md', '**/*.md', '*.mdx', '**/*.mdx'],
+      include: (yaml['include'] as List?)?.cast<String>() ?? const ['*.md', '**/*.md', '*.mdx', '**/*.mdx'],
       exclude: (yaml['exclude'] as List?)?.cast<String>() ?? const [],
     );
   }
@@ -140,11 +139,8 @@ class SidebarGroup {
         group: yaml['group'] as String,
         icon: yaml['icon'] as String?,
         collapsed: yaml['collapsed'] as bool? ?? false,
-        pages:
-            (yaml['pages'] as List?)?.map(SidebarPage.fromYaml).toList() ?? [],
-        autogenerate: yaml['autogenerate'] != null
-            ? AutogenerateConfig.fromYaml(yaml['autogenerate'] as Map)
-            : null,
+        pages: (yaml['pages'] as List?)?.map(SidebarPage.fromYaml).toList() ?? [],
+        autogenerate: yaml['autogenerate'] != null ? AutogenerateConfig.fromYaml(yaml['autogenerate'] as Map) : null,
       );
 }
 
@@ -235,9 +231,7 @@ class ThemeConfig {
       darkMode: DarkModeConfig.fromYaml(yaml['darkMode'] as Map?),
       fonts: FontsConfig.fromYaml(yaml['fonts'] as Map?),
       radius: yaml['radius'] as String? ?? '8px',
-      custom: yaml['custom'] != null
-          ? CustomThemeConfig.fromYaml(yaml['custom'] as Map)
-          : null,
+      custom: yaml['custom'] != null ? CustomThemeConfig.fromYaml(yaml['custom'] as Map) : null,
     );
   }
 }
@@ -263,12 +257,8 @@ class ColorsConfig {
       primary: yaml['primary'] as String? ?? '#6366f1',
       secondary: yaml['secondary'] as String?,
       accent: yaml['accent'] as String?,
-      background: yaml['background'] != null
-          ? BackgroundColors.fromYaml(yaml['background'] as Map)
-          : null,
-      text: yaml['text'] != null
-          ? TextColors.fromYaml(yaml['text'] as Map)
-          : null,
+      background: yaml['background'] != null ? BackgroundColors.fromYaml(yaml['background'] as Map) : null,
+      text: yaml['text'] != null ? TextColors.fromYaml(yaml['text'] as Map) : null,
     );
   }
 }
@@ -344,8 +334,7 @@ class CustomThemeConfig {
 
   const CustomThemeConfig({this.css});
 
-  factory CustomThemeConfig.fromYaml(Map yaml) =>
-      CustomThemeConfig(css: yaml['css'] as String?);
+  factory CustomThemeConfig.fromYaml(Map yaml) => CustomThemeConfig(css: yaml['css'] as String?);
 }
 
 class CodeConfig {
@@ -421,8 +410,7 @@ class ComponentsConfig {
 
     return ComponentsConfig(
       callouts: calloutsYaml.map(
-        (key, value) =>
-            MapEntry(key as String, CalloutConfig.fromYaml(value as Map)),
+        (key, value) => MapEntry(key as String, CalloutConfig.fromYaml(value as Map)),
       ),
     );
   }
@@ -465,9 +453,7 @@ class SearchConfig {
       provider: yaml['provider'] as String? ?? 'pagefind',
       placeholder: yaml['placeholder'] as String? ?? 'Search docs...',
       hotkey: yaml['hotkey'] as String? ?? '/',
-      algolia: yaml['algolia'] != null
-          ? AlgoliaConfig.fromYaml(yaml['algolia'] as Map)
-          : null,
+      algolia: yaml['algolia'] != null ? AlgoliaConfig.fromYaml(yaml['algolia'] as Map) : null,
     );
   }
 }
@@ -572,9 +558,7 @@ class HeaderConfig {
       showSearch: yaml['showSearch'] as bool? ?? true,
       showThemeToggle: yaml['showThemeToggle'] as bool? ?? true,
       showSocial: yaml['showSocial'] as bool? ?? true,
-      announcement: yaml['announcement'] != null
-          ? AnnouncementConfig.fromYaml(yaml['announcement'] as Map)
-          : null,
+      announcement: yaml['announcement'] != null ? AnnouncementConfig.fromYaml(yaml['announcement'] as Map) : null,
     );
   }
 }
@@ -613,10 +597,7 @@ class FooterConfig {
     if (yaml == null) return const FooterConfig();
     return FooterConfig(
       copyright: yaml['copyright'] as String?,
-      links: (yaml['links'] as List?)
-              ?.map((e) => FooterLinkGroup.fromYaml(e as Map))
-              .toList() ??
-          [],
+      links: (yaml['links'] as List?)?.map((e) => FooterLinkGroup.fromYaml(e as Map)).toList() ?? [],
     );
   }
 }
@@ -632,10 +613,7 @@ class FooterLinkGroup {
 
   factory FooterLinkGroup.fromYaml(Map yaml) => FooterLinkGroup(
         group: yaml['group'] as String,
-        items: (yaml['items'] as List?)
-                ?.map((e) => FooterLink.fromYaml(e as Map))
-                .toList() ??
-            [],
+        items: (yaml['items'] as List?)?.map((e) => FooterLink.fromYaml(e as Map)).toList() ?? [],
       );
 }
 
@@ -676,10 +654,7 @@ class VersionsConfig {
       current: yaml['current'] as String?,
       defaultVersion: yaml['default'] as String?,
       dropdown: yaml['dropdown'] as bool? ?? true,
-      list: (yaml['list'] as List?)
-              ?.map((e) => VersionEntry.fromYaml(e as Map))
-              .toList() ??
-          [],
+      list: (yaml['list'] as List?)?.map((e) => VersionEntry.fromYaml(e as Map)).toList() ?? [],
     );
   }
 }
@@ -721,10 +696,7 @@ class I18nConfig {
     return I18nConfig(
       enabled: yaml['enabled'] as bool? ?? false,
       defaultLocale: yaml['defaultLocale'] as String? ?? 'en',
-      locales: (yaml['locales'] as List?)
-              ?.map((e) => LocaleConfig.fromYaml(e as Map))
-              .toList() ??
-          [],
+      locales: (yaml['locales'] as List?)?.map((e) => LocaleConfig.fromYaml(e as Map)).toList() ?? [],
     );
   }
 }
@@ -763,18 +735,10 @@ class IntegrationsConfig {
   factory IntegrationsConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const IntegrationsConfig();
     return IntegrationsConfig(
-      editLink: yaml['editLink'] != null
-          ? EditLinkConfig.fromYaml(yaml['editLink'] as Map)
-          : null,
-      lastUpdated: yaml['lastUpdated'] != null
-          ? LastUpdatedConfig.fromYaml(yaml['lastUpdated'] as Map)
-          : null,
-      analytics: yaml['analytics'] != null
-          ? AnalyticsConfig.fromYaml(yaml['analytics'] as Map)
-          : null,
-      comments: yaml['comments'] != null
-          ? CommentsConfig.fromYaml(yaml['comments'] as Map)
-          : null,
+      editLink: yaml['editLink'] != null ? EditLinkConfig.fromYaml(yaml['editLink'] as Map) : null,
+      lastUpdated: yaml['lastUpdated'] != null ? LastUpdatedConfig.fromYaml(yaml['lastUpdated'] as Map) : null,
+      analytics: yaml['analytics'] != null ? AnalyticsConfig.fromYaml(yaml['analytics'] as Map) : null,
+      comments: yaml['comments'] != null ? CommentsConfig.fromYaml(yaml['comments'] as Map) : null,
     );
   }
 }
@@ -835,9 +799,7 @@ class AnalyticsConfig {
   factory AnalyticsConfig.fromYaml(Map yaml) => AnalyticsConfig(
         google: yaml['google'] as String?,
         plausible: yaml['plausible'] as String?,
-        posthog: yaml['posthog'] != null
-            ? PosthogConfig.fromYaml(yaml['posthog'] as Map)
-            : null,
+        posthog: yaml['posthog'] != null ? PosthogConfig.fromYaml(yaml['posthog'] as Map) : null,
       );
 }
 
@@ -869,12 +831,8 @@ class CommentsConfig {
 
   factory CommentsConfig.fromYaml(Map yaml) => CommentsConfig(
         provider: yaml['provider'] as String?,
-        giscus: yaml['giscus'] != null
-            ? GiscusConfig.fromYaml(yaml['giscus'] as Map)
-            : null,
-        disqus: yaml['disqus'] != null
-            ? DisqusConfig.fromYaml(yaml['disqus'] as Map)
-            : null,
+        giscus: yaml['giscus'] != null ? GiscusConfig.fromYaml(yaml['giscus'] as Map) : null,
+        disqus: yaml['disqus'] != null ? DisqusConfig.fromYaml(yaml['disqus'] as Map) : null,
       );
 }
 
@@ -904,8 +862,7 @@ class DisqusConfig {
 
   const DisqusConfig({this.shortname});
 
-  factory DisqusConfig.fromYaml(Map yaml) =>
-      DisqusConfig(shortname: yaml['shortname'] as String?);
+  factory DisqusConfig.fromYaml(Map yaml) => DisqusConfig(shortname: yaml['shortname'] as String?);
 }
 
 class BuildConfig {
@@ -936,10 +893,7 @@ class BuildConfig {
       sitemap: SitemapConfig.fromYaml(yaml['sitemap'] as Map?),
       robots: RobotsConfig.fromYaml(yaml['robots'] as Map?),
       assets: AssetsConfig.fromYaml(yaml['assets'] as Map?),
-      redirects: (yaml['redirects'] as List?)
-              ?.map((e) => RedirectConfig.fromYaml(e as Map))
-              .toList() ??
-          [],
+      redirects: (yaml['redirects'] as List?)?.map((e) => RedirectConfig.fromYaml(e as Map)).toList() ?? [],
     );
   }
 }
@@ -1062,8 +1016,7 @@ class DevConfig {
       port: yaml['port'] as int? ?? 4000,
       host: yaml['host'] as String? ?? 'localhost',
       open: yaml['open'] as bool? ?? true,
-      watch: (yaml['watch'] as List?)?.cast<String>() ??
-          const ['docs/', 'public/'],
+      watch: (yaml['watch'] as List?)?.cast<String>() ?? const ['docs/', 'public/'],
     );
   }
 }

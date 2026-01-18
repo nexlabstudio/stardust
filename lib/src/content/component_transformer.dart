@@ -55,36 +55,26 @@ class ComponentTransformer {
   }
 
   String _transformCallouts(String content) {
-    final calloutTypes = [
-      'Info',
-      'Warning',
-      'Danger',
-      'Tip',
-      'Note',
-      'Success'
-    ];
+    final calloutTypes = ['Info', 'Warning', 'Danger', 'Tip', 'Note', 'Success'];
     var result = content;
 
     for (final type in calloutTypes) {
       result = _transformComponent(
         result,
         type,
-        (attributes, innerContent) =>
-            _buildCallout(type.toLowerCase(), attributes, innerContent),
+        (attributes, innerContent) => _buildCallout(type.toLowerCase(), attributes, innerContent),
       );
     }
 
     return result;
   }
 
-  String _buildCallout(
-      String type, Map<String, String> attributes, String content) {
+  String _buildCallout(String type, Map<String, String> attributes, String content) {
     final title = attributes['title'];
     final icon = attributes['icon'];
 
-    final calloutConfig = config.callouts[type] ??
-        _defaultCallouts[type] ??
-        const CalloutConfig(icon: '📌', color: '#6b7280');
+    final calloutConfig =
+        config.callouts[type] ?? _defaultCallouts[type] ?? const CalloutConfig(icon: '📌', color: '#6b7280');
 
     final rawIcon = icon ?? calloutConfig.icon;
     String displayIcon;
@@ -190,8 +180,7 @@ $tabPanels  </div>
     for (var i = 0; i < codeBlocks.length; i++) {
       final block = codeBlocks[i];
       final title = block.attributes['title'] ?? 'Code ${i + 1}';
-      final language =
-          block.attributes['language'] ?? block.attributes['lang'] ?? '';
+      final language = block.attributes['language'] ?? block.attributes['lang'] ?? '';
       final isActive = i == 0;
       final tabId = '$groupId-$i';
 
@@ -253,8 +242,7 @@ $tabPanels  </div>
 
     final accordionHtml = StringBuffer();
     for (final accordion in accordions) {
-      accordionHtml
-          .writeln(_buildAccordion(accordion.attributes, accordion.content));
+      accordionHtml.writeln(_buildAccordion(accordion.attributes, accordion.content));
     }
 
     return '''
@@ -266,8 +254,7 @@ $accordionHtml</div>
   String _buildAccordion(Map<String, String> attributes, String content) {
     final title = attributes['title'] ?? 'Details';
     final icon = attributes['icon'] ?? '';
-    final defaultOpen =
-        attributes['defaultOpen'] == 'true' || attributes['open'] == 'true';
+    final defaultOpen = attributes['defaultOpen'] == 'true' || attributes['open'] == 'true';
 
     String iconHtml = '';
     if (icon.isNotEmpty) {
@@ -275,9 +262,8 @@ $accordionHtml</div>
         iconHtml = '<span class="accordion-icon">$icon</span> ';
       } else {
         final svg = _getBuiltInIcon(icon, '18');
-        iconHtml = svg != null
-            ? '<span class="accordion-icon">$svg</span> '
-            : '<span class="accordion-icon">$icon</span> ';
+        iconHtml =
+            svg != null ? '<span class="accordion-icon">$svg</span> ' : '<span class="accordion-icon">$icon</span> ';
       }
     }
 
@@ -390,14 +376,11 @@ $cardsHtml</div>
         iconHtml = '<span class="card-icon">$icon</span>';
       } else {
         final svg = _getBuiltInIcon(icon, '20');
-        iconHtml = svg != null
-            ? '<span class="card-icon">$svg</span>'
-            : '<span class="card-icon">$icon</span>';
+        iconHtml = svg != null ? '<span class="card-icon">$svg</span>' : '<span class="card-icon">$icon</span>';
       }
     }
 
-    final titleHtml =
-        title.isNotEmpty ? '<h3 class="card-title">$iconHtml$title</h3>' : '';
+    final titleHtml = title.isNotEmpty ? '<h3 class="card-title">$iconHtml$title</h3>' : '';
 
     final cardContent = '''
 $titleHtml
@@ -447,8 +430,7 @@ $content
     final columnsHtml = StringBuffer();
     for (final column in columns) {
       final width = column.attributes['width'];
-      final styleAttr =
-          width != null ? ' style="flex: 0 0 $width; max-width: $width;"' : '';
+      final styleAttr = width != null ? ' style="flex: 0 0 $width; max-width: $width;"' : '';
 
       columnsHtml.writeln('''
   <div class="column"$styleAttr>
@@ -500,14 +482,11 @@ $tilesHtml</div>
         iconHtml = '<div class="tile-icon">$icon</div>';
       } else {
         final svg = _getBuiltInIcon(icon, '24');
-        iconHtml = svg != null
-            ? '<div class="tile-icon">$svg</div>'
-            : '<div class="tile-icon">$icon</div>';
+        iconHtml = svg != null ? '<div class="tile-icon">$svg</div>' : '<div class="tile-icon">$icon</div>';
       }
     }
 
-    final titleHtml =
-        title.isNotEmpty ? '<h4 class="tile-title">$title</h4>' : '';
+    final titleHtml = title.isNotEmpty ? '<h4 class="tile-title">$title</h4>' : '';
 
     final tileContent = '''
 $iconHtml
@@ -549,9 +528,7 @@ $tileContent</div>
         iconHtml = '<span class="panel-icon">$icon</span>';
       } else {
         final svg = _getBuiltInIcon(icon, '20');
-        iconHtml = svg != null
-            ? '<span class="panel-icon">$svg</span>'
-            : '<span class="panel-icon">$icon</span>';
+        iconHtml = svg != null ? '<span class="panel-icon">$svg</span>' : '<span class="panel-icon">$icon</span>';
       }
     }
 
@@ -592,9 +569,7 @@ $content
         iconHtml = '<span class="badge-icon">$icon</span>';
       } else {
         final svg = _getBuiltInIcon(icon, '14');
-        iconHtml = svg != null
-            ? '<span class="badge-icon">$svg</span>'
-            : '<span class="badge-icon">$icon</span>';
+        iconHtml = svg != null ? '<span class="badge-icon">$svg</span>' : '<span class="badge-icon">$icon</span>';
       }
     }
 
@@ -723,16 +698,13 @@ $content
     final width = attributes['width'];
     final height = attributes['height'];
     final zoom = attributes['zoom'] == 'true' || attributes.containsKey('zoom');
-    final rounded =
-        attributes['rounded'] == 'true' || attributes.containsKey('rounded');
-    final border =
-        attributes['border'] == 'true' || attributes.containsKey('border');
+    final rounded = attributes['rounded'] == 'true' || attributes.containsKey('rounded');
+    final border = attributes['border'] == 'true' || attributes.containsKey('border');
 
     final styleList = <String>[];
     if (width != null) styleList.add('width: $width');
     if (height != null) styleList.add('height: $height');
-    final styleAttr =
-        styleList.isNotEmpty ? ' style="${styleList.join('; ')}"' : '';
+    final styleAttr = styleList.isNotEmpty ? ' style="${styleList.join('; ')}"' : '';
 
     final classList = <String>['image-component'];
     if (zoom) classList.add('image-zoomable');
@@ -841,8 +813,7 @@ $treeContent  </ul>
         buffer.writeln('$indent<li class="tree-folder">');
         buffer.writeln('$indent  <details$openAttr>');
         buffer.writeln('$indent    <summary class="tree-folder-name">');
-        buffer.writeln(
-            '$indent      <span class="tree-icon tree-icon-folder">📁</span>');
+        buffer.writeln('$indent      <span class="tree-icon tree-icon-folder">📁</span>');
         buffer.writeln('$indent      <span>${element.name}</span>');
         buffer.writeln('$indent    </summary>');
         buffer.writeln('$indent    <ul class="tree-children">');
@@ -853,10 +824,8 @@ $treeContent  </ul>
       } else {
         final icon = element.icon ?? _getFileIcon(element.name);
         buffer.writeln('$indent<li class="tree-file">');
-        buffer.writeln(
-            '$indent  <span class="tree-icon tree-icon-file">$icon</span>');
-        buffer.writeln(
-            '$indent  <span class="tree-file-name">${element.name}</span>');
+        buffer.writeln('$indent  <span class="tree-icon tree-icon-file">$icon</span>');
+        buffer.writeln('$indent  <span class="tree-file-name">${element.name}</span>');
         buffer.writeln('$indent</li>');
       }
     }
@@ -865,8 +834,7 @@ $treeContent  </ul>
   }
 
   String _getFileIcon(String filename) {
-    final ext =
-        filename.contains('.') ? filename.split('.').last.toLowerCase() : '';
+    final ext = filename.contains('.') ? filename.split('.').last.toLowerCase() : '';
 
     final iconMap = {
       'dart': '🎯',
@@ -949,11 +917,7 @@ $treeContent  </ul>
     final theme = attributes['theme'] ?? 'default';
 
     // Escape content for safe embedding
-    final escapedContent = content
-        .trim()
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
+    final escapedContent = content.trim().replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
     final diagramHtml = '''
 <div class="mermaid-diagram" data-theme="$theme">
@@ -983,10 +947,7 @@ $treeContent  </ul>
     final position = attributes['position'] ?? 'top';
 
     // Escape the tooltip content
-    final escapedTip = tip
-        .replaceAll('"', '&quot;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
+    final escapedTip = tip.replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
     return '''<span class="tooltip tooltip-$position" data-tooltip="$escapedTip">$content</span>''';
   }
@@ -1185,8 +1146,7 @@ $treeContent  </ul>
     }
 
     final editableParam = editable ? '&editable=true' : '';
-    final embedUrl =
-        'https://codepen.io/$user/embed/$id?default-tab=$defaultTab&theme-id=$theme$editableParam';
+    final embedUrl = 'https://codepen.io/$user/embed/$id?default-tab=$defaultTab&theme-id=$theme$editableParam';
 
     return '''
 <div class="embed embed-codepen" style="height: ${height}px">
@@ -1251,8 +1211,7 @@ $treeContent  </ul>
   String _buildField(Map<String, String> attributes, String content) {
     final name = attributes['name'] ?? '';
     final type = attributes['type'] ?? 'any';
-    final required =
-        attributes['required'] == 'true' || attributes.containsKey('required');
+    final required = attributes['required'] == 'true' || attributes.containsKey('required');
     final defaultValue = attributes['default'];
     final deprecated = attributes['deprecated'] == 'true';
 
@@ -1260,13 +1219,10 @@ $treeContent  </ul>
         ? '<span class="field-badge field-required">required</span>'
         : '<span class="field-badge field-optional">optional</span>';
 
-    final deprecatedBadge = deprecated
-        ? '<span class="field-badge field-deprecated">deprecated</span>'
-        : '';
+    final deprecatedBadge = deprecated ? '<span class="field-badge field-deprecated">deprecated</span>' : '';
 
-    final defaultHtml = defaultValue != null
-        ? '<span class="field-default">Default: <code>$defaultValue</code></span>'
-        : '';
+    final defaultHtml =
+        defaultValue != null ? '<span class="field-default">Default: <code>$defaultValue</code></span>' : '';
 
     return '''
 <div class="field${deprecated ? ' field-is-deprecated' : ''}">
@@ -1297,9 +1253,7 @@ $content
     final type = attributes['type'] ?? 'any';
     final nullable = attributes['nullable'] == 'true';
 
-    final nullableBadge = nullable
-        ? '<span class="field-badge field-nullable">nullable</span>'
-        : '';
+    final nullableBadge = nullable ? '<span class="field-badge field-nullable">nullable</span>' : '';
 
     return '''
 <div class="field field-response">
@@ -1327,20 +1281,17 @@ $content
     final name = attributes['name'] ?? '';
     final type = attributes['type'] ?? 'string';
     final paramType = attributes['paramType'] ?? attributes['in'] ?? 'query';
-    final required =
-        attributes['required'] == 'true' || attributes.containsKey('required');
+    final required = attributes['required'] == 'true' || attributes.containsKey('required');
     final defaultValue = attributes['default'];
 
     final requiredBadge = required
         ? '<span class="field-badge field-required">required</span>'
         : '<span class="field-badge field-optional">optional</span>';
 
-    final paramTypeBadge =
-        '<span class="field-badge field-param-type">$paramType</span>';
+    final paramTypeBadge = '<span class="field-badge field-param-type">$paramType</span>';
 
-    final defaultHtml = defaultValue != null
-        ? '<span class="field-default">Default: <code>$defaultValue</code></span>'
-        : '';
+    final defaultHtml =
+        defaultValue != null ? '<span class="field-default">Default: <code>$defaultValue</code></span>' : '';
 
     return '''
 <div class="field field-param">
@@ -1374,11 +1325,9 @@ $content
 
     final methodClass = 'api-method-${method.toLowerCase()}';
 
-    final titleHtml =
-        title != null ? '<div class="api-title">$title</div>' : '';
+    final titleHtml = title != null ? '<div class="api-title">$title</div>' : '';
 
-    final authHtml =
-        auth != null ? '<span class="api-auth">🔒 $auth</span>' : '';
+    final authHtml = auth != null ? '<span class="api-auth">🔒 $auth</span>' : '';
 
     return '''
 <div class="api-endpoint">
@@ -1463,11 +1412,9 @@ $content
 
     final typeClass = 'update-$type';
 
-    final versionHtml =
-        version != null ? '<span class="update-version">v$version</span>' : '';
+    final versionHtml = version != null ? '<span class="update-version">v$version</span>' : '';
 
-    final dateHtml =
-        date != null ? '<span class="update-date">$date</span>' : '';
+    final dateHtml = date != null ? '<span class="update-date">$date</span>' : '';
 
     return '''
 <div class="update $typeClass">
@@ -1490,8 +1437,7 @@ $content
   String _transformComponent(
     String content,
     String componentName,
-    String Function(Map<String, String> attributes, String innerContent)
-        builder,
+    String Function(Map<String, String> attributes, String innerContent) builder,
   ) {
     // Pattern for self-closing: <Component attr="value" />
     final selfClosingPattern = RegExp(
@@ -1532,8 +1478,7 @@ $content
   }
 
   /// Extract child components from content
-  List<_ExtractedComponent> _extractChildComponents(
-      String content, String componentName) {
+  List<_ExtractedComponent> _extractChildComponents(String content, String componentName) {
     final components = <_ExtractedComponent>[];
 
     // Pattern for open/close tags
@@ -1567,8 +1512,7 @@ $content
 
     for (final match in pattern.allMatches(attributesStr)) {
       if (match.group(1) case final name?) {
-        final value =
-            match.group(2) ?? match.group(3) ?? match.group(4) ?? 'true';
+        final value = match.group(2) ?? match.group(3) ?? match.group(4) ?? 'true';
         attributes[name] = value;
       }
     }
@@ -1576,12 +1520,10 @@ $content
     return attributes;
   }
 
-  String _capitalize(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+  String _capitalize(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
   int _idCounter = 0;
-  String _generateId() =>
-      '${DateTime.now().millisecondsSinceEpoch}-${_idCounter++}';
+  String _generateId() => '${DateTime.now().millisecondsSinceEpoch}-${_idCounter++}';
 }
 
 /// Represents an extracted child component

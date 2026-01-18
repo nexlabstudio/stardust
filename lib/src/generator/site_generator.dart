@@ -149,8 +149,7 @@ class SiteGenerator {
         .replaceAll('-', ' ')
         .replaceAll('_', ' ')
         .split(' ')
-        .map((word) =>
-            word.isEmpty ? word : word[0].toUpperCase() + word.substring(1))
+        .map((word) => word.isEmpty ? word : word[0].toUpperCase() + word.substring(1))
         .join(' ');
   }
 
@@ -268,8 +267,7 @@ class SiteGenerator {
 
     final buffer = StringBuffer();
     buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
-    buffer.writeln(
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+    buffer.writeln('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
 
     for (final page in pages) {
       final url = '${config.url}${page.path}';
@@ -284,10 +282,8 @@ class SiteGenerator {
         buffer.writeln('    <lastmod>$formatted</lastmod>');
       }
 
-      buffer.writeln(
-          '    <changefreq>${config.build.sitemap.changefreq}</changefreq>');
-      buffer
-          .writeln('    <priority>${config.build.sitemap.priority}</priority>');
+      buffer.writeln('    <changefreq>${config.build.sitemap.changefreq}</changefreq>');
+      buffer.writeln('    <priority>${config.build.sitemap.priority}</priority>');
       buffer.writeln('  </url>');
     }
 

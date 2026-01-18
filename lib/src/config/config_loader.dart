@@ -32,14 +32,8 @@ class ConfigLoader {
       favicon: yaml['favicon'] as String?,
       url: yaml['url'] as String?,
       content: ContentConfig.fromYaml(yaml['content'] as Map?),
-      nav: (yaml['nav'] as List?)
-              ?.map((e) => NavItem.fromYaml(e as Map))
-              .toList() ??
-          [],
-      sidebar: (yaml['sidebar'] as List?)
-              ?.map((e) => SidebarGroup.fromYaml(e as Map))
-              .toList() ??
-          [],
+      nav: (yaml['nav'] as List?)?.map((e) => NavItem.fromYaml(e as Map)).toList() ?? [],
+      sidebar: (yaml['sidebar'] as List?)?.map((e) => SidebarGroup.fromYaml(e as Map)).toList() ?? [],
       toc: TocConfig.fromYaml(yaml['toc'] as Map?),
       theme: ThemeConfig.fromYaml(yaml['theme'] as Map?),
       code: CodeConfig.fromYaml(yaml['code'] as Map?),
@@ -49,12 +43,8 @@ class ConfigLoader {
       social: SocialConfig.fromYaml(yaml['social'] as Map?),
       header: HeaderConfig.fromYaml(yaml['header'] as Map?),
       footer: FooterConfig.fromYaml(yaml['footer'] as Map?),
-      versions: yaml['versions'] != null
-          ? VersionsConfig.fromYaml(yaml['versions'] as Map)
-          : null,
-      i18n: yaml['i18n'] != null
-          ? I18nConfig.fromYaml(yaml['i18n'] as Map)
-          : null,
+      versions: yaml['versions'] != null ? VersionsConfig.fromYaml(yaml['versions'] as Map) : null,
+      i18n: yaml['i18n'] != null ? I18nConfig.fromYaml(yaml['i18n'] as Map) : null,
       integrations: IntegrationsConfig.fromYaml(yaml['integrations'] as Map?),
       build: BuildConfig.fromYaml(yaml['build'] as Map?),
       dev: DevConfig.fromYaml(yaml['dev'] as Map?),

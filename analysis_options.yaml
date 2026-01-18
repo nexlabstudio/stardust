@@ -5,6 +5,10 @@ analyzer:
     - build/**
     - '**/*.g.dart'
 
+formatter:
+  trailing_commas: automate
+  page_width: 120
+
 linter:
   rules:
     - implicit_call_tearoffs
