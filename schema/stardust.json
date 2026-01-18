@@ -1,0 +1,829 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://stardust.nexlab.studio/schemas/docs.json",
+  "title": "Stardust Configuration",
+  "description": "Configuration schema for Stardust documentation framework",
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of your documentation site"
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description of your project"
+    },
+    "tagline": {
+      "type": "string",
+      "description": "A catchy tagline for your project"
+    },
+    "logo": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Path to logo file"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "light": {
+              "type": "string",
+              "description": "Logo for light mode"
+            },
+            "dark": {
+              "type": "string",
+              "description": "Logo for dark mode"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "favicon": {
+      "type": "string",
+      "description": "Path to favicon file"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Production URL of your documentation site"
+    },
+
+    "content": {
+      "type": "object",
+      "description": "Content source configuration",
+      "additionalProperties": false,
+      "properties": {
+        "dir": {
+          "type": "string",
+          "default": "docs/",
+          "description": "Directory where markdown files live"
+        },
+        "index": {
+          "type": "string",
+          "default": "index.md",
+          "description": "Landing page file"
+        },
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["**/*.md", "**/*.mdx"],
+          "description": "Glob patterns for files to include"
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Glob patterns for files to exclude"
+        }
+      }
+    },
+
+    "nav": {
+      "type": "array",
+      "description": "Top navigation items",
+      "items": {
+        "$ref": "#/$defs/navItem"
+      }
+    },
+
+    "sidebar": {
+      "type": "array",
+      "description": "Sidebar navigation structure",
+      "items": {
+        "$ref": "#/$defs/sidebarGroup"
+      }
+    },
+
+    "toc": {
+      "type": "object",
+      "description": "Table of contents configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "minDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 2
+        },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 4
+        },
+        "title": {
+          "type": "string",
+          "default": "On this page"
+        }
+      }
+    },
+
+    "theme": {
+      "type": "object",
+      "description": "Theme configuration",
+      "additionalProperties": false,
+      "properties": {
+        "colors": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "primary": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "secondary": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "accent": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "background": {
+              "type": "object",
+              "properties": {
+                "light": { "type": "string" },
+                "dark": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "text": {
+              "type": "object",
+              "properties": {
+                "light": { "type": "string" },
+                "dark": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "darkMode": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "default": {
+              "type": "string",
+              "enum": ["light", "dark", "system"],
+              "default": "system"
+            }
+          }
+        },
+        "fonts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sans": {
+              "type": "string",
+              "default": "Inter"
+            },
+            "mono": {
+              "type": "string",
+              "default": "JetBrains Mono"
+            }
+          }
+        },
+        "radius": {
+          "type": "string",
+          "default": "8px"
+        },
+        "custom": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "css": {
+              "type": "string",
+              "description": "Path to custom CSS file"
+            }
+          }
+        }
+      }
+    },
+
+    "code": {
+      "type": "object",
+      "description": "Code block configuration",
+      "additionalProperties": false,
+      "properties": {
+        "theme": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "light": { "type": "string" },
+                "dark": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "default": "github-dark"
+        },
+        "lineNumbers": {
+          "type": "boolean",
+          "default": false
+        },
+        "copyButton": {
+          "type": "boolean",
+          "default": true
+        },
+        "wrapLongLines": {
+          "type": "boolean",
+          "default": false
+        },
+        "defaultLanguage": {
+          "type": "string",
+          "default": "plaintext"
+        },
+        "aliases": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "components": {
+      "type": "object",
+      "description": "Component configuration",
+      "additionalProperties": false,
+      "properties": {
+        "callouts": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/calloutConfig"
+          }
+        }
+      }
+    },
+
+    "search": {
+      "type": "object",
+      "description": "Search configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["pagefind", "algolia", "custom"],
+          "default": "pagefind"
+        },
+        "placeholder": {
+          "type": "string",
+          "default": "Search docs..."
+        },
+        "hotkey": {
+          "type": "string",
+          "default": "/"
+        },
+        "algolia": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "appId": { "type": "string" },
+            "apiKey": { "type": "string" },
+            "indexName": { "type": "string" }
+          },
+          "required": ["appId", "apiKey", "indexName"]
+        }
+      }
+    },
+
+    "seo": {
+      "type": "object",
+      "description": "SEO configuration",
+      "additionalProperties": false,
+      "properties": {
+        "titleTemplate": {
+          "type": "string",
+          "default": "%s"
+        },
+        "ogImage": {
+          "type": "string"
+        },
+        "twitterCard": {
+          "type": "string",
+          "enum": ["summary", "summary_large_image"],
+          "default": "summary_large_image"
+        },
+        "twitterHandle": {
+          "type": "string"
+        },
+        "structuredData": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+
+    "social": {
+      "type": "object",
+      "description": "Social links",
+      "additionalProperties": false,
+      "properties": {
+        "github": { "type": "string", "format": "uri" },
+        "discord": { "type": "string", "format": "uri" },
+        "twitter": { "type": "string", "format": "uri" },
+        "youtube": { "type": "string", "format": "uri" },
+        "linkedin": { "type": "string", "format": "uri" },
+        "mastodon": { "type": "string", "format": "uri" },
+        "slack": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "header": {
+      "type": "object",
+      "description": "Header configuration",
+      "additionalProperties": false,
+      "properties": {
+        "showName": {
+          "type": "boolean",
+          "default": true
+        },
+        "showSearch": {
+          "type": "boolean",
+          "default": true
+        },
+        "showThemeToggle": {
+          "type": "boolean",
+          "default": true
+        },
+        "showSocial": {
+          "type": "boolean",
+          "default": true
+        },
+        "announcement": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": { "type": "string" },
+            "link": { "type": "string" },
+            "dismissible": {
+              "type": "boolean",
+              "default": true
+            },
+            "style": {
+              "type": "string",
+              "enum": ["info", "warning", "success"],
+              "default": "info"
+            }
+          },
+          "required": ["text"]
+        }
+      }
+    },
+
+    "footer": {
+      "type": "object",
+      "description": "Footer configuration",
+      "additionalProperties": false,
+      "properties": {
+        "copyright": {
+          "type": "string"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "group": { "type": "string" },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": { "type": "string" },
+                    "href": { "type": "string" }
+                  },
+                  "required": ["label", "href"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["group", "items"]
+          }
+        }
+      }
+    },
+
+    "versions": {
+      "type": "object",
+      "description": "Versioning configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "current": {
+          "type": "string"
+        },
+        "default": {
+          "type": "string"
+        },
+        "dropdown": {
+          "type": "boolean",
+          "default": true
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "version": { "type": "string" },
+              "label": { "type": "string" },
+              "path": { "type": "string" },
+              "banner": { "type": "string" }
+            },
+            "required": ["version", "path"]
+          }
+        }
+      }
+    },
+
+    "i18n": {
+      "type": "object",
+      "description": "Internationalization configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "defaultLocale": {
+          "type": "string",
+          "default": "en"
+        },
+        "locales": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": { "type": "string" },
+              "label": { "type": "string" },
+              "dir": {
+                "type": "string",
+                "enum": ["ltr", "rtl"],
+                "default": "ltr"
+              }
+            },
+            "required": ["code", "label"]
+          }
+        }
+      }
+    },
+
+    "integrations": {
+      "type": "object",
+      "description": "Third-party integrations",
+      "additionalProperties": false,
+      "properties": {
+        "editLink": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "repo": {
+              "type": "string",
+              "format": "uri"
+            },
+            "branch": {
+              "type": "string",
+              "default": "main"
+            },
+            "path": {
+              "type": "string",
+              "default": "docs/"
+            },
+            "text": {
+              "type": "string",
+              "default": "Edit this page on GitHub"
+            }
+          }
+        },
+        "lastUpdated": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "format": {
+              "type": "string",
+              "default": "MMM d, yyyy"
+            },
+            "text": {
+              "type": "string",
+              "default": "Last updated"
+            }
+          }
+        },
+        "analytics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "google": {
+              "type": "string",
+              "description": "Google Analytics measurement ID"
+            },
+            "plausible": {
+              "type": "string",
+              "description": "Plausible domain"
+            },
+            "posthog": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string" },
+                "host": { "type": "string", "format": "uri" }
+              },
+              "required": ["key"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "comments": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": ["giscus", "disqus"]
+            },
+            "giscus": {
+              "type": "object",
+              "properties": {
+                "repo": { "type": "string" },
+                "repoId": { "type": "string" },
+                "category": { "type": "string" },
+                "categoryId": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "disqus": {
+              "type": "object",
+              "properties": {
+                "shortname": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+
+    "build": {
+      "type": "object",
+      "description": "Build configuration",
+      "additionalProperties": false,
+      "properties": {
+        "outDir": {
+          "type": "string",
+          "default": "dist/"
+        },
+        "cleanUrls": {
+          "type": "boolean",
+          "default": true
+        },
+        "trailingSlash": {
+          "type": "boolean",
+          "default": false
+        },
+        "sitemap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "changefreq": {
+              "type": "string",
+              "enum": ["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"],
+              "default": "weekly"
+            },
+            "priority": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.7
+            }
+          }
+        },
+        "robots": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "allow": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": ["/"]
+            },
+            "disallow": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            }
+          }
+        },
+        "assets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "type": "string",
+              "default": "public/"
+            },
+            "images": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "optimize": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "quality": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 80
+                },
+                "formats": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["webp", "avif", "original"]
+                  },
+                  "default": ["original"]
+                }
+              }
+            }
+          }
+        },
+        "redirects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "status": {
+                "type": "integer",
+                "enum": [301, 302, 307, 308],
+                "default": 301
+              }
+            },
+            "required": ["from", "to"]
+          }
+        }
+      }
+    },
+
+    "dev": {
+      "type": "object",
+      "description": "Development server configuration",
+      "additionalProperties": false,
+      "properties": {
+        "port": {
+          "type": "integer",
+          "default": 4000
+        },
+        "host": {
+          "type": "string",
+          "default": "localhost"
+        },
+        "open": {
+          "type": "boolean",
+          "default": true
+        },
+        "watch": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["docs/", "public/"]
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "navItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "href": {
+          "type": "string"
+        },
+        "external": {
+          "type": "boolean",
+          "default": false
+        },
+        "icon": {
+          "type": "string"
+        }
+      },
+      "required": ["label", "href"]
+    },
+
+    "sidebarGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "group": {
+          "type": "string",
+          "description": "Group title"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "collapsed": {
+          "type": "boolean",
+          "default": false
+        },
+        "pages": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Page slug"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "slug": { "type": "string" },
+                  "label": { "type": "string" },
+                  "icon": { "type": "string" }
+                },
+                "required": ["slug"]
+              }
+            ]
+          }
+        },
+        "autogenerate": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "type": "string"
+            },
+            "order": {
+              "type": "string",
+              "enum": ["alphabetical", "filename", "frontmatter"],
+              "default": "filename"
+            }
+          },
+          "required": ["dir"]
+        }
+      },
+      "required": ["group"]
+    },
+
+    "calloutConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
