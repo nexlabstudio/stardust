@@ -8,9 +8,16 @@ class PageBuilder {
 
   PageBuilder({required this.config});
 
+  String _getBasePath(String pagePath) {
+    final segments = pagePath.split('/').where((s) => s.isNotEmpty).toList();
+    if (segments.isEmpty) return '.';
+    return List.filled(segments.length, '..').join('/');
+  }
+
   /// Build a complete HTML page
   String build(Page page, {required List<SidebarGroup> sidebar}) {
     final seoTitle = config.seo.titleTemplate.replaceAll('%s', page.title);
+    final basePath = _getBasePath(page.path);
 
     return '''
 <!DOCTYPE html>
@@ -22,7 +29,7 @@ class PageBuilder {
   ${_buildMeta(page)}
   ${_buildFonts()}
   ${_buildStyles()}
-  ${_buildPagefindStyles()}
+  ${_buildPagefindStyles(basePath)}
 </head>
 <body>
   <div class="layout">
@@ -39,7 +46,7 @@ class PageBuilder {
     </div>
     ${_buildFooter()}
   </div>
-  ${_buildSearchModal()}
+  ${_buildSearchModal(basePath)}
   ${_buildScripts()}
 </body>
 </html>
@@ -2369,13 +2376,13 @@ class PageBuilder {
   </script>
 ''';
 
-  String _buildPagefindStyles() {
+  String _buildPagefindStyles(String basePath) {
     if (!config.search.enabled || config.search.provider != 'pagefind') {
       return '';
     }
 
     return '''
-  <link href="/_pagefind/pagefind-ui.css" rel="stylesheet">
+  <link href="$basePath/_pagefind/pagefind-ui.css" rel="stylesheet">
   <style>
     /* Pagefind customizations */
     :root {
@@ -2393,7 +2400,7 @@ class PageBuilder {
 ''';
   }
 
-  String _buildSearchModal() {
+  String _buildSearchModal(String basePath) {
     if (!config.search.enabled) {
       return '';
     }
@@ -2421,7 +2428,7 @@ class PageBuilder {
       </div>
     </div>
   </div>
-  <script src="/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+  <script src="$basePath/_pagefind/pagefind-ui.js" type="text/javascript"></script>
   <script>
     // Initialize Pagefind search
     (function() {
