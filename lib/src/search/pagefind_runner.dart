@@ -47,58 +47,34 @@ class PagefindRunner {
     final arch = _getArch();
     if (arch == null) return null;
 
-    String platform;
-    String ext;
+    final (platform, ext) = switch (Platform.operatingSystem) {
+      'macos' => ('$arch-apple-darwin', 'tar.gz'),
+      'linux' => ('$arch-unknown-linux-musl', 'tar.gz'),
+      'windows' => ('$arch-pc-windows-msvc', 'zip'),
+      _ => (null, null),
+    };
 
-    if (Platform.isMacOS) {
-      platform = '$arch-apple-darwin';
-      ext = 'tar.gz';
-    } else if (Platform.isLinux) {
-      platform = '$arch-unknown-linux-musl';
-      ext = 'tar.gz';
-    } else if (Platform.isWindows) {
-      platform = '$arch-pc-windows-msvc';
-      ext = 'zip';
-    } else {
-      return null;
-    }
-
+    if (platform == null) return null;
     return '$_baseUrl/v$_version/pagefind-v$_version-$platform.$ext';
   }
 
   /// Get the architecture string
-  static String? _getArch() {
-    if (Platform.isMacOS) {
-      try {
-        final result = Process.runSync('uname', ['-m']);
-        final machine = result.stdout.toString().trim();
-        if (machine == 'arm64') {
-          return 'aarch64';
-        }
-        return 'x86_64';
-      } catch (_) {
-        return 'x86_64';
-      }
-    }
+  static String? _getArch() => switch (Platform.operatingSystem) {
+        'macos' || 'linux' => _unameArch(),
+        'windows' => 'x86_64',
+        _ => null,
+      };
 
-    if (Platform.isLinux) {
-      try {
-        final result = Process.runSync('uname', ['-m']);
-        final machine = result.stdout.toString().trim();
-        if (machine == 'aarch64' || machine == 'arm64') {
-          return 'aarch64';
-        }
-        return 'x86_64';
-      } catch (_) {
-        return 'x86_64';
-      }
-    }
-
-    if (Platform.isWindows) {
+  static String _unameArch() {
+    try {
+      final machine = Process.runSync('uname', ['-m']).stdout.toString().trim();
+      return switch (machine) {
+        'arm64' || 'aarch64' => 'aarch64',
+        _ => 'x86_64',
+      };
+    } catch (_) {
       return 'x86_64';
     }
-
-    return null;
   }
 
   /// Download and install the Pagefind binary
