@@ -657,6 +657,17 @@
             }
           }
         },
+        "llms": {
+          "type": "object",
+          "description": "llms.txt generation for AI crawlers",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
         "assets": {
           "type": "object",
           "additionalProperties": false,

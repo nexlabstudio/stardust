@@ -70,6 +70,10 @@ class SiteGenerator {
       await _generateRobots();
     }
 
+    if (config.build.llms.enabled) {
+      await _generateLlms(pagesWithNav);
+    }
+
     return count;
   }
 
@@ -318,6 +322,62 @@ class SiteGenerator {
     await robotsFile.writeAsString(buffer.toString());
 
     _log('🤖 Generated robots.txt');
+  }
+
+  Future<void> _generateLlms(List<Page> pages) async {
+    final buffer = StringBuffer();
+    final pagesByPath = {for (final page in pages) page.path: page};
+
+    buffer.writeln('# ${config.name}');
+    buffer.writeln('');
+
+    if (config.description case final desc?) {
+      buffer.writeln('> $desc');
+      buffer.writeln('');
+    }
+
+    if (config.url case final url?) {
+      buffer.writeln('Website: $url');
+      buffer.writeln('');
+    }
+
+    if (config.sidebar.isNotEmpty) {
+      for (final group in config.sidebar) {
+        buffer.writeln('## ${group.group}');
+        buffer.writeln('');
+
+        for (final sidebarPage in group.pages) {
+          final path = sidebarPage.slug == 'index' ? '/' : '/${sidebarPage.slug}';
+          if (pagesByPath[path] case final page?) {
+            final title = sidebarPage.label ?? page.title;
+            buffer.write('- [$title]($path)');
+            if (page.description case final desc?) {
+              buffer.write(': $desc');
+            }
+            buffer.writeln('');
+          }
+        }
+
+        buffer.writeln('');
+      }
+    } else {
+      buffer.writeln('## Pages');
+      buffer.writeln('');
+
+      for (final page in pages) {
+        buffer.write('- [${page.title}](${page.path})');
+        if (page.description case final desc?) {
+          buffer.write(': $desc');
+        }
+        buffer.writeln('');
+      }
+    }
+
+    final llmsFile = File(p.join(outputDir, 'llms.txt'));
+    await llmsFile.parent.create(recursive: true);
+    await llmsFile.writeAsString(buffer.toString());
+
+    _log('🤖 Generated llms.txt');
   }
 }
 
