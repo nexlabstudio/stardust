@@ -1,0 +1,26 @@
+name: stardust
+description: A Dart-native documentation framework. Beautiful docs, zero config.
+version: 0.1.0
+homepage: https://github.com/stardust-docs/stardust
+repository: https://github.com/stardust-docs/stardust
+
+environment:
+  sdk: ^3.0.0
+
+executables:
+  stardust: stardust
+
+dependencies:
+  args: ^2.4.2
+  yaml: ^3.1.2
+  path: ^1.8.3
+  markdown: ^7.2.2
+  glob: ^2.1.2
+  watcher: ^1.1.0
+  shelf: ^1.4.1
+  shelf_static: ^1.1.2
+  highlight: ^0.7.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.24.9
