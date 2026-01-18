@@ -670,9 +670,6 @@ Content goes here...
 Stardust generates a static site in the `dist/` directory. Deploy it anywhere:
 
 - **GitHub Pages** — Push to `gh-pages` branch
-- **Netlify** — Connect your repo and set build command to `stardust build`
-- **Vercel** — Same as Netlify
-- **Cloudflare Pages** — Same as above
 - **Any static host** — Just upload the `dist/` folder
 
 ## License
