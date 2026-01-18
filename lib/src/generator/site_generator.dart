@@ -326,6 +326,7 @@ class SiteGenerator {
 
   Future<void> _generateLlms(List<Page> pages) async {
     final buffer = StringBuffer();
+    final pagesByPath = {for (final page in pages) page.path: page};
 
     buffer.writeln('# ${config.name}');
     buffer.writeln('');
@@ -340,19 +341,36 @@ class SiteGenerator {
       buffer.writeln('');
     }
 
-    buffer.writeln('## Pages');
-    buffer.writeln('');
+    if (config.sidebar.isNotEmpty) {
+      for (final group in config.sidebar) {
+        buffer.writeln('## ${group.group}');
+        buffer.writeln('');
 
-    for (final page in pages) {
-      final title = page.title;
-      final path = page.path;
-      final desc = page.description;
+        for (final sidebarPage in group.pages) {
+          final path = sidebarPage.slug == 'index' ? '/' : '/${sidebarPage.slug}';
+          if (pagesByPath[path] case final page?) {
+            final title = sidebarPage.label ?? page.title;
+            buffer.write('- [$title]($path)');
+            if (page.description case final desc?) {
+              buffer.write(': $desc');
+            }
+            buffer.writeln('');
+          }
+        }
 
-      buffer.write('- [$title]($path)');
-      if (desc != null) {
-        buffer.write(': $desc');
+        buffer.writeln('');
       }
+    } else {
+      buffer.writeln('## Pages');
       buffer.writeln('');
+
+      for (final page in pages) {
+        buffer.write('- [${page.title}](${page.path})');
+        if (page.description case final desc?) {
+          buffer.write(': $desc');
+        }
+        buffer.writeln('');
+      }
     }
 
     final llmsFile = File(p.join(outputDir, 'llms.txt'));
