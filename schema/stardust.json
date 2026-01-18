@@ -347,7 +347,8 @@
         "youtube": { "type": "string", "format": "uri" },
         "linkedin": { "type": "string", "format": "uri" },
         "mastodon": { "type": "string", "format": "uri" },
-        "slack": { "type": "string", "format": "uri" }
+        "slack": { "type": "string", "format": "uri" },
+        "pubdev": { "type": "string", "format": "uri" }
       }
     },
 

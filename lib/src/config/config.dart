@@ -511,6 +511,7 @@ class SocialConfig {
   final String? linkedin;
   final String? mastodon;
   final String? slack;
+  final String? pubdev;
 
   const SocialConfig({
     this.github,
@@ -520,6 +521,7 @@ class SocialConfig {
     this.linkedin,
     this.mastodon,
     this.slack,
+    this.pubdev,
   });
 
   factory SocialConfig.fromYaml(Map? yaml) {
@@ -532,6 +534,7 @@ class SocialConfig {
       linkedin: yaml['linkedin'] as String?,
       mastodon: yaml['mastodon'] as String?,
       slack: yaml['slack'] as String?,
+      pubdev: yaml['pubdev'] as String?,
     );
   }
 }
