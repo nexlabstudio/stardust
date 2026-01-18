@@ -642,7 +642,54 @@ Options:
 - `-c, --config` — Path to config file (default: `docs.yaml`)
 - `-o, --output` — Output directory (default: `dist`)
 - `--clean` — Clean output directory before building (default: `true`)
+- `--skip-search` — Skip search index generation
 - `-v, --verbose` — Verbose output
+
+## Search
+
+Stardust includes full-text search powered by [Pagefind](https://pagefind.app/). **No installation required** — Stardust automatically downloads the Pagefind binary on first build.
+
+### How it works
+
+1. Run `stardust build` to generate your site
+2. Pagefind binary is downloaded automatically (cached in `~/.stardust/bin/`)
+3. All pages are indexed
+4. Users can search using the search button or keyboard shortcuts
+
+### Configuration
+
+Configure search in `docs.yaml`:
+
+```yaml
+search:
+  enabled: true
+  provider: pagefind    # currently only pagefind is supported
+  placeholder: "Search docs..."
+  hotkey: "/"           # keyboard shortcut to open search
+```
+
+To disable search:
+
+```yaml
+search:
+  enabled: false
+```
+
+Or skip search indexing for a single build:
+
+```bash
+stardust build --skip-search
+```
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `/` | Open search |
+| `Cmd/Ctrl + K` | Open/close search |
+| `Escape` | Close search |
+| `↑` `↓` | Navigate results |
+| `Enter` | Select result |
 
 ## Frontmatter
 
@@ -671,6 +718,81 @@ Stardust generates a static site in the `dist/` directory. Deploy it anywhere:
 
 - **GitHub Pages** — Push to `gh-pages` branch
 - **Any static host** — Just upload the `dist/` folder
+
+## SEO
+
+Stardust automatically generates `sitemap.xml` and `robots.txt` for search engine optimization.
+
+### Sitemap
+
+To enable sitemap generation, set the `url` in your `docs.yaml`:
+
+```yaml
+url: https://your-docs.com
+
+build:
+  sitemap:
+    enabled: true        # default: true
+    changefreq: weekly   # always, hourly, daily, weekly, monthly, yearly, never
+    priority: 0.7        # 0.0 to 1.0
+```
+
+This generates `/sitemap.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://your-docs.com/</loc>
+    <lastmod>2025-01-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- ... more pages -->
+</urlset>
+```
+
+The `lastmod` date is automatically set from each file's modification time.
+
+### Robots.txt
+
+Configure crawling rules:
+
+```yaml
+build:
+  robots:
+    enabled: true        # default: true
+    allow:
+      - /
+    disallow:
+      - /internal/
+      - /drafts/
+```
+
+This generates `/robots.txt`:
+
+```
+User-agent: *
+Allow: /
+Disallow: /internal/
+Disallow: /drafts/
+
+Sitemap: https://your-docs.com/sitemap.xml
+```
+
+### Open Graph & Twitter Cards
+
+Page metadata is automatically generated from frontmatter:
+
+```yaml
+seo:
+  titleTemplate: "%s | My Docs"    # %s = page title
+  ogImage: /assets/og-image.png
+  twitterCard: summary_large_image
+  twitterHandle: "@youraccount"
+```
+
+Each page's `title` and `description` frontmatter are used for meta tags.
 
 ## License
 
