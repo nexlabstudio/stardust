@@ -70,6 +70,10 @@ class SiteGenerator {
       await _generateRobots();
     }
 
+    if (config.build.llms.enabled) {
+      await _generateLlms(pagesWithNav);
+    }
+
     return count;
   }
 
@@ -318,6 +322,44 @@ class SiteGenerator {
     await robotsFile.writeAsString(buffer.toString());
 
     _log('🤖 Generated robots.txt');
+  }
+
+  Future<void> _generateLlms(List<Page> pages) async {
+    final buffer = StringBuffer();
+
+    buffer.writeln('# ${config.name}');
+    buffer.writeln('');
+
+    if (config.description case final desc?) {
+      buffer.writeln('> $desc');
+      buffer.writeln('');
+    }
+
+    if (config.url case final url?) {
+      buffer.writeln('Website: $url');
+      buffer.writeln('');
+    }
+
+    buffer.writeln('## Pages');
+    buffer.writeln('');
+
+    for (final page in pages) {
+      final title = page.title;
+      final path = page.path;
+      final desc = page.description;
+
+      buffer.write('- [$title]($path)');
+      if (desc != null) {
+        buffer.write(': $desc');
+      }
+      buffer.writeln('');
+    }
+
+    final llmsFile = File(p.join(outputDir, 'llms.txt'));
+    await llmsFile.parent.create(recursive: true);
+    await llmsFile.writeAsString(buffer.toString());
+
+    _log('🤖 Generated llms.txt');
   }
 }
 
