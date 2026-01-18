@@ -56,8 +56,8 @@ class DevCommand extends Command<int> {
     // Load config
     final configFile = File(configPath);
     if (!configFile.existsSync()) {
-      print('❌ Config file not found: $configPath');
-      print('   Run `stardust init` to create a new project.');
+      stderr.writeln('❌ Config file not found: $configPath');
+      stderr.writeln('   Run `stardust init` to create a new project.');
       return 1;
     }
 
@@ -65,12 +65,12 @@ class DevCommand extends Command<int> {
     const outputDir = '.stardust';
 
     // Initial build
-    print('🔨 Building site...');
+    stdout.writeln('🔨 Building site...');
     var generator = SiteGenerator(
       config: config,
       outputDir: outputDir,
-      onError: (message) => stderr.writeln(message),
-      onLog: (message) => stdout.writeln(message),
+      onError: stderr.writeln,
+      onLog: stdout.writeln,
     );
     await generator.generate();
 
@@ -109,7 +109,10 @@ class DevCommand extends Command<int> {
 
     shelf.Response handleReload(shelf.Request request) {
       if (request.url.path == '__stardust_reload') {
-        final controller = reloadController = StreamController<void>.broadcast();
+        reloadController?.close();
+        // ignore: close_sinks - closed on shutdown or next request
+        final controller = StreamController<void>.broadcast();
+        reloadController = controller;
         final stream = controller.stream.map((_) => 'data: reload\n\n');
 
         return shelf.Response.ok(
@@ -136,13 +139,13 @@ class DevCommand extends Command<int> {
 
     // Start server
     final server = await shelf_io.serve(handler, host, port);
-    print('');
-    print('  ✨ Stardust dev server running');
-    print('');
-    print('  ➜ Local:   http://$host:$port/');
-    print('');
-    print('  Watching for changes...');
-    print('');
+    stdout.writeln('');
+    stdout.writeln('  ✨ Stardust dev server running');
+    stdout.writeln('');
+    stdout.writeln('  ➜ Local:   http://$host:$port/');
+    stdout.writeln('');
+    stdout.writeln('  Watching for changes...');
+    stdout.writeln('');
 
     if (openBrowser) {
       await _openBrowser('http://$host:$port/');
@@ -161,7 +164,7 @@ class DevCommand extends Command<int> {
     Future<void> rebuild({bool reloadConfig = false}) async {
       debounceTimer?.cancel();
       debounceTimer = Timer(const Duration(milliseconds: 100), () async {
-        print('🔄 Rebuilding...');
+        stdout.writeln('🔄 Rebuilding...');
 
         try {
           if (reloadConfig) {
@@ -174,31 +177,32 @@ class DevCommand extends Command<int> {
 
           await generator.generate();
           reloadController?.add(null);
-          print('✅ Done');
+          stdout.writeln('✅ Done');
         } catch (e) {
-          print('❌ Build error: $e');
+          stderr.writeln('❌ Build error: $e');
         }
       });
     }
 
     subscriptions.add(watcher.events.listen((event) {
       if (event.path.endsWith('.md') || event.path.endsWith('.mdx')) {
-        print('📝 ${p.basename(event.path)} changed');
+        stdout.writeln('📝 ${p.basename(event.path)} changed');
         rebuild();
       }
     }));
 
     subscriptions.add(configWatcher.events.listen((event) {
-      print('⚙️  Config changed');
+      stdout.writeln('⚙️  Config changed');
       rebuild(reloadConfig: true);
     }));
 
     // Handle shutdown
     ProcessSignal.sigint.watch().listen((_) async {
-      print('\n👋 Shutting down...');
+      stdout.writeln('\n👋 Shutting down...');
       for (final sub in subscriptions) {
         await sub.cancel();
       }
+      await reloadController?.close();
       await server.close();
       exit(0);
     });

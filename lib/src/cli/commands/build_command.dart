@@ -49,24 +49,24 @@ class BuildCommand extends Command<int> {
     final clean = args['clean'] as bool;
     final verbose = args['verbose'] as bool;
 
-    print('🔨 Building Stardust site...');
-    print('');
+    stdout.writeln('🔨 Building Stardust site...');
+    stdout.writeln('');
 
     // Load config
     final configFile = File(configPath);
     if (!configFile.existsSync()) {
-      print('❌ Config file not found: $configPath');
-      print('   Run `stardust init` to create a new project.');
+      stderr.writeln('❌ Config file not found: $configPath');
+      stderr.writeln('   Run `stardust init` to create a new project.');
       return 1;
     }
 
-    if (verbose) print('📄 Loading config from $configPath');
+    if (verbose) stdout.writeln('📄 Loading config from $configPath');
     final config = await ConfigLoader.load(configPath);
 
     // Clean output directory if requested
     final outDir = Directory(outputDir);
     if (clean && outDir.existsSync()) {
-      if (verbose) print('🧹 Cleaning output directory');
+      if (verbose) stdout.writeln('🧹 Cleaning output directory');
       await outDir.delete(recursive: true);
     }
     await outDir.create(recursive: true);
@@ -75,23 +75,23 @@ class BuildCommand extends Command<int> {
     final generator = SiteGenerator(
       config: config,
       outputDir: outputDir,
-      onError: (message) => stderr.writeln(message),
-      onLog: (message) => stdout.writeln(message),
+      onError: stderr.writeln,
+      onLog: stdout.writeln,
     );
 
     try {
       final pageCount = await generator.generate();
 
       stopwatch.stop();
-      print('');
-      print('✅ Built $pageCount pages in ${stopwatch.elapsedMilliseconds}ms');
-      print('   Output: ${p.absolute(outputDir)}');
-      print('');
+      stdout.writeln('');
+      stdout.writeln('✅ Built $pageCount pages in ${stopwatch.elapsedMilliseconds}ms');
+      stdout.writeln('   Output: ${p.absolute(outputDir)}');
+      stdout.writeln('');
 
       return 0;
     } catch (e, stackTrace) {
-      print('❌ Build failed: $e');
-      if (verbose) print(stackTrace);
+      stderr.writeln('❌ Build failed: $e');
+      if (verbose) stderr.writeln(stackTrace);
       return 1;
     }
   }

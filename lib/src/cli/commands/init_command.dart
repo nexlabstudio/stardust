@@ -33,19 +33,19 @@ class InitCommand extends Command<int> {
     final projectName = args['name'] as String? ?? p.basename(targetDir);
     final force = args['force'] as bool;
 
-    print('✨ Creating Stardust project: $projectName');
-    print('   Location: $targetDir');
-    print('');
+    stdout.writeln('✨ Creating Stardust project: $projectName');
+    stdout.writeln('   Location: $targetDir');
+    stdout.writeln('');
 
     await _createProject(targetDir, projectName, force);
 
-    print('');
-    print('🚀 Project created successfully!');
-    print('');
-    print('Next steps:');
-    print('  cd ${p.relative(targetDir)}');
-    print('  stardust dev');
-    print('');
+    stdout.writeln('');
+    stdout.writeln('🚀 Project created successfully!');
+    stdout.writeln('');
+    stdout.writeln('Next steps:');
+    stdout.writeln('  cd ${p.relative(targetDir)}');
+    stdout.writeln('  stardust dev');
+    stdout.writeln('');
 
     return 0;
   }
@@ -108,12 +108,12 @@ class InitCommand extends Command<int> {
     final file = File(path);
 
     if (file.existsSync() && !force) {
-      print('  ⏭️  Skipping $displayName (already exists)');
+      stdout.writeln('  ⏭️  Skipping $displayName (already exists)');
       return;
     }
 
     await file.writeAsString(content);
-    print('  ✅ Created $displayName');
+    stdout.writeln('  ✅ Created $displayName');
   }
 
   String _docsYamlTemplate(String projectName) => '''

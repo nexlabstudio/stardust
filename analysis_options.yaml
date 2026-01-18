@@ -7,6 +7,8 @@ analyzer:
 
 linter:
   rules:
+    - implicit_call_tearoffs
+    - unnecessary_constructor_name
     - prefer_expression_function_bodies
     - always_declare_return_types
     - avoid_empty_else

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
 
 import 'commands/build_command.dart';
@@ -29,20 +31,20 @@ class StardustCliRunner extends CommandRunner<int> {
       final argResults = parse(args);
 
       if (argResults['version'] == true) {
-        print('Stardust v0.1.0');
+        stdout.writeln('Stardust v0.1.0');
         return 0;
       }
 
       final result = await runCommand(argResults);
       return result ?? 0;
     } on UsageException catch (e) {
-      print(e.message);
-      print('');
-      print(e.usage);
+      stderr.writeln(e.message);
+      stderr.writeln('');
+      stderr.writeln(e.usage);
       return 64;
     } catch (e, stackTrace) {
-      print('Error: $e');
-      print(stackTrace);
+      stderr.writeln('Error: $e');
+      stderr.writeln(stackTrace);
       return 1;
     }
   }
