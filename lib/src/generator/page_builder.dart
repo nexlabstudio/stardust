@@ -2428,7 +2428,6 @@ class PageBuilder {
       </div>
     </div>
   </div>
-  <script src="$basePath/_pagefind/pagefind-ui.js" type="text/javascript"></script>
   <script>
     // Initialize Pagefind search
     (function() {
@@ -2436,15 +2435,38 @@ class PageBuilder {
       const searchTrigger = document.getElementById('search-trigger');
       const searchBackdrop = searchModal?.querySelector('.search-modal-backdrop');
       const searchClose = searchModal?.querySelector('.search-modal-close');
+      const container = document.getElementById('pagefind-container');
       let pagefindUI = null;
+      let searchUnavailable = false;
+
+      // Pagefind uses ES modules which don't work with file:// protocol
+      if (location.protocol === 'file:') {
+        searchUnavailable = true;
+        if (container) {
+          container.innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--color-text-secondary);">Search requires a web server.<br><small>Run <code>stardust dev</code> or use a local server.</small></p>';
+        }
+      } else {
+        // Only load Pagefind when served via HTTP
+        const script = document.createElement('script');
+        script.src = '$basePath/_pagefind/pagefind-ui.js';
+        script.onload = () => {};
+        script.onerror = () => {
+          searchUnavailable = true;
+          if (container) {
+            container.innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--color-text-secondary);">Search index not found.<br><small>Run <code>stardust build</code> to generate it.</small></p>';
+          }
+        };
+        document.head.appendChild(script);
+      }
 
       function openSearch() {
         if (!searchModal) return;
-        
+
         // Initialize Pagefind UI on first open
-        if (!pagefindUI && typeof PagefindUI !== 'undefined') {
+        if (!pagefindUI && !searchUnavailable && typeof PagefindUI !== 'undefined') {
           pagefindUI = new PagefindUI({
             element: '#pagefind-container',
+            baseUrl: '$basePath/',
             showSubResults: true,
             showImages: false,
             excerptLength: 15,
@@ -2459,7 +2481,7 @@ class PageBuilder {
         searchModal.classList.add('active');
         searchModal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
-        
+
         // Focus the search input
         setTimeout(() => {
           const input = searchModal.querySelector('.pagefind-ui__search-input');
