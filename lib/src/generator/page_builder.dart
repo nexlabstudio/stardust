@@ -40,6 +40,7 @@ class PageBuilder {
         <article class="prose">
           ${page.content}
         </article>
+        ${_buildEditLink(page)}
         ${_buildPageNav(page)}
       </main>
       ${_buildToc(page.toc)}
@@ -61,7 +62,6 @@ class PageBuilder {
           '  <meta name="description" content="${_escapeHtml(description)}">');
     }
 
-    // Open Graph
     buffer.writeln(
         '  <meta property="og:title" content="${_escapeHtml(page.title)}">');
     if (page.description case final description?) {
@@ -74,7 +74,6 @@ class PageBuilder {
           '  <meta property="og:image" content="${config.seo.ogImage}">');
     }
 
-    // Twitter
     buffer.writeln(
         '  <meta name="twitter:card" content="${config.seo.twitterCard}">');
     if (config.seo.twitterHandle != null) {
@@ -1946,6 +1945,31 @@ class PageBuilder {
       padding-left: 1.5rem;
     }
 
+    /* Edit link */
+    .edit-link {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .edit-link a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .edit-link a:hover {
+      color: var(--color-primary);
+    }
+
+    .edit-link svg {
+      flex-shrink: 0;
+    }
+
     /* Page navigation */
     .page-nav {
       display: grid;
@@ -2172,6 +2196,48 @@ class PageBuilder {
 ''';
   }
 
+  String _buildEditLink(Page page) {
+    final editConfig = config.integrations.editLink;
+
+    if (editConfig == null || !editConfig.enabled || editConfig.repo == null) {
+      return '';
+    }
+
+    final contentDir = config.content.dir;
+    final sourcePath = page.sourcePath;
+
+    String relativePath;
+    if (sourcePath.contains(contentDir)) {
+      final contentIndex = sourcePath.indexOf(contentDir);
+      relativePath = sourcePath.substring(contentIndex + contentDir.length);
+      if (relativePath.startsWith('/')) {
+        relativePath = relativePath.substring(1);
+      }
+    } else {
+      relativePath =
+          page.path == '/' ? 'index.md' : '${page.path.substring(1)}.md';
+    }
+
+    final repo = editConfig.repo!;
+    final branch = editConfig.branch;
+    final basePath =
+        editConfig.path.endsWith('/') ? editConfig.path : '${editConfig.path}/';
+
+    final editUrl = '$repo/edit/$branch/$basePath$relativePath';
+
+    return '''
+        <div class="edit-link">
+          <a href="$editUrl" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            ${editConfig.text}
+          </a>
+        </div>
+''';
+  }
+
   String _buildPageNav(Page page) {
     final buffer = StringBuffer();
     buffer.writeln('<nav class="page-nav">');
@@ -2215,7 +2281,6 @@ class PageBuilder {
 
   String _buildScripts() => '''
   <script>
-    // Theme toggle
     const themeToggle = document.getElementById('theme-toggle');
     const html = document.documentElement;
 
@@ -2241,7 +2306,6 @@ class PageBuilder {
       setTheme(next);
     });
 
-    // Copy button
     document.querySelectorAll('.copy-button').forEach(button => {
       button.addEventListener('click', async () => {
         const code = button.closest('.code-block').querySelector('code').textContent;
@@ -2251,7 +2315,6 @@ class PageBuilder {
       });
     });
 
-    // Tabs
     document.querySelectorAll('.tabs').forEach(tabs => {
       const buttons = tabs.querySelectorAll('.tab-button');
       const panels = tabs.querySelectorAll('.tab-panel');
@@ -2274,7 +2337,6 @@ class PageBuilder {
       });
     });
 
-    // ToC active state
     const tocLinks = document.querySelectorAll('.toc-link');
     const headings = Array.from(tocLinks).map(link => 
       document.getElementById(link.getAttribute('href').slice(1))
@@ -2300,7 +2362,6 @@ class PageBuilder {
     window.addEventListener('scroll', updateToc, { passive: true });
     updateToc();
 
-    // Code group tabs (same behavior as regular tabs)
     document.querySelectorAll('.code-group').forEach(group => {
       const buttons = group.querySelectorAll('.tab-button');
       const panels = group.querySelectorAll('.tab-panel');
@@ -2323,13 +2384,10 @@ class PageBuilder {
       });
     });
 
-    // Image zoom
     (function() {
       const zoomableImages = document.querySelectorAll('.image-zoomable .image-zoom-wrapper');
-      
       if (zoomableImages.length === 0) return;
 
-      // Create overlay
       const overlay = document.createElement('div');
       overlay.className = 'image-zoom-overlay';
       document.body.appendChild(overlay);
@@ -2356,12 +2414,10 @@ class PageBuilder {
       });
     })();
 
-    // Mermaid initialization
     (function() {
       const mermaidDiagrams = document.querySelectorAll('.mermaid');
       if (mermaidDiagrams.length === 0) return;
 
-      // Load Mermaid from CDN
       const script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
       script.onload = () => {
