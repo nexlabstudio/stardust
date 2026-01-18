@@ -794,6 +794,151 @@ seo:
 
 Each page's `title` and `description` frontmatter are used for meta tags.
 
+## Edit on GitHub
+
+Add "Edit this page on GitHub" links to encourage contributions:
+
+```yaml
+integrations:
+  editLink:
+    enabled: true
+    repo: https://github.com/your-org/your-repo
+    branch: main           # default: main
+    path: docs/            # path to docs folder in repo
+    text: "Edit this page on GitHub"  # link text
+```
+
+This adds a link at the bottom of each page that points directly to the source file on GitHub:
+
+```
+https://github.com/your-org/your-repo/edit/main/docs/getting-started.md
+```
+
+### Example with GitLab
+
+Works with any Git host that supports `/edit/` URLs:
+
+```yaml
+integrations:
+  editLink:
+    enabled: true
+    repo: https://gitlab.com/your-org/your-repo/-/blob
+    branch: main
+    path: docs/
+    text: "Edit on GitLab"
+```
+
+## OpenAPI Import
+
+Generate beautiful API documentation from OpenAPI/Swagger specs automatically.
+
+### Usage
+
+```bash
+stardust openapi <spec-file> [options]
+```
+
+### Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-o, --output` | Output directory | `docs/api` |
+| `-g, --group-by` | How to group endpoints: `tag`, `path`, or `none` | `tag` |
+| `-v, --verbose` | Verbose output | `false` |
+
+### Examples
+
+```bash
+# Import from OpenAPI 3.x YAML
+stardust openapi openapi.yaml
+
+# Import from Swagger 2.0 JSON
+stardust openapi swagger.json
+
+# Custom output directory
+stardust openapi api-spec.yaml -o docs/reference
+
+# Group by path instead of tag
+stardust openapi openapi.yaml --group-by path
+
+# Single page with all endpoints
+stardust openapi openapi.yaml --group-by none
+```
+
+### Generated Output
+
+For an OpenAPI spec with tags `Users` and `Products`:
+
+```
+docs/api/
+├── index.md        # Overview with links to each tag
+├── users.md        # All /users endpoints
+└── products.md     # All /products endpoints
+```
+
+Each endpoint is rendered using Stardust's built-in API components:
+
+```markdown
+<Api method="GET" path="/users/{id}" title="Get User" auth="Bearer">
+
+Retrieve a user by their unique identifier.
+
+### Parameters
+
+<ParamField name="id" type="string" paramType="path" required>
+The user's unique identifier.
+</ParamField>
+
+### Response
+
+#### 200 OK
+
+<ResponseField name="id" type="string">
+The user's unique identifier.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+The user's email address.
+</ResponseField>
+
+</Api>
+```
+
+### Supported Features
+
+- ✅ OpenAPI 3.0, 3.1
+- ✅ Swagger 2.0
+- ✅ JSON and YAML formats
+- ✅ Path, query, header, and body parameters
+- ✅ Request bodies with schema
+- ✅ Response schemas
+- ✅ Authentication/security schemes
+- ✅ Deprecated endpoints
+- ✅ Tags and descriptions
+- ✅ `$ref` references
+
+### Workflow
+
+1. **Import your spec:**
+   ```bash
+   stardust openapi openapi.yaml -o docs/api
+   ```
+
+2. **Add to sidebar** in `docs.yaml`:
+   ```yaml
+   sidebar:
+     - group: API Reference
+       pages:
+         - api/index
+         - api/users
+         - api/products
+   ```
+
+3. **Build your docs:**
+   ```bash
+   stardust build
+   ```
+
 ## License
 
 MIT

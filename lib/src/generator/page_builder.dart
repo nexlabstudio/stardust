@@ -1246,6 +1246,19 @@ class PageBuilder {
       font-size: 0.875em;
     }
 
+    /* Lucide icons */
+    [data-lucide] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
     /* ==========================================
        IMAGE (Phase 3c)
        ========================================== */
@@ -2416,6 +2429,18 @@ class PageBuilder {
           theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
           securityLevel: 'loose',
         });
+      };
+      document.head.appendChild(script);
+    })();
+
+    (function() {
+      const lucideIcons = document.querySelectorAll('[data-lucide]');
+      if (lucideIcons.length === 0) return;
+
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js';
+      script.onload = () => {
+        lucide.createIcons();
       };
       document.head.appendChild(script);
     })();
