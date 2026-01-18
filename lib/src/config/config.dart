@@ -105,12 +105,7 @@ class NavItem {
   final bool external;
   final String? icon;
 
-  const NavItem({
-    required this.label,
-    required this.href,
-    this.external = false,
-    this.icon,
-  });
+  const NavItem({required this.label, required this.href, this.external = false, this.icon});
 
   factory NavItem.fromYaml(Map yaml) => NavItem(
         label: yaml['label'] as String,
@@ -149,11 +144,7 @@ class SidebarPage {
   final String? label;
   final String? icon;
 
-  const SidebarPage({
-    required this.slug,
-    this.label,
-    this.icon,
-  });
+  const SidebarPage({required this.slug, this.label, this.icon});
 
   factory SidebarPage.fromYaml(dynamic yaml) {
     if (yaml is String) {
@@ -174,10 +165,7 @@ class AutogenerateConfig {
   final String dir;
   final String order;
 
-  const AutogenerateConfig({
-    required this.dir,
-    this.order = 'filename',
-  });
+  const AutogenerateConfig({required this.dir, this.order = 'filename'});
 
   factory AutogenerateConfig.fromYaml(Map yaml) => AutogenerateConfig(
         dir: yaml['dir'] as String,
@@ -267,10 +255,7 @@ class BackgroundColors {
   final String light;
   final String dark;
 
-  const BackgroundColors({
-    this.light = '#ffffff',
-    this.dark = '#0f172a',
-  });
+  const BackgroundColors({this.light = '#ffffff', this.dark = '#0f172a'});
 
   factory BackgroundColors.fromYaml(Map yaml) => BackgroundColors(
         light: yaml['light'] as String? ?? '#ffffff',
@@ -282,10 +267,7 @@ class TextColors {
   final String light;
   final String dark;
 
-  const TextColors({
-    this.light = '#1e293b',
-    this.dark = '#e2e8f0',
-  });
+  const TextColors({this.light = '#1e293b', this.dark = '#e2e8f0'});
 
   factory TextColors.fromYaml(Map yaml) => TextColors(
         light: yaml['light'] as String? ?? '#1e293b',
@@ -297,10 +279,7 @@ class DarkModeConfig {
   final bool enabled;
   final String defaultMode;
 
-  const DarkModeConfig({
-    this.enabled = true,
-    this.defaultMode = 'system',
-  });
+  const DarkModeConfig({this.enabled = true, this.defaultMode = 'system'});
 
   factory DarkModeConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const DarkModeConfig();
@@ -315,10 +294,7 @@ class FontsConfig {
   final String sans;
   final String mono;
 
-  const FontsConfig({
-    this.sans = 'Inter',
-    this.mono = 'JetBrains Mono',
-  });
+  const FontsConfig({this.sans = 'Inter', this.mono = 'JetBrains Mono'});
 
   factory FontsConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const FontsConfig();
@@ -371,10 +347,7 @@ class CodeThemeConfig {
   final String light;
   final String dark;
 
-  const CodeThemeConfig({
-    this.light = 'github-light',
-    this.dark = 'github-dark',
-  });
+  const CodeThemeConfig({this.light = 'github-light', this.dark = 'github-dark'});
 
   factory CodeThemeConfig.fromYaml(dynamic yaml) {
     if (yaml is String) {
@@ -420,10 +393,7 @@ class CalloutConfig {
   final String icon;
   final String color;
 
-  const CalloutConfig({
-    required this.icon,
-    required this.color,
-  });
+  const CalloutConfig({required this.icon, required this.color});
 
   factory CalloutConfig.fromYaml(Map yaml) => CalloutConfig(
         icon: yaml['icon'] as String,
@@ -463,11 +433,7 @@ class AlgoliaConfig {
   final String apiKey;
   final String indexName;
 
-  const AlgoliaConfig({
-    required this.appId,
-    required this.apiKey,
-    required this.indexName,
-  });
+  const AlgoliaConfig({required this.appId, required this.apiKey, required this.indexName});
 
   factory AlgoliaConfig.fromYaml(Map yaml) => AlgoliaConfig(
         appId: yaml['appId'] as String,
@@ -572,12 +538,7 @@ class AnnouncementConfig {
   final bool dismissible;
   final String style;
 
-  const AnnouncementConfig({
-    required this.text,
-    this.link,
-    this.dismissible = true,
-    this.style = 'info',
-  });
+  const AnnouncementConfig({required this.text, this.link, this.dismissible = true, this.style = 'info'});
 
   factory AnnouncementConfig.fromYaml(Map yaml) => AnnouncementConfig(
         text: yaml['text'] as String,
@@ -591,10 +552,7 @@ class FooterConfig {
   final String? copyright;
   final List<FooterLinkGroup> links;
 
-  const FooterConfig({
-    this.copyright,
-    this.links = const [],
-  });
+  const FooterConfig({this.copyright, this.links = const []});
 
   factory FooterConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const FooterConfig();
@@ -609,10 +567,7 @@ class FooterLinkGroup {
   final String group;
   final List<FooterLink> items;
 
-  const FooterLinkGroup({
-    required this.group,
-    this.items = const [],
-  });
+  const FooterLinkGroup({required this.group, this.items = const []});
 
   factory FooterLinkGroup.fromYaml(Map yaml) => FooterLinkGroup(
         group: yaml['group'] as String,
@@ -624,10 +579,7 @@ class FooterLink {
   final String label;
   final String href;
 
-  const FooterLink({
-    required this.label,
-    required this.href,
-  });
+  const FooterLink({required this.label, required this.href});
 
   factory FooterLink.fromYaml(Map yaml) => FooterLink(
         label: yaml['label'] as String,
@@ -642,13 +594,8 @@ class VersionsConfig {
   final bool dropdown;
   final List<VersionEntry> list;
 
-  const VersionsConfig({
-    this.enabled = false,
-    this.current,
-    this.defaultVersion,
-    this.dropdown = true,
-    this.list = const [],
-  });
+  const VersionsConfig(
+      {this.enabled = false, this.current, this.defaultVersion, this.dropdown = true, this.list = const []});
 
   factory VersionsConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const VersionsConfig();
@@ -668,12 +615,7 @@ class VersionEntry {
   final String path;
   final String? banner;
 
-  const VersionEntry({
-    required this.version,
-    this.label,
-    required this.path,
-    this.banner,
-  });
+  const VersionEntry({required this.version, this.label, required this.path, this.banner});
 
   factory VersionEntry.fromYaml(Map yaml) => VersionEntry(
         version: yaml['version'] as String,
@@ -688,11 +630,7 @@ class I18nConfig {
   final String defaultLocale;
   final List<LocaleConfig> locales;
 
-  const I18nConfig({
-    this.enabled = false,
-    this.defaultLocale = 'en',
-    this.locales = const [],
-  });
+  const I18nConfig({this.enabled = false, this.defaultLocale = 'en', this.locales = const []});
 
   factory I18nConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const I18nConfig();
@@ -709,11 +647,7 @@ class LocaleConfig {
   final String label;
   final String dir;
 
-  const LocaleConfig({
-    required this.code,
-    required this.label,
-    this.dir = 'ltr',
-  });
+  const LocaleConfig({required this.code, required this.label, this.dir = 'ltr'});
 
   factory LocaleConfig.fromYaml(Map yaml) => LocaleConfig(
         code: yaml['code'] as String,
@@ -728,12 +662,7 @@ class IntegrationsConfig {
   final AnalyticsConfig? analytics;
   final CommentsConfig? comments;
 
-  const IntegrationsConfig({
-    this.editLink,
-    this.lastUpdated,
-    this.analytics,
-    this.comments,
-  });
+  const IntegrationsConfig({this.editLink, this.lastUpdated, this.analytics, this.comments});
 
   factory IntegrationsConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const IntegrationsConfig();
@@ -753,13 +682,12 @@ class EditLinkConfig {
   final String path;
   final String text;
 
-  const EditLinkConfig({
-    this.enabled = false,
-    this.repo,
-    this.branch = 'main',
-    this.path = 'docs/',
-    this.text = 'Edit this page on GitHub',
-  });
+  const EditLinkConfig(
+      {this.enabled = false,
+      this.repo,
+      this.branch = 'main',
+      this.path = 'docs/',
+      this.text = 'Edit this page on GitHub'});
 
   factory EditLinkConfig.fromYaml(Map yaml) => EditLinkConfig(
         enabled: yaml['enabled'] as bool? ?? false,
@@ -775,11 +703,7 @@ class LastUpdatedConfig {
   final String format;
   final String text;
 
-  const LastUpdatedConfig({
-    this.enabled = false,
-    this.format = 'MMM d, yyyy',
-    this.text = 'Last updated',
-  });
+  const LastUpdatedConfig({this.enabled = false, this.format = 'MMM d, yyyy', this.text = 'Last updated'});
 
   factory LastUpdatedConfig.fromYaml(Map yaml) => LastUpdatedConfig(
         enabled: yaml['enabled'] as bool? ?? false,
@@ -793,11 +717,7 @@ class AnalyticsConfig {
   final String? plausible;
   final PosthogConfig? posthog;
 
-  const AnalyticsConfig({
-    this.google,
-    this.plausible,
-    this.posthog,
-  });
+  const AnalyticsConfig({this.google, this.plausible, this.posthog});
 
   factory AnalyticsConfig.fromYaml(Map yaml) => AnalyticsConfig(
         google: yaml['google'] as String?,
@@ -810,10 +730,7 @@ class PosthogConfig {
   final String key;
   final String? host;
 
-  const PosthogConfig({
-    required this.key,
-    this.host,
-  });
+  const PosthogConfig({required this.key, this.host});
 
   factory PosthogConfig.fromYaml(Map yaml) => PosthogConfig(
         key: yaml['key'] as String,
@@ -826,11 +743,7 @@ class CommentsConfig {
   final GiscusConfig? giscus;
   final DisqusConfig? disqus;
 
-  const CommentsConfig({
-    this.provider,
-    this.giscus,
-    this.disqus,
-  });
+  const CommentsConfig({this.provider, this.giscus, this.disqus});
 
   factory CommentsConfig.fromYaml(Map yaml) => CommentsConfig(
         provider: yaml['provider'] as String?,
@@ -845,12 +758,7 @@ class GiscusConfig {
   final String? category;
   final String? categoryId;
 
-  const GiscusConfig({
-    this.repo,
-    this.repoId,
-    this.category,
-    this.categoryId,
-  });
+  const GiscusConfig({this.repo, this.repoId, this.category, this.categoryId});
 
   factory GiscusConfig.fromYaml(Map yaml) => GiscusConfig(
         repo: yaml['repo'] as String?,
@@ -874,6 +782,7 @@ class BuildConfig {
   final bool trailingSlash;
   final SitemapConfig sitemap;
   final RobotsConfig robots;
+  final LlmsConfig llms;
   final AssetsConfig assets;
   final List<RedirectConfig> redirects;
 
@@ -883,6 +792,7 @@ class BuildConfig {
     this.trailingSlash = false,
     this.sitemap = const SitemapConfig(),
     this.robots = const RobotsConfig(),
+    this.llms = const LlmsConfig(),
     this.assets = const AssetsConfig(),
     this.redirects = const [],
   });
@@ -895,6 +805,7 @@ class BuildConfig {
       trailingSlash: yaml['trailingSlash'] as bool? ?? false,
       sitemap: SitemapConfig.fromYaml(yaml['sitemap'] as Map?),
       robots: RobotsConfig.fromYaml(yaml['robots'] as Map?),
+      llms: LlmsConfig.fromYaml(yaml['llms'] as Map?),
       assets: AssetsConfig.fromYaml(yaml['assets'] as Map?),
       redirects: (yaml['redirects'] as List?)?.map((e) => RedirectConfig.fromYaml(e as Map)).toList() ?? [],
     );
@@ -906,11 +817,7 @@ class SitemapConfig {
   final String changefreq;
   final double priority;
 
-  const SitemapConfig({
-    this.enabled = true,
-    this.changefreq = 'weekly',
-    this.priority = 0.7,
-  });
+  const SitemapConfig({this.enabled = true, this.changefreq = 'weekly', this.priority = 0.7});
 
   factory SitemapConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const SitemapConfig();
@@ -927,11 +834,7 @@ class RobotsConfig {
   final List<String> allow;
   final List<String> disallow;
 
-  const RobotsConfig({
-    this.enabled = true,
-    this.allow = const ['/'],
-    this.disallow = const [],
-  });
+  const RobotsConfig({this.enabled = true, this.allow = const ['/'], this.disallow = const []});
 
   factory RobotsConfig.fromYaml(Map? yaml) {
     if (yaml == null) return const RobotsConfig();
@@ -939,6 +842,19 @@ class RobotsConfig {
       enabled: yaml['enabled'] as bool? ?? true,
       allow: (yaml['allow'] as List?)?.cast<String>() ?? const ['/'],
       disallow: (yaml['disallow'] as List?)?.cast<String>() ?? const [],
+    );
+  }
+}
+
+class LlmsConfig {
+  final bool enabled;
+
+  const LlmsConfig({this.enabled = true});
+
+  factory LlmsConfig.fromYaml(Map? yaml) {
+    if (yaml == null) return const LlmsConfig();
+    return LlmsConfig(
+      enabled: yaml['enabled'] as bool? ?? true,
     );
   }
 }
