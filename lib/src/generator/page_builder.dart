@@ -92,8 +92,93 @@ class PageBuilder {
       buffer.writeln('  <meta name="twitter:site" content="$handle">');
     }
 
+    if (config.seo.structuredData) {
+      buffer.writeln(_buildStructuredData(page));
+    }
+
     return buffer.toString();
   }
+
+  String _buildStructuredData(Page page) {
+    final buffer = StringBuffer();
+
+    if (config.url case final url?) {
+      final baseUrl = switch (url) {
+        final u when u.endsWith('/') => u.substring(0, u.length - 1),
+        _ => url,
+      };
+      final pagePath = switch (page.path) { '/' => '', final p => p };
+      final pageUrl = '$baseUrl$pagePath';
+
+      final articleJson = StringBuffer()
+        ..write('{"@context":"https://schema.org"')
+        ..write(',"@type":"Article"')
+        ..write(',"headline":"${_escapeJson(page.title)}"')
+        ..write(',"url":"$pageUrl"');
+
+      if (page.description case final desc?) {
+        articleJson.write(',"description":"${_escapeJson(desc)}"');
+      }
+
+      if (config.seo.ogImage case final image?) {
+        articleJson.write(',"image":"$image"');
+      }
+
+      articleJson
+        ..write(',"publisher":{"@type":"Organization","name":"${_escapeJson(config.name)}"')
+        ..write('}')
+        ..write('}');
+
+      buffer.writeln('  <script type="application/ld+json">${articleJson.toString()}</script>');
+
+      if (page.breadcrumbs.isNotEmpty) {
+        final breadcrumbJson = StringBuffer()
+          ..write('{"@context":"https://schema.org"')
+          ..write(',"@type":"BreadcrumbList"')
+          ..write(',"itemListElement":[');
+
+        final items = <String>[];
+        for (final (index, crumb) in page.breadcrumbs.indexed) {
+          final crumbUrl = '$baseUrl${crumb.path}';
+          items.add(
+              '{"@type":"ListItem","position":${index + 1},"name":"${_escapeJson(crumb.title)}","item":"$crumbUrl"}');
+        }
+        items.add(
+            '{"@type":"ListItem","position":${page.breadcrumbs.length + 1},"name":"${_escapeJson(page.title)}","item":"$pageUrl"}');
+
+        breadcrumbJson
+          ..write(items.join(','))
+          ..write(']}');
+
+        buffer.writeln('  <script type="application/ld+json">${breadcrumbJson.toString()}</script>');
+      }
+
+      if (page.path == '/') {
+        final websiteJson = StringBuffer()
+          ..write('{"@context":"https://schema.org"')
+          ..write(',"@type":"WebSite"')
+          ..write(',"name":"${_escapeJson(config.name)}"')
+          ..write(',"url":"$baseUrl"');
+
+        if (config.description case final desc?) {
+          websiteJson.write(',"description":"${_escapeJson(desc)}"');
+        }
+
+        websiteJson.write('}');
+
+        buffer.writeln('  <script type="application/ld+json">${websiteJson.toString()}</script>');
+      }
+    }
+
+    return buffer.toString();
+  }
+
+  String _escapeJson(String text) => text
+      .replaceAll('\\', '\\\\')
+      .replaceAll('"', '\\"')
+      .replaceAll('\n', '\\n')
+      .replaceAll('\r', '\\r')
+      .replaceAll('\t', '\\t');
 
   String _buildFonts() {
     final sans = config.theme.fonts.sans;
