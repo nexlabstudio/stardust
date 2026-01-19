@@ -270,6 +270,7 @@ jobs:
       - name: Update Homebrew tap
         env:
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
           VERSION=${{ steps.extract.outputs.version }}
 
@@ -290,3 +291,10 @@ jobs:
           # Pull with rebase to handle any new commits, then push
           git pull --rebase origin dev || true
           git push
+
+          # Create a release in homebrew-tap repo
+          gh release create "stardust-${VERSION}" \
+            --repo nexlabstudio/homebrew-tap \
+            --title "stardust ${VERSION}" \
+            --notes "Update stardust formula to ${VERSION}. See full release notes: https://github.com/nexlabstudio/stardust/releases/tag/v${VERSION}" \
+            || echo "Release already exists or failed to create"
