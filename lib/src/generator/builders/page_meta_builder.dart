@@ -1,5 +1,6 @@
 import '../../config/config.dart';
 import '../../models/page.dart';
+import '../../utils/html_utils.dart';
 
 /// Builds meta tags, Open Graph, Twitter Cards, and JSON-LD structured data
 class PageMetaBuilder {
@@ -17,12 +18,12 @@ class PageMetaBuilder {
     }
 
     if (page.description case final description?) {
-      buffer.writeln('  <meta name="description" content="${escapeHtml(description)}">');
+      buffer.writeln('  <meta name="description" content="${encodeHtml(description)}">');
     }
 
-    buffer.writeln('  <meta property="og:title" content="${escapeHtml(page.title)}">');
+    buffer.writeln('  <meta property="og:title" content="${encodeHtml(page.title)}">');
     if (page.description case final description?) {
-      buffer.writeln('  <meta property="og:description" content="${escapeHtml(description)}">');
+      buffer.writeln('  <meta property="og:description" content="${encodeHtml(description)}">');
     }
     buffer.writeln('  <meta property="og:type" content="article">');
     if (config.url case final url?) {
@@ -139,7 +140,4 @@ class PageMetaBuilder {
       .replaceAll('\n', '\\n')
       .replaceAll('\r', '\\r')
       .replaceAll('\t', '\\t');
-
-  String escapeHtml(String text) =>
-      text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }

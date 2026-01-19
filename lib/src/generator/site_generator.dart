@@ -7,14 +7,14 @@ import 'package:path/path.dart' as p;
 import '../config/config.dart';
 import '../content/markdown_parser.dart';
 import '../models/page.dart';
+import '../utils/logger.dart';
 import 'page_builder.dart';
 
 /// Generates static documentation site
 class SiteGenerator {
   final StardustConfig config;
   final String outputDir;
-  final void Function(String message)? onLog;
-  final void Function(String message)? onError;
+  final Logger logger;
 
   late final MarkdownParser _markdownParser;
   late final PageBuilder _pageBuilder;
@@ -22,22 +22,18 @@ class SiteGenerator {
   SiteGenerator({
     required this.config,
     required this.outputDir,
-    this.onLog,
-    this.onError,
+    this.logger = const Logger(),
   }) {
     _markdownParser = MarkdownParser(config: config);
     _pageBuilder = PageBuilder(config: config);
   }
-
-  void _log(String message) => onLog?.call(message);
-  void _error(String message) => (onError ?? onLog)?.call(message);
 
   /// Generate the static site, returns number of pages generated
   Future<int> generate() async {
     final contentDir = p.join(Directory.current.path, config.content.dir);
     final files = await _findMarkdownFiles(contentDir);
 
-    _log('📄 Found ${files.length} markdown files');
+    logger.log('📄 Found ${files.length} markdown files');
 
     final pages = <Page>[];
     final pagesBySlug = <String, Page>{};
@@ -57,7 +53,7 @@ class SiteGenerator {
     for (final page in pagesWithNav) {
       await _generatePage(page);
       count++;
-      _log('  ✅ ${page.path}');
+      logger.log('  ✅ ${page.path}');
     }
 
     await _copyPublicAssets();
@@ -118,7 +114,7 @@ class SiteGenerator {
       final parsed = _markdownParser.parse(content, defaultTitle: defaultTitle);
 
       if (parsed.frontmatter['draft'] == true) {
-        _log('⏭️  Skipping draft: $slug');
+        logger.log('⏭️  Skipping draft: $slug');
         return null;
       }
 
@@ -134,7 +130,7 @@ class SiteGenerator {
         frontmatter: parsed.frontmatter,
       );
     } catch (e) {
-      _error('  ❌ Error parsing ${file.path}: $e');
+      logger.error('  ❌ Error parsing ${file.path}: $e');
       return null;
     }
   }
@@ -247,7 +243,7 @@ class SiteGenerator {
     final publicDir = Directory(config.build.assets.dir);
     if (!publicDir.existsSync()) return;
 
-    _log('📦 Copying public assets');
+    logger.log('📦 Copying public assets');
 
     await for (final entity in publicDir.list(recursive: true)) {
       if (entity is File) {
@@ -258,14 +254,14 @@ class SiteGenerator {
         await destFile.parent.create(recursive: true);
         await entity.copy(destPath);
 
-        _log('  📄 $relativePath');
+        logger.log('  📄 $relativePath');
       }
     }
   }
 
   Future<void> _generateSitemap(List<Page> pages) async {
     if (config.url == null) {
-      _log('⏭️  Skipping sitemap.xml (no url configured)');
+      logger.log('⏭️  Skipping sitemap.xml (no url configured)');
       return;
     }
 
@@ -297,7 +293,7 @@ class SiteGenerator {
     await sitemapFile.parent.create(recursive: true);
     await sitemapFile.writeAsString(buffer.toString());
 
-    _log('🗺️  Generated sitemap.xml');
+    logger.log('🗺️  Generated sitemap.xml');
   }
 
   Future<void> _generateRobots() async {
@@ -321,7 +317,7 @@ class SiteGenerator {
     await robotsFile.parent.create(recursive: true);
     await robotsFile.writeAsString(buffer.toString());
 
-    _log('🤖 Generated robots.txt');
+    logger.log('🤖 Generated robots.txt');
   }
 
   Future<void> _generateLlms(List<Page> pages) async {
@@ -377,7 +373,7 @@ class SiteGenerator {
     await llmsFile.parent.create(recursive: true);
     await llmsFile.writeAsString(buffer.toString());
 
-    _log('🤖 Generated llms.txt');
+    logger.log('🤖 Generated llms.txt');
   }
 }
 

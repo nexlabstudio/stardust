@@ -2,6 +2,7 @@ import 'package:highlight/highlight.dart' show highlight;
 import 'package:markdown/markdown.dart' as md;
 
 import '../config/config.dart';
+import '../utils/html_utils.dart';
 import 'component_transformer.dart';
 import 'frontmatter_parser.dart';
 
@@ -92,7 +93,7 @@ class MarkdownParser {
 
     return html.replaceAllMapped(codeBlockPattern, (match) {
       final language = match.group(1) ?? '';
-      final code = _decodeHtmlEntities(match.group(2) ?? '');
+      final code = decodeHtmlEntities(match.group(2) ?? '');
 
       try {
         final highlighted = highlight.parse(code, language: language);
@@ -124,17 +125,17 @@ $copyButton
 
     for (final node in nodes) {
       if (node is String) {
-        buffer.write(_encodeHtml(node));
+        buffer.write(encodeHtml(node));
       } else if (node.className != null) {
         buffer.write('<span class="hljs-${node.className}">');
         if (node.children != null) {
           buffer.write(_renderHighlight(node.children));
         } else if (node.value != null) {
-          buffer.write(_encodeHtml(node.value));
+          buffer.write(encodeHtml(node.value));
         }
         buffer.write('</span>');
       } else if (node.value != null) {
-        buffer.write(_encodeHtml(node.value));
+        buffer.write(encodeHtml(node.value));
       } else if (node.children != null) {
         buffer.write(_renderHighlight(node.children));
       }
@@ -162,27 +163,11 @@ $copyButton
 
       final level = int.parse(levelStr);
       if (level >= minDepth && level <= maxDepth) {
-        final text = _stripHtml(rawText);
+        final text = stripHtml(rawText);
         toc.add(TocEntry(level: level, text: text, id: id));
       }
     }
 
     return toc;
   }
-
-  String _stripHtml(String html) => html.replaceAll(RegExp(r'<[^>]*>'), '').trim();
-
-  String _decodeHtmlEntities(String text) => text
-      .replaceAll('&lt;', '<')
-      .replaceAll('&gt;', '>')
-      .replaceAll('&amp;', '&')
-      .replaceAll('&quot;', '"')
-      .replaceAll('&#39;', "'");
-
-  String _encodeHtml(String text) => text
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
 }

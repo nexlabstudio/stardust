@@ -1,3 +1,4 @@
+import '../../utils/html_utils.dart';
 import '../utils/icon_utils.dart';
 import 'base_component.dart';
 
@@ -51,7 +52,7 @@ class UtilityBuilder extends ComponentBuilder {
     final tip = attributes['content'] ?? attributes['tip'] ?? '';
     final position = attributes['position'] ?? 'top';
 
-    final escapedTip = tip.replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    final escapedTip = encodeHtml(tip);
 
     return '''<span class="tooltip tooltip-$position" data-tooltip="$escapedTip">$content</span>''';
   }

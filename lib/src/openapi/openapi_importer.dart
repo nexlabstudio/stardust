@@ -4,34 +4,31 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+import '../utils/logger.dart';
+
 /// Imports OpenAPI/Swagger specs and generates Stardust markdown docs
 class OpenApiImporter {
   final String specPath;
   final String outputDir;
   final OpenApiOptions options;
-  final void Function(String)? onLog;
-  final void Function(String)? onError;
+  final Logger logger;
 
   OpenApiImporter({
     required this.specPath,
     required this.outputDir,
     this.options = const OpenApiOptions(),
-    this.onLog,
-    this.onError,
+    this.logger = const Logger(),
   });
-
-  void _log(String message) => onLog?.call(message);
-  void _error(String message) => (onError ?? onLog)?.call(message);
 
   /// Import the OpenAPI spec and generate markdown files
   Future<int> import() async {
     final file = File(specPath);
     if (!file.existsSync()) {
-      _error('OpenAPI spec not found: $specPath');
+      logger.error('OpenAPI spec not found: $specPath');
       return 0;
     }
 
-    _log('📖 Parsing OpenAPI spec: $specPath');
+    logger.log('📖 Parsing OpenAPI spec: $specPath');
 
     final content = await file.readAsString();
     final Map<String, dynamic> spec;
@@ -44,7 +41,7 @@ class OpenApiImporter {
         spec = jsonDecode(content) as Map<String, dynamic>;
       }
     } catch (e) {
-      _error('Failed to parse OpenAPI spec: $e');
+      logger.error('Failed to parse OpenAPI spec: $e');
       return 0;
     }
 
@@ -52,11 +49,11 @@ class OpenApiImporter {
     final isSwagger2 = spec.containsKey('swagger');
 
     if (!isOpenApi3 && !isSwagger2) {
-      _error('Invalid OpenAPI/Swagger spec: missing version field');
+      logger.error('Invalid OpenAPI/Swagger spec: missing version field');
       return 0;
     }
 
-    _log('   Version: ${isOpenApi3 ? spec['openapi'] : spec['swagger']}');
+    logger.log('   Version: ${isOpenApi3 ? spec['openapi'] : spec['swagger']}');
 
     final outDir = Directory(outputDir);
     if (!outDir.existsSync()) {
@@ -86,11 +83,11 @@ class OpenApiImporter {
         );
 
         if (endpoint.deprecated && !options.includeDeprecated) {
-          _log('   Skipping deprecated: ${endpoint.method} ${endpoint.path}');
+          logger.log('   Skipping deprecated: ${endpoint.method} ${endpoint.path}');
           return;
         }
 
-        _log('   Found: ${endpoint.method} ${endpoint.path}');
+        logger.log('   Found: ${endpoint.method} ${endpoint.path}');
 
         if (endpoint.tags.isEmpty) {
           untaggedEndpoints.add(endpoint);
@@ -165,7 +162,7 @@ class OpenApiImporter {
         break;
     }
 
-    _log('✅ Generated $fileCount API documentation files');
+    logger.log('✅ Generated $fileCount API documentation files');
     return fileCount;
   }
 
@@ -448,7 +445,7 @@ class OpenApiImporter {
 
     final filePath = p.join(outputDir, 'index.md');
     await File(filePath).writeAsString(buffer.toString());
-    _log('   📄 index.md');
+    logger.log('   📄 index.md');
   }
 
   /// Generate a page for a tag group
@@ -491,7 +488,7 @@ class OpenApiImporter {
 
     final filePath = p.join(outputDir, '$filename.md');
     await File(filePath).writeAsString(buffer.toString());
-    _log('   📄 $filename.md (${endpoints.length} endpoints)');
+    logger.log('   📄 $filename.md (${endpoints.length} endpoints)');
   }
 
   /// Generate a page for a path group
@@ -523,7 +520,7 @@ class OpenApiImporter {
 
     final filePath = p.join(outputDir, '$pathKey.md');
     await File(filePath).writeAsString(buffer.toString());
-    _log('   📄 $pathKey.md (${endpoints.length} methods)');
+    logger.log('   📄 $pathKey.md (${endpoints.length} methods)');
   }
 
   /// Generate single page with all endpoints
@@ -568,7 +565,7 @@ class OpenApiImporter {
 
     final filePath = p.join(outputDir, 'index.md');
     await File(filePath).writeAsString(buffer.toString());
-    _log('   📄 index.md (${endpoints.length} endpoints)');
+    logger.log('   📄 index.md (${endpoints.length} endpoints)');
   }
 
   /// Write a single endpoint to the buffer

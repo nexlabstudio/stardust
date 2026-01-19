@@ -1,3 +1,4 @@
+import '../../utils/html_utils.dart';
 import '../utils/attribute_parser.dart';
 import '../utils/icon_utils.dart';
 import 'base_component.dart';
@@ -97,7 +98,7 @@ class MediaBuilder extends ComponentBuilder {
     final caption = attributes['caption'];
     final theme = attributes['theme'] ?? 'default';
 
-    final escapedContent = content.trim().replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    final escapedContent = encodeHtml(content.trim());
 
     final diagramHtml = '''
 <div class="mermaid-diagram" data-theme="$theme">

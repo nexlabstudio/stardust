@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 import '../../openapi/openapi_importer.dart';
+import '../../utils/logger.dart';
 
 /// Import OpenAPI/Swagger spec and generate documentation
 class OpenApiCommand extends Command<int> {
@@ -70,13 +71,9 @@ class OpenApiCommand extends Command<int> {
       _ => OpenApiGroupBy.tag,
     };
 
+    final logger = Logger(onLog: stdout.writeln, onError: stderr.writeln);
     final importer = OpenApiImporter(
-      specPath: specPath,
-      outputDir: outputDir,
-      options: OpenApiOptions(groupBy: groupBy),
-      onLog: stdout.writeln,
-      onError: stderr.writeln,
-    );
+        specPath: specPath, outputDir: outputDir, options: OpenApiOptions(groupBy: groupBy), logger: logger);
 
     try {
       final fileCount = await importer.import();

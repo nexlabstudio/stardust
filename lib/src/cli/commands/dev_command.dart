@@ -8,6 +8,7 @@ import 'package:shelf_static/shelf_static.dart';
 import 'package:watcher/watcher.dart';
 import '../../config/config_loader.dart';
 import '../../generator/site_generator.dart';
+import '../../utils/logger.dart';
 
 /// Development server with hot reload
 class DevCommand extends Command<int> {
@@ -66,12 +67,8 @@ class DevCommand extends Command<int> {
 
     // Initial build
     stdout.writeln('🔨 Building site...');
-    var generator = SiteGenerator(
-      config: config,
-      outputDir: outputDir,
-      onError: stderr.writeln,
-      onLog: stdout.writeln,
-    );
+    final logger = Logger(onLog: stdout.writeln, onError: stderr.writeln);
+    var generator = SiteGenerator(config: config, outputDir: outputDir, logger: logger);
     await generator.generate();
 
     // Create static file handler with live reload injection
@@ -167,10 +164,7 @@ class DevCommand extends Command<int> {
         try {
           if (reloadConfig) {
             config = await ConfigLoader.load(configPath);
-            generator = SiteGenerator(
-              config: config,
-              outputDir: outputDir,
-            );
+            generator = SiteGenerator(config: config, outputDir: outputDir, logger: logger);
           }
 
           await generator.generate();

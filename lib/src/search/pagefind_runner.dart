@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
+import '../utils/logger.dart';
+
 /// Manages Pagefind binary - downloads if needed and runs indexing
 class PagefindRunner {
   static const _version = '1.4.0';
@@ -76,21 +78,20 @@ class PagefindRunner {
 
   /// Download and install the Pagefind binary
   static Future<bool> install({
-    void Function(String)? onLog,
-    void Function(String)? onError,
+    Logger logger = const Logger(),
     void Function(int received, int total)? onProgress,
   }) async {
     final url = _downloadUrl;
     if (url == null) {
-      onError?.call('Unsupported platform for Pagefind');
+      logger.error('Unsupported platform for Pagefind');
       return false;
     }
 
     final oldVersion = _installedVersion;
     if (oldVersion != null && oldVersion != _version) {
-      onLog?.call('   Updating Pagefind from v$oldVersion to v$_version...');
+      logger.log('   Updating Pagefind from v$oldVersion to v$_version...');
     } else {
-      onLog?.call('   Downloading Pagefind v$_version...');
+      logger.log('   Downloading Pagefind v$_version...');
     }
 
     try {
@@ -105,7 +106,7 @@ class PagefindRunner {
         final response = await request.close();
 
         if (response.statusCode != 200) {
-          onError?.call('Failed to download Pagefind: HTTP ${response.statusCode}');
+          logger.error('Failed to download Pagefind: HTTP ${response.statusCode}');
           return false;
         }
 
@@ -115,22 +116,21 @@ class PagefindRunner {
           final percent = received * 100 ~/ total;
           if (percent ~/ 10 > lastPercent ~/ 10) {
             lastPercent = percent;
-            onLog?.call('   Downloading... $percent%');
+            logger.log('   Downloading... $percent%');
           }
         }
 
         return await _extractAndInstall(
           response,
           url,
-          onLog: onLog,
-          onError: onError,
-          onProgress: onProgress ?? (onLog != null ? defaultProgress : null),
+          logger: logger,
+          onProgress: onProgress ?? defaultProgress,
         );
       } finally {
         httpClient.close();
       }
     } catch (e) {
-      onError?.call('Failed to download Pagefind: $e');
+      logger.error('Failed to download Pagefind: $e');
       return false;
     }
   }
@@ -138,8 +138,7 @@ class PagefindRunner {
   static Future<bool> _extractAndInstall(
     HttpClientResponse response,
     String url, {
-    void Function(String)? onLog,
-    void Function(String)? onError,
+    required Logger logger,
     void Function(int received, int total)? onProgress,
   }) async {
     final isZip = url.endsWith('.zip');
@@ -165,7 +164,7 @@ class PagefindRunner {
           ['-Command', 'Expand-Archive', '-Path', tempFile.path, '-DestinationPath', _cacheDir, '-Force'],
         );
         if (result.exitCode != 0) {
-          onError?.call('Failed to extract Pagefind: ${result.stderr}');
+          logger.error('Failed to extract Pagefind: ${result.stderr}');
           return false;
         }
       } else {
@@ -174,7 +173,7 @@ class PagefindRunner {
           ['-xzf', tempFile.path, '-C', _cacheDir],
         );
         if (result.exitCode != 0) {
-          onError?.call('Failed to extract Pagefind: ${result.stderr}');
+          logger.error('Failed to extract Pagefind: ${result.stderr}');
           return false;
         }
       }
@@ -186,14 +185,14 @@ class PagefindRunner {
       await File(_versionFilePath).writeAsString(_version);
 
       if (isInstalled) {
-        onLog?.call('   ✓ Pagefind v$_version installed');
+        logger.log('   ✓ Pagefind v$_version installed');
         return true;
       } else {
-        onError?.call('Pagefind binary not found after extraction');
+        logger.error('Pagefind binary not found after extraction');
         return false;
       }
     } catch (e) {
-      onError?.call('Failed to extract Pagefind: $e');
+      logger.error('Failed to extract Pagefind: $e');
       return false;
     } finally {
       if (tempFile.existsSync()) {
@@ -208,11 +207,10 @@ class PagefindRunner {
   static Future<bool> run(
     String outputDir, {
     bool verbose = false,
-    void Function(String)? onLog,
-    void Function(String)? onError,
+    Logger logger = const Logger(),
   }) async {
     if (needsInstall) {
-      final installed = await install(onLog: onLog, onError: onError);
+      final installed = await install(logger: logger);
       if (!installed) {
         return false;
       }
@@ -226,16 +224,16 @@ class PagefindRunner {
 
       if (result.exitCode == 0) {
         if (verbose) {
-          onLog?.call(result.stdout.toString());
+          logger.log(result.stdout.toString());
         }
-        onLog?.call('   ✓ Search index created');
+        logger.log('   ✓ Search index created');
         return true;
       } else {
-        onError?.call('Pagefind failed: ${result.stderr}');
+        logger.error('Pagefind failed: ${result.stderr}');
         return false;
       }
     } catch (e) {
-      onError?.call('Failed to run Pagefind: $e');
+      logger.error('Failed to run Pagefind: $e');
       return false;
     }
   }

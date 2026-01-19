@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import '../../config/config_loader.dart';
 import '../../generator/site_generator.dart';
 import '../../search/pagefind_runner.dart';
+import '../../utils/logger.dart';
 
 /// Build static documentation site
 class BuildCommand extends Command<int> {
@@ -79,12 +80,8 @@ class BuildCommand extends Command<int> {
     await outDir.create(recursive: true);
 
     // Generate site
-    final generator = SiteGenerator(
-      config: config,
-      outputDir: outputDir,
-      onError: stderr.writeln,
-      onLog: stdout.writeln,
-    );
+    final logger = Logger(onLog: stdout.writeln, onError: stderr.writeln);
+    final generator = SiteGenerator(config: config, outputDir: outputDir, logger: logger);
 
     try {
       final pageCount = await generator.generate();
@@ -93,12 +90,7 @@ class BuildCommand extends Command<int> {
       if (!skipSearch && config.search.enabled && config.search.provider == 'pagefind') {
         stdout.writeln('');
         stdout.writeln('🔍 Building search index...');
-        await PagefindRunner.run(
-          outputDir,
-          verbose: verbose,
-          onLog: stdout.writeln,
-          onError: stderr.writeln,
-        );
+        await PagefindRunner.run(outputDir, verbose: verbose, logger: logger);
       }
 
       stopwatch.stop();
