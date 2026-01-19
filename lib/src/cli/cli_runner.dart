@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
+import '../version.dart';
 import 'commands/build_command.dart';
 import 'commands/dev_command.dart';
 import 'commands/init_command.dart';
@@ -33,7 +34,7 @@ class StardustCliRunner extends CommandRunner<int> {
       final argResults = parse(args);
 
       if (argResults['version'] == true) {
-        stdout.writeln('Stardust v0.1.0');
+        stdout.writeln('Stardust v$version');
         return 0;
       }
 
