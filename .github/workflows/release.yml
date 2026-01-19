@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: darwin-x64
+            arch: x64
+          - os: macos-latest
+            target: darwin-arm64
+            arch: arm64
+          - os: ubuntu-latest
+            target: linux-x64
+            arch: x64
+          - os: ubuntu-24.04-arm
+            target: linux-arm64
+            arch: arm64
+          - os: windows-latest
+            target: windows-x64
+            arch: x64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+          architecture: ${{ matrix.arch }}
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Run tests
+        run: dart test
+
+      - name: Compile binary
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            dart compile exe bin/stardust.dart -o stardust.exe
+          else
+            dart compile exe bin/stardust.dart -o stardust
+          fi
+
+      - name: Package (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          chmod +x stardust
+          tar -czvf stardust-${{ matrix.target }}.tar.gz stardust
+
+      - name: Package (Windows)
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path stardust.exe -DestinationPath stardust-${{ matrix.target }}.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stardust-${{ matrix.target }}
+          path: stardust-${{ matrix.target }}.*
+          retention-days: 1
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Generate checksums
+        run: |
+          cd artifacts
+          sha256sum stardust-* > checksums.txt
+          cat checksums.txt
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Stardust ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: ${{ contains(github.ref, '-') }}
+          generate_release_notes: true
+          files: |
+            artifacts/stardust-darwin-x64.tar.gz
+            artifacts/stardust-darwin-arm64.tar.gz
+            artifacts/stardust-linux-x64.tar.gz
+            artifacts/stardust-linux-arm64.tar.gz
+            artifacts/stardust-windows-x64.zip
+            artifacts/checksums.txt
