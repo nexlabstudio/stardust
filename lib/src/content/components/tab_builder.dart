@@ -28,7 +28,7 @@ class TabBuilder extends ComponentBuilder {
 
     for (var i = 0; i < tabs.length; i++) {
       final tab = tabs[i];
-      final name = tab.attributes['name'] ?? 'Tab ${i + 1}';
+      final name = tab.attributes['label'] ?? tab.attributes['name'] ?? 'Tab ${i + 1}';
       final isActive = i == 0;
       final tabId = '$tabsId-$i';
 

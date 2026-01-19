@@ -1,5 +1,4 @@
 import '../../utils/html_utils.dart';
-import '../../utils/patterns.dart';
 import '../utils/attribute_parser.dart';
 import '../utils/icon_utils.dart';
 import 'base_component.dart';
@@ -140,19 +139,27 @@ $treeContent  </ul>
     );
 
     final elements = <_TreeElement>[];
+    final folderMatches = findBalancedTags(content, 'Folder');
 
-    for (final match in openCloseComponentPattern('Folder').allMatches(content)) {
-      final attrs = parseAttributes(match.group(1) ?? '');
+    for (final match in folderMatches) {
+      final attrs = parseAttributes(match.attributes);
       elements.add(_TreeElement(
         type: 'folder',
         start: match.start,
         name: attrs['name'] ?? 'folder',
         open: attrs['open'] == 'true' || attrs.containsKey('open'),
-        content: match.group(2) ?? '',
+        content: match.content,
       ));
     }
 
+    // Skip files inside folders - they're handled recursively
     for (final match in filePattern.allMatches(content)) {
+      final fileStart = match.start;
+      final isInsideFolder = folderMatches.any(
+        (folder) => fileStart > folder.start && fileStart < folder.end,
+      );
+      if (isInsideFolder) continue;
+
       final attrs = parseAttributes(match.group(1) ?? '');
       elements.add(_TreeElement(
         type: 'file',

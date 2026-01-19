@@ -5,18 +5,18 @@ import 'base_component.dart';
 /// Builds card components: Cards, Card, Tiles, Tile
 class CardBuilder extends ComponentBuilder {
   @override
-  List<String> get tagNames => ['Cards', 'Card', 'Tiles'];
+  List<String> get tagNames => ['Cards', 'CardGroup', 'Card', 'Tiles'];
 
   @override
   String build(String tagName, Map<String, String> attributes, String content) => switch (tagName) {
-        'Cards' => _buildCards(attributes, content),
+        'Cards' || 'CardGroup' => _buildCards(attributes, content),
         'Card' => _buildCard(attributes, content),
         'Tiles' => _buildTiles(attributes, content),
         _ => content
       };
 
   String _buildCards(Map<String, String> attributes, String content) {
-    final columns = attributes['columns'] ?? '2';
+    final columns = attributes['cols'] ?? attributes['columns'] ?? '2';
     final cards = extractChildComponents(content, 'Card');
 
     final cardsHtml = StringBuffer();

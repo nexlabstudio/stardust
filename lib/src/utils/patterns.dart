@@ -34,7 +34,6 @@ RegExp selfClosingComponentPattern(String tagName) => _selfClosingCache.putIfAbs
       tagName,
       () => RegExp(
         '<$tagName([^>]*?)/>',
-        caseSensitive: false,
         dotAll: true,
       ),
     );
@@ -43,13 +42,11 @@ RegExp openCloseComponentPattern(String tagName) => _openCloseCache.putIfAbsent(
       tagName,
       () => RegExp(
         '<$tagName([^>]*)>([\\s\\S]*?)</$tagName>',
-        caseSensitive: false,
         dotAll: true,
       ),
     );
 
 RegExp childComponentPattern(String componentName) => RegExp(
       '<$componentName([^>]*)>([\\s\\S]*?)</$componentName>',
-      caseSensitive: false,
       dotAll: true,
     );
