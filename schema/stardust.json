@@ -798,8 +798,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "slug": { "type": "string" },
-                  "label": { "type": "string" },
-                  "icon": { "type": "string" }
+                  "label": { "type": "string" }
                 },
                 "required": ["slug"]
               }

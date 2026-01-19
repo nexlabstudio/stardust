@@ -1,0 +1,150 @@
+name: Stardust
+description: The Dart-native documentation framework. Beautiful docs, zero config.
+url: https://stardust.dev
+
+content:
+  dir: docs/
+
+nav:
+  - label: Docs
+    href: /
+  - label: Components
+    href: /components/callouts
+  - label: GitHub
+    href: https://github.com/nexlabstudio/stardust
+    external: true
+
+sidebar:
+  - group: Getting Started
+    icon: rocket
+    pages:
+      - slug: ''
+        label: Introduction
+      - slug: installation
+        label: Installation
+      - slug: quickstart
+        label: Quick Start
+
+  - group: Writing Content
+    icon: file
+    pages:
+      - slug: markdown
+        label: Markdown Syntax
+      - slug: frontmatter
+        label: Frontmatter
+
+  - group: Components
+    icon: code
+    pages:
+      - slug: components/callouts
+        label: Callouts
+      - slug: components/tabs
+        label: Tabs
+      - slug: components/accordion
+        label: Accordion
+      - slug: components/steps
+        label: Steps
+      - slug: components/cards
+        label: Cards
+      - slug: components/code-groups
+        label: Code Groups
+      - slug: components/layout
+        label: Layout
+      - slug: components/media
+        label: Media
+      - slug: components/api-docs
+        label: API Documentation
+      - slug: components/other
+        label: Other Components
+
+  - group: Configuration
+    icon: settings
+    pages:
+      - slug: config/overview
+        label: Overview
+      - slug: config/theme
+        label: Theme
+      - slug: config/navigation
+        label: Navigation
+      - slug: config/search
+        label: Search
+      - slug: config/seo
+        label: SEO
+      - slug: config/integrations
+        label: Integrations
+
+  - group: Features
+    icon: sparkles
+    pages:
+      - slug: features/search
+        label: Full-Text Search
+      - slug: features/dark-mode
+        label: Dark Mode
+      - slug: features/openapi
+        label: OpenAPI Import
+      - slug: features/llm-output
+        label: LLM-Friendly Output
+
+  - group: CLI Reference
+    icon: terminal
+    pages:
+      - slug: cli/init
+        label: stardust init
+      - slug: cli/dev
+        label: stardust dev
+      - slug: cli/build
+        label: stardust build
+      - slug: cli/openapi
+        label: stardust openapi
+
+  - group: Deployment
+    icon: upload
+    pages:
+      - slug: deployment/overview
+        label: Overview
+      - slug: deployment/github-pages
+        label: GitHub Pages
+      - slug: deployment/vercel
+        label: Vercel
+      - slug: deployment/netlify
+        label: Netlify
+
+theme:
+  colors:
+    primary: "#6366f1"
+  darkMode:
+    enabled: true
+    default: system
+
+code:
+  theme:
+    light: github-light
+    dark: github-dark
+  copyButton: true
+  lineNumbers: false
+
+search:
+  enabled: true
+  provider: pagefind
+  placeholder: "Search documentation..."
+  hotkey: "/"
+
+build:
+  sitemap:
+    enabled: true
+    changefreq: weekly
+    priority: 0.7
+  robots:
+    enabled: true
+    allow:
+      - /
+  llms:
+    enabled: true
+
+integrations:
+  editLink:
+    enabled: true
+    repo: https://github.com/nexlabstudio/stardust
+    branch: dev
+    path: website/docs/
+    text: "Edit this page on GitHub"
