@@ -1,5 +1,6 @@
 class BuildConfig {
   final String outDir;
+  final String? basePath;
   final bool cleanUrls;
   final bool trailingSlash;
   final SitemapConfig sitemap;
@@ -10,6 +11,7 @@ class BuildConfig {
 
   const BuildConfig({
     this.outDir = 'dist/',
+    this.basePath,
     this.cleanUrls = true,
     this.trailingSlash = false,
     this.sitemap = const SitemapConfig(),
@@ -22,6 +24,7 @@ class BuildConfig {
   factory BuildConfig.fromYaml(Map? yaml) => switch (yaml) {
         final Map yaml => BuildConfig(
             outDir: yaml['outDir'] as String? ?? 'dist/',
+            basePath: yaml['basePath'] as String?,
             cleanUrls: yaml['cleanUrls'] as bool? ?? true,
             trailingSlash: yaml['trailingSlash'] as bool? ?? false,
             sitemap: SitemapConfig.fromYaml(yaml['sitemap'] as Map?),
