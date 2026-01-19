@@ -1,3 +1,5 @@
+import 'package:markdown/markdown.dart' as md;
+
 import '../utils/attribute_parser.dart';
 import 'base_component.dart';
 
@@ -40,13 +42,11 @@ class TabBuilder extends ComponentBuilder {
       $name
     </button>''');
 
+      final hiddenAttr = isActive ? '' : ' hidden';
+      final processedContent = _processMarkdown(tab.content);
       tabPanels.writeln('''
-    <div class="tab-panel${isActive ? ' active' : ''}"
-         id="$tabId"
-         role="tabpanel"${isActive ? '' : ' hidden'}>
-
-${tab.content}
-
+    <div class="tab-panel${isActive ? ' active' : ''}" id="$tabId" role="tabpanel"$hiddenAttr>
+$processedContent
     </div>''');
     }
 
@@ -86,18 +86,18 @@ $tabPanels  </div>
       $title
     </button>''');
 
-      // Wrap content in code fence if not already
       var codeContent = block.content.trim();
       if (!codeContent.startsWith('```')) {
         codeContent = '```$language\n$codeContent\n```';
       }
+      final processedContent = _processMarkdown(codeContent);
 
       tabPanels.writeln('''
     <div class="tab-panel${isActive ? ' active' : ''}"
          id="$tabId"
          role="tabpanel"${isActive ? '' : ' hidden'}>
 
-$codeContent
+$processedContent
 
     </div>''');
     }
@@ -113,4 +113,44 @@ $tabPanels  </div>
   }
 
   String _generateId() => '${DateTime.now().millisecondsSinceEpoch}-${_idCounter++}';
+
+  String _processMarkdown(String content) {
+    final dedented = _dedent(content).trim();
+    return md.markdownToHtml(
+      dedented,
+      blockSyntaxes: [
+        const md.FencedCodeBlockSyntax(),
+        const md.HeaderWithIdSyntax(),
+        const md.TableSyntax(),
+      ],
+      inlineSyntaxes: [
+        md.StrikethroughSyntax(),
+        md.AutolinkExtensionSyntax(),
+      ],
+      extensionSet: md.ExtensionSet.gitHubFlavored,
+    );
+  }
+
+  String _dedent(String text) {
+    final lines = text.split('\n');
+    if (lines.isEmpty) return text;
+
+    int? minIndent;
+    for (final line in lines) {
+      if (line.trim().isEmpty) continue;
+      final indent = line.length - line.trimLeft().length;
+      if (indent > 0 && (minIndent == null || indent < minIndent)) {
+        minIndent = indent;
+      }
+    }
+
+    if (minIndent case final min? when min > 0) {
+      return lines.map((line) {
+        if (line.trim().isEmpty) return '';
+        final indent = line.length - line.trimLeft().length;
+        return indent >= min ? line.substring(min) : line;
+      }).join('\n');
+    }
+    return text;
+  }
 }

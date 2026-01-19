@@ -174,7 +174,7 @@ Re-running `stardust openapi` will overwrite changes. Keep custom content in sep
 
 Create `docs/api/authentication.md` manually:
 
-```markdown
+````markdown
 ---
 title: Authentication
 ---
@@ -189,7 +189,7 @@ All API requests require authentication via Bearer token.
 curl -X POST https://api.example.com/auth/token \
   -d '{"email": "user@example.com", "password": "secret"}'
 ```
-```
+````
 
 ## Continuous Integration
 

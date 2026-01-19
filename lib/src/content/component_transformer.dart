@@ -30,7 +30,6 @@ class ComponentTransformer implements ContentTransformer {
   final Map<String, ComponentBuilder> _builders = {};
 
   ComponentTransformer({ComponentsConfig config = const ComponentsConfig()}) {
-    // Register built-in component builders
     register(CalloutBuilder(config: config));
     register(TabBuilder());
     register(AccordionBuilder());
@@ -53,7 +52,10 @@ class ComponentTransformer implements ContentTransformer {
     }
   }
 
-  /// Transform JSX-style components in markdown content
+  /// Transform JSX-style components in HTML content
+  ///
+  /// Note: This runs AFTER markdown parsing, so content inside code blocks
+  /// is already HTML-escaped (e.g., `<Info>` becomes &lt;Info&gt;) and won't match.
   @override
   String transform(String content) {
     var result = content;
@@ -70,7 +72,6 @@ class ComponentTransformer implements ContentTransformer {
   String _transformTag(String content, String tagName, ComponentBuilder builder) {
     var result = content;
 
-    // Handle self-closing: <Component />
     if (builder.allowSelfClosing) {
       result = result.replaceAllMapped(selfClosingComponentPattern(tagName), (match) {
         final attrs = parseAttributes(match.group(1) ?? '');
@@ -78,10 +79,7 @@ class ComponentTransformer implements ContentTransformer {
       });
     }
 
-    // Handle open/close: <Component>...</Component>
     final pattern = openCloseComponentPattern(tagName);
-
-    // May need multiple passes for nested same-type components
     var previousResult = '';
     while (previousResult != result) {
       previousResult = result;

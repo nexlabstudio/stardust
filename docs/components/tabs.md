@@ -27,25 +27,25 @@ Tabs let you organize related content into switchable panels, perfect for showin
   </Tab>
 </Tabs>
 
-```markdown
+````markdown
 <Tabs>
   <Tab name="JavaScript">
-    \`\`\`javascript
+    ```javascript
     console.log('Hello, world!');
-    \`\`\`
+    ```
   </Tab>
   <Tab name="Python">
-    \`\`\`python
+    ```python
     print('Hello, world!')
-    \`\`\`
+    ```
   </Tab>
   <Tab name="Dart">
-    \`\`\`dart
+    ```dart
     print('Hello, world!');
-    \`\`\`
+    ```
   </Tab>
 </Tabs>
-```
+````
 
 ## Tabs with Rich Content
 
@@ -114,30 +114,30 @@ A common use case — showing installation commands for different package manage
   </Tab>
 </Tabs>
 
-```markdown
+````markdown
 <Tabs>
   <Tab name="npm">
-    \`\`\`bash
+    ```bash
     npm install my-package
-    \`\`\`
+    ```
   </Tab>
   <Tab name="yarn">
-    \`\`\`bash
+    ```bash
     yarn add my-package
-    \`\`\`
+    ```
   </Tab>
   <Tab name="pnpm">
-    \`\`\`bash
+    ```bash
     pnpm add my-package
-    \`\`\`
+    ```
   </Tab>
   <Tab name="bun">
-    \`\`\`bash
+    ```bash
     bun add my-package
-    \`\`\`
+    ```
   </Tab>
 </Tabs>
-```
+````
 
 ## Framework Comparison
 

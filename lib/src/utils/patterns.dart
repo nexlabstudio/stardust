@@ -4,6 +4,11 @@ final htmlTagPattern = RegExp(r'<[^>]*>');
 final codeBlockPattern = RegExp(r'<pre><code class="language-(\w+)">([\s\S]*?)</code></pre>');
 final headingPattern = RegExp(r'<h([1-6])[^>]*id="([^"]+)"[^>]*>(.*?)</h\1>', dotAll: true);
 
+final fencedCodeBlockPattern = RegExp(
+  r'(`{3,}|~{3,})(\w*)\n([\s\S]*?)\1',
+  multiLine: true,
+);
+
 final attributePattern = RegExp(
   r'''(\w+)(?:=(?:"([^"]*)"|'([^']*)'|\{([^}]*)\}))?''',
 );
