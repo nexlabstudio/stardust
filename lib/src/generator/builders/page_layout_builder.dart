@@ -5,13 +5,17 @@ import '../../models/page.dart';
 /// Builds layout components: header, sidebar, footer, navigation
 class PageLayoutBuilder {
   final StardustConfig config;
+  late final String _basePath;
 
-  PageLayoutBuilder({required this.config});
+  PageLayoutBuilder({required this.config}) : _basePath = config.basePath;
+
+  String _prefixPath(String path) => '$_basePath$path';
 
   String buildHeader() {
     final navLinks = config.nav.map((item) {
       final external = item.external ? ' target="_blank" rel="noopener"' : '';
-      return '<a href="${item.href}"$external>${item.label}</a>';
+      final href = item.external ? item.href : _prefixPath(item.href);
+      return '<a href="$href"$external>${item.label}</a>';
     }).join('\n          ');
 
     final socialLinks = _buildSocialLinks();
@@ -19,7 +23,7 @@ class PageLayoutBuilder {
     return '''
     <header class="header">
       <div class="header-inner">
-        <a href="/" class="logo">${config.name}</a>
+        <a href="${_prefixPath('/')}" class="logo">${config.name}</a>
         <nav class="nav">
           $navLinks
         </nav>
@@ -139,7 +143,7 @@ class PageLayoutBuilder {
         final isActive = pagePath == currentPath || (currentPath == '/' && page.slug == 'index');
         final activeClass = isActive ? ' active' : '';
         final label = page.label ?? _titleCase(page.slug);
-        return '<li><a href="$pagePath" class="sidebar-link$activeClass">$label</a></li>';
+        return '<li><a href="${_prefixPath(pagePath)}" class="sidebar-link$activeClass">$label</a></li>';
       }).join('\n          ');
 
       return '''
@@ -225,7 +229,7 @@ class PageLayoutBuilder {
 
     if (page.prev case final prev?) {
       buffer.writeln('''
-        <a href="${prev.path}" class="page-nav-link prev">
+        <a href="${_prefixPath(prev.path)}" class="page-nav-link prev">
           <span class="page-nav-label">← Previous</span>
           <span class="page-nav-title">${prev.title}</span>
         </a>
@@ -236,7 +240,7 @@ class PageLayoutBuilder {
 
     if (page.next case final next?) {
       buffer.writeln('''
-        <a href="${next.path}" class="page-nav-link next">
+        <a href="${_prefixPath(next.path)}" class="page-nav-link next">
           <span class="page-nav-label">Next →</span>
           <span class="page-nav-title">${next.title}</span>
         </a>
