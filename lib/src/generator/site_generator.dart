@@ -6,29 +6,31 @@ import 'package:path/path.dart' as p;
 
 import '../config/config.dart';
 import '../content/markdown_parser.dart';
+import '../core/file_system.dart';
+import '../core/interfaces.dart';
 import '../models/page.dart';
 import '../utils/exceptions.dart';
-import '../utils/file_utils.dart';
 import '../utils/logger.dart';
 import 'page_builder.dart';
 
-/// Generates static documentation site
 class SiteGenerator {
   final StardustConfig config;
   final String outputDir;
   final Logger logger;
-
-  late final MarkdownParser _markdownParser;
-  late final PageBuilder _pageBuilder;
+  final FileSystem fileSystem;
+  final ContentParser contentParser;
+  final PageBuilder pageBuilder;
 
   SiteGenerator({
     required this.config,
     required this.outputDir,
     this.logger = const Logger(),
-  }) {
-    _markdownParser = MarkdownParser(config: config);
-    _pageBuilder = PageBuilder(config: config);
-  }
+    FileSystem? fileSystem,
+    ContentParser? contentParser,
+    PageBuilder? pageBuilder,
+  })  : fileSystem = fileSystem ?? const LocalFileSystem(),
+        contentParser = contentParser ?? MarkdownParser(config: config),
+        pageBuilder = pageBuilder ?? PageBuilder(config: config);
 
   /// Generate the static site, returns number of pages generated
   Future<int> generate() async {
@@ -76,7 +78,7 @@ class SiteGenerator {
   }
 
   Future<List<File>> _findMarkdownFiles(String contentDir) async {
-    if (!FileUtils.directoryExists(contentDir)) {
+    if (!await fileSystem.directoryExists(contentDir)) {
       throw GeneratorException('Content directory not found: $contentDir');
     }
 
@@ -112,7 +114,7 @@ class SiteGenerator {
       final slug = _pathToSlug(file.path, contentDir);
       final defaultTitle = _slugToTitle(slug);
 
-      final parsed = _markdownParser.parse(content, defaultTitle: defaultTitle);
+      final parsed = contentParser.parse(content, defaultTitle: defaultTitle);
 
       if (parsed.frontmatter['draft'] == true) {
         logger.log('⏭️  Skipping draft: $slug');
@@ -231,22 +233,21 @@ class SiteGenerator {
   }
 
   Future<void> _generatePage(Page page) async {
-    final html = _pageBuilder.build(page, sidebar: config.sidebar);
+    final html = pageBuilder.build(page, sidebar: config.sidebar);
     final outputPath = p.join(outputDir, page.outputPath);
-    await FileUtils.writeFile(outputPath, html);
+    await fileSystem.writeFile(outputPath, html);
   }
 
   Future<void> _copyPublicAssets() async {
-    final publicDir = Directory(config.build.assets.dir);
-    if (!FileUtils.directoryExists(config.build.assets.dir)) return;
+    if (!await fileSystem.directoryExists(config.build.assets.dir)) return;
 
     logger.log('📦 Copying public assets');
 
-    await for (final entity in publicDir.list(recursive: true)) {
+    await for (final entity in fileSystem.listDirectory(config.build.assets.dir, recursive: true)) {
       if (entity is File) {
-        final relativePath = p.relative(entity.path, from: publicDir.path);
+        final relativePath = p.relative(entity.path, from: config.build.assets.dir);
         final destPath = p.join(outputDir, relativePath);
-        await FileUtils.copyFile(entity.path, destPath);
+        await fileSystem.copyFile(entity.path, destPath);
         logger.log('  📄 $relativePath');
       }
     }
@@ -267,8 +268,8 @@ class SiteGenerator {
       buffer.writeln('  <url>');
       buffer.writeln('    <loc>$url</loc>');
 
-      if (FileUtils.fileExists(page.sourcePath)) {
-        final lastMod = File(page.sourcePath).lastModifiedSync();
+      if (await fileSystem.fileExists(page.sourcePath)) {
+        final lastMod = await fileSystem.lastModified(page.sourcePath);
         final formatted =
             '${lastMod.year}-${lastMod.month.toString().padLeft(2, '0')}-${lastMod.day.toString().padLeft(2, '0')}';
         buffer.writeln('    <lastmod>$formatted</lastmod>');
@@ -281,7 +282,7 @@ class SiteGenerator {
 
     buffer.writeln('</urlset>');
 
-    await FileUtils.writeFile(p.join(outputDir, 'sitemap.xml'), buffer.toString());
+    await fileSystem.writeFile(p.join(outputDir, 'sitemap.xml'), buffer.toString());
     logger.log('🗺️  Generated sitemap.xml');
   }
 
@@ -302,7 +303,7 @@ class SiteGenerator {
       buffer.writeln('Sitemap: ${config.url}/sitemap.xml');
     }
 
-    await FileUtils.writeFile(p.join(outputDir, 'robots.txt'), buffer.toString());
+    await fileSystem.writeFile(p.join(outputDir, 'robots.txt'), buffer.toString());
     logger.log('🤖 Generated robots.txt');
   }
 
@@ -355,7 +356,7 @@ class SiteGenerator {
       }
     }
 
-    await FileUtils.writeFile(p.join(outputDir, 'llms.txt'), buffer.toString());
+    await fileSystem.writeFile(p.join(outputDir, 'llms.txt'), buffer.toString());
     logger.log('🤖 Generated llms.txt');
   }
 }

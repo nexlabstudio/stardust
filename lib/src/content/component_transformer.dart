@@ -1,4 +1,5 @@
 import '../config/config.dart';
+import '../core/interfaces.dart';
 import '../utils/patterns.dart';
 import 'components/accordion_builder.dart';
 import 'components/api_builder.dart';
@@ -25,7 +26,7 @@ import 'utils/attribute_parser.dart';
 /// - And many more...
 ///
 /// Custom components can be registered via [register].
-class ComponentTransformer {
+class ComponentTransformer implements ContentTransformer {
   final Map<String, ComponentBuilder> _builders = {};
 
   ComponentTransformer({ComponentsConfig config = const ComponentsConfig()}) {
@@ -53,6 +54,7 @@ class ComponentTransformer {
   }
 
   /// Transform JSX-style components in markdown content
+  @override
   String transform(String content) {
     var result = content;
 

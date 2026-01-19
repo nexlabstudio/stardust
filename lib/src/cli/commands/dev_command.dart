@@ -7,18 +7,25 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:watcher/watcher.dart';
 import '../../config/config_loader.dart';
-import '../../generator/site_generator.dart';
+import '../../core/file_system.dart';
+import '../../core/stardust_factory.dart';
 import '../../utils/logger.dart';
 
-/// Development server with hot reload
 class DevCommand extends Command<int> {
+  final FileSystem fileSystem;
+  final Logger Function() loggerFactory;
+
   @override
   final name = 'dev';
 
   @override
   final description = 'Start development server with hot reload';
 
-  DevCommand() {
+  DevCommand({
+    FileSystem? fileSystem,
+    Logger Function()? loggerFactory,
+  })  : fileSystem = fileSystem ?? const LocalFileSystem(),
+        loggerFactory = loggerFactory ?? (() => Logger(onLog: stdout.writeln, onError: stderr.writeln)) {
     argParser.addOption(
       'config',
       abbr: 'c',
@@ -49,26 +56,24 @@ class DevCommand extends Command<int> {
     final args = argResults;
     if (args == null) return 1;
 
+    final logger = loggerFactory();
     final configPath = args['config'] as String;
     final port = int.parse(args['port'] as String);
     final host = args['host'] as String;
     final openBrowser = args['open'] as bool;
 
-    // Load config
-    final configFile = File(configPath);
-    if (!configFile.existsSync()) {
-      stderr.writeln('❌ Config file not found: $configPath');
-      stderr.writeln('   Run `stardust init` to create a new project.');
+    if (!await fileSystem.fileExists(configPath)) {
+      logger.error('❌ Config file not found: $configPath');
+      logger.error('   Run `stardust init` to create a new project.');
       return 1;
     }
 
     var config = await ConfigLoader.load(configPath);
     const outputDir = '.stardust';
 
-    // Initial build
-    stdout.writeln('🔨 Building site...');
-    final logger = Logger(onLog: stdout.writeln, onError: stderr.writeln);
-    var generator = SiteGenerator(config: config, outputDir: outputDir, logger: logger);
+    logger.log('🔨 Building site...');
+    final factory = StardustFactory(fileSystem: fileSystem, logger: logger);
+    var generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
     await generator.generate();
 
     // Create static file handler with live reload injection
@@ -134,13 +139,13 @@ class DevCommand extends Command<int> {
 
     // Start server
     final server = await shelf_io.serve(handler, host, port);
-    stdout.writeln('');
-    stdout.writeln('  ✨ Stardust dev server running');
-    stdout.writeln('');
-    stdout.writeln('  ➜ Local:   http://$host:$port/');
-    stdout.writeln('');
-    stdout.writeln('  Watching for changes...');
-    stdout.writeln('');
+    logger.log('');
+    logger.log('  ✨ Stardust dev server running');
+    logger.log('');
+    logger.log('  ➜ Local:   http://$host:$port/');
+    logger.log('');
+    logger.log('  Watching for changes...');
+    logger.log('');
 
     if (openBrowser) {
       await _openBrowser('http://$host:$port/');
@@ -159,38 +164,38 @@ class DevCommand extends Command<int> {
     Future<void> rebuild({bool reloadConfig = false}) async {
       debounceTimer?.cancel();
       debounceTimer = Timer(const Duration(milliseconds: 100), () async {
-        stdout.writeln('🔄 Rebuilding...');
+        logger.log('🔄 Rebuilding...');
 
         try {
           if (reloadConfig) {
             config = await ConfigLoader.load(configPath);
-            generator = SiteGenerator(config: config, outputDir: outputDir, logger: logger);
+            generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
           }
 
           await generator.generate();
           reloadController?.add(null);
-          stdout.writeln('✅ Done');
+          logger.log('✅ Done');
         } catch (e) {
-          stderr.writeln('❌ Build error: $e');
+          logger.error('❌ Build error: $e');
         }
       });
     }
 
     subscriptions.add(watcher.events.listen((event) {
       if (event.path.endsWith('.md') || event.path.endsWith('.mdx')) {
-        stdout.writeln('📝 ${p.basename(event.path)} changed');
+        logger.log('📝 ${p.basename(event.path)} changed');
         rebuild();
       }
     }));
 
     subscriptions.add(configWatcher.events.listen((event) {
-      stdout.writeln('⚙️  Config changed');
+      logger.log('⚙️  Config changed');
       rebuild(reloadConfig: true);
     }));
 
     // Handle shutdown
     ProcessSignal.sigint.watch().listen((_) async {
-      stdout.writeln('\n👋 Shutting down...');
+      logger.log('\n👋 Shutting down...');
       for (final sub in subscriptions) {
         await sub.cancel();
       }

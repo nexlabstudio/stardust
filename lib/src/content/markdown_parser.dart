@@ -2,6 +2,7 @@ import 'package:highlight/highlight.dart' show highlight;
 import 'package:markdown/markdown.dart' as md;
 
 import '../config/config.dart';
+import '../core/interfaces.dart';
 import '../utils/html_utils.dart';
 import '../utils/patterns.dart';
 import 'component_transformer.dart';
@@ -38,19 +39,19 @@ class TocEntry {
 }
 
 /// Markdown parser with syntax highlighting and custom components
-class MarkdownParser {
+class MarkdownParser implements ContentParser {
   final StardustConfig config;
-  final ComponentTransformer _componentTransformer;
+  final ContentTransformer componentTransformer;
 
-  MarkdownParser({required this.config}) : _componentTransformer = ComponentTransformer(config: config.components);
+  MarkdownParser({
+    required this.config,
+    ContentTransformer? componentTransformer,
+  }) : componentTransformer = componentTransformer ?? ComponentTransformer(config: config.components);
 
-  /// Parse markdown content into HTML
+  @override
   ParsedPage parse(String content, {String? defaultTitle}) {
-    // Extract frontmatter
     final doc = FrontmatterParser.parse(content);
-
-    // Transform custom components
-    final transformed = _componentTransformer.transform(doc.content);
+    final transformed = componentTransformer.transform(doc.content);
 
     // Parse markdown to HTML
     final html = md.markdownToHtml(
