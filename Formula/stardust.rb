@@ -2,7 +2,7 @@ class Stardust < Formula
   desc "Dart-native documentation framework. Beautiful docs, zero config."
   homepage "https://github.com/nexlabstudio/stardust"
   version "0.1.0"
-  license "MIT"
+  license "Apache-2.0"
 
   on_macos do
     on_arm do

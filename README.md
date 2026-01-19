@@ -944,4 +944,4 @@ The user's email address.
 
 ## License
 
-MIT
+Apache-2.0

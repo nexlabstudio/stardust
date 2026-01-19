@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "description": "Dart-native documentation framework. Beautiful docs, zero config.",
   "homepage": "https://github.com/nexlabstudio/stardust",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "architecture": {
     "64bit": {
       "url": "https://github.com/nexlabstudio/stardust/releases/download/v0.1.0/stardust-windows-x64.zip",
