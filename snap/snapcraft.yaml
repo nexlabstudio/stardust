@@ -1,0 +1,48 @@
+name: stardust
+base: core22
+version: '0.1.0'
+summary: Dart-native documentation framework
+description: |
+  Stardust is a Dart-native documentation framework that generates
+  beautiful, static documentation sites with zero configuration required.
+
+  Features:
+  - Markdown-based documentation with JSX-style components
+  - Beautiful, modern design with automatic dark mode
+  - Static site generation for instant page loads
+  - Full-text search powered by Pagefind
+  - SEO optimization (sitemap, robots.txt, Open Graph)
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  stardust:
+    command: bin/stardust
+    plugs:
+      - home
+      - network
+      - network-bind
+
+parts:
+  stardust:
+    plugin: dump
+    source: https://github.com/nexlabstudio/stardust/releases/download/v${SNAPCRAFT_PROJECT_VERSION}/stardust-linux-$CRAFT_ARCH_BUILD_FOR.tar.gz
+    source-type: tar
+    override-build: |
+      # Map snap arch to our naming convention
+      case "$CRAFT_ARCH_BUILD_FOR" in
+        amd64) ARCH="x64" ;;
+        arm64) ARCH="arm64" ;;
+      esac
+      curl -sSL "https://github.com/nexlabstudio/stardust/releases/download/v${SNAPCRAFT_PROJECT_VERSION}/stardust-linux-${ARCH}.tar.gz" -o stardust.tar.gz
+      tar -xzf stardust.tar.gz
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cp stardust $CRAFT_PART_INSTALL/bin/
+      chmod +x $CRAFT_PART_INSTALL/bin/stardust
+    build-packages:
+      - curl

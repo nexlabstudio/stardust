@@ -114,3 +114,155 @@ jobs:
             artifacts/stardust-linux-arm64.tar.gz
             artifacts/stardust-windows-x64.zip
             artifacts/checksums.txt
+
+  update-package-manifests:
+    name: Update Package Manifests
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download checksums
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          curl -sSL "https://github.com/nexlabstudio/stardust/releases/download/v${VERSION}/checksums.txt" -o checksums.txt
+          cat checksums.txt
+
+      - name: Extract version and checksums
+        id: extract
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+          # Extract checksums for each platform
+          echo "darwin_x64=$(grep 'darwin-x64' checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "darwin_arm64=$(grep 'darwin-arm64' checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "linux_x64=$(grep 'linux-x64' checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "linux_arm64=$(grep 'linux-arm64' checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "windows_x64=$(grep 'windows-x64' checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: Update Homebrew formula
+        run: |
+          VERSION=${{ steps.extract.outputs.version }}
+
+          cat > Formula/stardust.rb << 'FORMULA'
+          class Stardust < Formula
+            desc "Dart-native documentation framework. Beautiful docs, zero config."
+            homepage "https://github.com/nexlabstudio/stardust"
+            version "VERSION_PLACEHOLDER"
+            license "MIT"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/nexlabstudio/stardust/releases/download/vVERSION_PLACEHOLDER/stardust-darwin-arm64.tar.gz"
+                sha256 "DARWIN_ARM64_PLACEHOLDER"
+              end
+              on_intel do
+                url "https://github.com/nexlabstudio/stardust/releases/download/vVERSION_PLACEHOLDER/stardust-darwin-x64.tar.gz"
+                sha256 "DARWIN_X64_PLACEHOLDER"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "https://github.com/nexlabstudio/stardust/releases/download/vVERSION_PLACEHOLDER/stardust-linux-arm64.tar.gz"
+                sha256 "LINUX_ARM64_PLACEHOLDER"
+              end
+              on_intel do
+                url "https://github.com/nexlabstudio/stardust/releases/download/vVERSION_PLACEHOLDER/stardust-linux-x64.tar.gz"
+                sha256 "LINUX_X64_PLACEHOLDER"
+              end
+            end
+
+            def install
+              bin.install "stardust"
+            end
+
+            test do
+              assert_match "Stardust vVERSION_PLACEHOLDER", shell_output("#{bin}/stardust --version")
+            end
+          end
+          FORMULA
+
+          sed -i "s/VERSION_PLACEHOLDER/${VERSION}/g" Formula/stardust.rb
+          sed -i "s/DARWIN_ARM64_PLACEHOLDER/${{ steps.extract.outputs.darwin_arm64 }}/g" Formula/stardust.rb
+          sed -i "s/DARWIN_X64_PLACEHOLDER/${{ steps.extract.outputs.darwin_x64 }}/g" Formula/stardust.rb
+          sed -i "s/LINUX_ARM64_PLACEHOLDER/${{ steps.extract.outputs.linux_arm64 }}/g" Formula/stardust.rb
+          sed -i "s/LINUX_X64_PLACEHOLDER/${{ steps.extract.outputs.linux_x64 }}/g" Formula/stardust.rb
+
+      - name: Update Scoop manifest
+        run: |
+          VERSION=${{ steps.extract.outputs.version }}
+          HASH=${{ steps.extract.outputs.windows_x64 }}
+
+          cat > scoop/stardust.json << EOF
+          {
+            "version": "${VERSION}",
+            "description": "Dart-native documentation framework. Beautiful docs, zero config.",
+            "homepage": "https://github.com/nexlabstudio/stardust",
+            "license": "MIT",
+            "architecture": {
+              "64bit": {
+                "url": "https://github.com/nexlabstudio/stardust/releases/download/v${VERSION}/stardust-windows-x64.zip",
+                "hash": "${HASH}"
+              }
+            },
+            "bin": "stardust.exe",
+            "checkver": {
+              "github": "https://github.com/nexlabstudio/stardust"
+            },
+            "autoupdate": {
+              "architecture": {
+                "64bit": {
+                  "url": "https://github.com/nexlabstudio/stardust/releases/download/v\$version/stardust-windows-x64.zip"
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Update Chocolatey package
+        run: |
+          VERSION=${{ steps.extract.outputs.version }}
+          HASH=${{ steps.extract.outputs.windows_x64 }}
+
+          # Update nuspec version
+          sed -i "s/<version>.*<\/version>/<version>${VERSION}<\/version>/" chocolatey/stardust.nuspec
+
+          # Update install script
+          cat > chocolatey/tools/chocolateyinstall.ps1 << EOF
+          \$ErrorActionPreference = 'Stop'
+
+          \$packageName = 'stardust'
+          \$toolsDir = "\$(Split-Path -Parent \$MyInvocation.MyCommand.Definition)"
+          \$version = '${VERSION}'
+          \$url64 = "https://github.com/nexlabstudio/stardust/releases/download/v\$version/stardust-windows-x64.zip"
+          \$checksum64 = '${HASH}'
+
+          \$packageArgs = @{
+            packageName    = \$packageName
+            unzipLocation  = \$toolsDir
+            url64bit       = \$url64
+            checksum64     = \$checksum64
+            checksumType64 = 'sha256'
+          }
+
+          Install-ChocolateyZipPackage @packageArgs
+          EOF
+
+      - name: Update Snap version
+        run: |
+          VERSION=${{ steps.extract.outputs.version }}
+          sed -i "s/^version: .*/version: '${VERSION}'/" snap/snapcraft.yaml
+
+      - name: Commit and push changes
+        run: |
+          VERSION=${{ steps.extract.outputs.version }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/ scoop/ chocolatey/ snap/
+          git commit -m "chore: update package manifests for v${VERSION}" || echo "No changes to commit"
+          git push
