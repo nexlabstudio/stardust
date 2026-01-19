@@ -1,5 +1,8 @@
 # ✨ Stardust
 
+[![CI](https://github.com/nexlabstudio/stardust/actions/workflows/ci.yml/badge.svg)](https://github.com/nexlabstudio/stardust/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/nexlabstudio/stardust/graph/badge.svg)](https://codecov.io/gh/nexlabstudio/stardust)
+
 A Dart-native documentation framework. Beautiful docs, zero config.
 
 ## Features
