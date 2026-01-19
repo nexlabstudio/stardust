@@ -298,3 +298,13 @@ jobs:
             --title "stardust ${VERSION}" \
             --notes "Update stardust formula to ${VERSION}. See full release notes: https://github.com/nexlabstudio/stardust/releases/tag/v${VERSION}" \
             || echo "Release already exists or failed to create"
+
+  deploy-docs:
+    name: Deploy Documentation
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger docs deployment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run docs.yml --repo nexlabstudio/stardust --ref dev
