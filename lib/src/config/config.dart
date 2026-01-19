@@ -43,6 +43,7 @@ class StardustConfig {
   final IntegrationsConfig integrations;
   final BuildConfig build;
   final DevConfig dev;
+  final bool devMode;
 
   const StardustConfig({
     required this.name,
@@ -68,5 +69,55 @@ class StardustConfig {
     this.integrations = const IntegrationsConfig(),
     this.build = const BuildConfig(),
     this.dev = const DevConfig(),
+    this.devMode = false,
   });
+
+  /// Returns the base path for URL generation.
+  /// Returns empty string in dev mode.
+  /// Uses explicit build.basePath if set, otherwise extracts from url.
+  String get basePath {
+    if (devMode) return '';
+
+    if (build.basePath case final explicit?) {
+      return explicit.startsWith('/') ? explicit : '/$explicit';
+    }
+
+    if (url case final siteUrl?) {
+      final uri = Uri.tryParse(siteUrl);
+      if (uri != null && uri.path.isNotEmpty && uri.path != '/') {
+        final path = uri.path;
+        return path.endsWith('/') ? path.substring(0, path.length - 1) : path;
+      }
+    }
+
+    return '';
+  }
+
+  /// Creates a copy with devMode enabled for local development.
+  StardustConfig withDevMode() => StardustConfig(
+        name: name,
+        description: description,
+        tagline: tagline,
+        logo: logo,
+        favicon: favicon,
+        url: url,
+        content: content,
+        nav: nav,
+        sidebar: sidebar,
+        toc: toc,
+        theme: theme,
+        code: code,
+        components: components,
+        search: search,
+        seo: seo,
+        social: social,
+        header: header,
+        footer: footer,
+        versions: versions,
+        i18n: i18n,
+        integrations: integrations,
+        build: build,
+        dev: dev,
+        devMode: true,
+      );
 }
