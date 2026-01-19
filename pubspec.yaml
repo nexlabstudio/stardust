@@ -1,8 +1,8 @@
 name: stardust
 description: A Dart-native documentation framework. Beautiful docs, zero config.
 version: 0.1.0
-homepage: https://github.com/stardust-docs/stardust
-repository: https://github.com/stardust-docs/stardust
+homepage: https://github.com/nexlabstudio/stardust
+repository: https://github.com/nexlabstudio/stardust
 
 environment:
   sdk: ^3.0.0
