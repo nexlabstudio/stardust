@@ -7,6 +7,8 @@ import 'package:path/path.dart' as p;
 import '../config/config.dart';
 import '../content/markdown_parser.dart';
 import '../models/page.dart';
+import '../utils/exceptions.dart';
+import '../utils/file_utils.dart';
 import '../utils/logger.dart';
 import 'page_builder.dart';
 
@@ -74,8 +76,7 @@ class SiteGenerator {
   }
 
   Future<List<File>> _findMarkdownFiles(String contentDir) async {
-    final dir = Directory(contentDir);
-    if (!dir.existsSync()) {
+    if (!FileUtils.directoryExists(contentDir)) {
       throw GeneratorException('Content directory not found: $contentDir');
     }
 
@@ -231,17 +232,13 @@ class SiteGenerator {
 
   Future<void> _generatePage(Page page) async {
     final html = _pageBuilder.build(page, sidebar: config.sidebar);
-
     final outputPath = p.join(outputDir, page.outputPath);
-    final outputFile = File(outputPath);
-
-    await outputFile.parent.create(recursive: true);
-    await outputFile.writeAsString(html);
+    await FileUtils.writeFile(outputPath, html);
   }
 
   Future<void> _copyPublicAssets() async {
     final publicDir = Directory(config.build.assets.dir);
-    if (!publicDir.existsSync()) return;
+    if (!FileUtils.directoryExists(config.build.assets.dir)) return;
 
     logger.log('📦 Copying public assets');
 
@@ -249,11 +246,7 @@ class SiteGenerator {
       if (entity is File) {
         final relativePath = p.relative(entity.path, from: publicDir.path);
         final destPath = p.join(outputDir, relativePath);
-        final destFile = File(destPath);
-
-        await destFile.parent.create(recursive: true);
-        await entity.copy(destPath);
-
+        await FileUtils.copyFile(entity.path, destPath);
         logger.log('  📄 $relativePath');
       }
     }
@@ -274,9 +267,8 @@ class SiteGenerator {
       buffer.writeln('  <url>');
       buffer.writeln('    <loc>$url</loc>');
 
-      final file = File(page.sourcePath);
-      if (file.existsSync()) {
-        final lastMod = file.lastModifiedSync();
+      if (FileUtils.fileExists(page.sourcePath)) {
+        final lastMod = File(page.sourcePath).lastModifiedSync();
         final formatted =
             '${lastMod.year}-${lastMod.month.toString().padLeft(2, '0')}-${lastMod.day.toString().padLeft(2, '0')}';
         buffer.writeln('    <lastmod>$formatted</lastmod>');
@@ -289,10 +281,7 @@ class SiteGenerator {
 
     buffer.writeln('</urlset>');
 
-    final sitemapFile = File(p.join(outputDir, 'sitemap.xml'));
-    await sitemapFile.parent.create(recursive: true);
-    await sitemapFile.writeAsString(buffer.toString());
-
+    await FileUtils.writeFile(p.join(outputDir, 'sitemap.xml'), buffer.toString());
     logger.log('🗺️  Generated sitemap.xml');
   }
 
@@ -313,10 +302,7 @@ class SiteGenerator {
       buffer.writeln('Sitemap: ${config.url}/sitemap.xml');
     }
 
-    final robotsFile = File(p.join(outputDir, 'robots.txt'));
-    await robotsFile.parent.create(recursive: true);
-    await robotsFile.writeAsString(buffer.toString());
-
+    await FileUtils.writeFile(p.join(outputDir, 'robots.txt'), buffer.toString());
     logger.log('🤖 Generated robots.txt');
   }
 
@@ -369,20 +355,7 @@ class SiteGenerator {
       }
     }
 
-    final llmsFile = File(p.join(outputDir, 'llms.txt'));
-    await llmsFile.parent.create(recursive: true);
-    await llmsFile.writeAsString(buffer.toString());
-
+    await FileUtils.writeFile(p.join(outputDir, 'llms.txt'), buffer.toString());
     logger.log('🤖 Generated llms.txt');
   }
-}
-
-/// Exception thrown during site generation
-class GeneratorException implements Exception {
-  final String message;
-
-  GeneratorException(this.message);
-
-  @override
-  String toString() => 'GeneratorException: $message';
 }

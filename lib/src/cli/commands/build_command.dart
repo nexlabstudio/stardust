@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import '../../config/config_loader.dart';
 import '../../generator/site_generator.dart';
 import '../../search/pagefind_runner.dart';
+import '../../utils/file_utils.dart';
 import '../../utils/logger.dart';
 
 /// Build static documentation site
@@ -61,8 +62,7 @@ class BuildCommand extends Command<int> {
     stdout.writeln('');
 
     // Load config
-    final configFile = File(configPath);
-    if (!configFile.existsSync()) {
+    if (!FileUtils.fileExists(configPath)) {
       stderr.writeln('❌ Config file not found: $configPath');
       stderr.writeln('   Run `stardust init` to create a new project.');
       return 1;
@@ -72,12 +72,11 @@ class BuildCommand extends Command<int> {
     final config = await ConfigLoader.load(configPath);
 
     // Clean output directory if requested
-    final outDir = Directory(outputDir);
-    if (clean && outDir.existsSync()) {
+    if (clean && FileUtils.directoryExists(outputDir)) {
       if (verbose) stdout.writeln('🧹 Cleaning output directory');
-      await outDir.delete(recursive: true);
+      await FileUtils.deleteDirectory(outputDir);
     }
-    await outDir.create(recursive: true);
+    await FileUtils.ensureDirectory(outputDir);
 
     // Generate site
     final logger = Logger(onLog: stdout.writeln, onError: stderr.writeln);

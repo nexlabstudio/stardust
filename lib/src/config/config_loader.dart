@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:yaml/yaml.dart';
+import '../utils/exceptions.dart';
 import 'config.dart';
 
 /// Loads and parses Stardust configuration from YAML files
@@ -21,7 +22,7 @@ class ConfigLoader {
   static StardustConfig parse(Map yaml) {
     final name = yaml['name'] as String?;
     if (name == null || name.isEmpty) {
-      throw ConfigException('Config must have a "name" field');
+      throw const ConfigException('Config must have a "name" field');
     }
 
     return StardustConfig(
@@ -50,14 +51,4 @@ class ConfigLoader {
       dev: DevConfig.fromYaml(yaml['dev'] as Map?),
     );
   }
-}
-
-/// Exception thrown when configuration is invalid
-class ConfigException implements Exception {
-  final String message;
-
-  ConfigException(this.message);
-
-  @override
-  String toString() => 'ConfigException: $message';
 }

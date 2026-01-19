@@ -1,11 +1,7 @@
+import '../../utils/patterns.dart';
+
 /// Check if a string is an emoji
-bool isEmoji(String text) {
-  final emojiPattern = RegExp(
-    r'[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]',
-    unicode: true,
-  );
-  return emojiPattern.hasMatch(text);
-}
+bool isEmoji(String text) => emojiPattern.hasMatch(text);
 
 /// Get a Lucide icon element for the given icon name
 String getLucideIcon(String name, String size) {

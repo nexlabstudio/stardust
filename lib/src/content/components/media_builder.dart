@@ -1,4 +1,5 @@
 import '../../utils/html_utils.dart';
+import '../../utils/patterns.dart';
 import '../utils/attribute_parser.dart';
 import '../utils/icon_utils.dart';
 import 'base_component.dart';
@@ -132,12 +133,6 @@ $treeContent  </ul>
     final buffer = StringBuffer();
     final indent = '    ' * (depth + 2);
 
-    final folderPattern = RegExp(
-      r'<Folder([^>]*)>([\s\S]*?)</Folder>',
-      caseSensitive: false,
-      dotAll: true,
-    );
-
     final filePattern = RegExp(
       r'<File([^>]*?)(?:/>|>([\s\S]*?)</File>)',
       caseSensitive: false,
@@ -146,7 +141,7 @@ $treeContent  </ul>
 
     final elements = <_TreeElement>[];
 
-    for (final match in folderPattern.allMatches(content)) {
+    for (final match in openCloseComponentPattern('Folder').allMatches(content)) {
       final attrs = parseAttributes(match.group(1) ?? '');
       elements.add(_TreeElement(
         type: 'folder',

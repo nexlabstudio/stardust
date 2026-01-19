@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+import '../utils/exceptions.dart';
 import '../utils/logger.dart';
+import '../utils/patterns.dart';
 
 /// Imports OpenAPI/Swagger specs and generates Stardust markdown docs
 class OpenApiImporter {
@@ -21,11 +23,13 @@ class OpenApiImporter {
   });
 
   /// Import the OpenAPI spec and generate markdown files
+  ///
+  /// Throws [OpenApiException] if the spec file is not found, cannot be parsed,
+  /// or is not a valid OpenAPI/Swagger spec.
   Future<int> import() async {
     final file = File(specPath);
     if (!file.existsSync()) {
-      logger.error('OpenAPI spec not found: $specPath');
-      return 0;
+      throw OpenApiException('OpenAPI spec not found: $specPath');
     }
 
     logger.log('📖 Parsing OpenAPI spec: $specPath');
@@ -41,16 +45,14 @@ class OpenApiImporter {
         spec = jsonDecode(content) as Map<String, dynamic>;
       }
     } catch (e) {
-      logger.error('Failed to parse OpenAPI spec: $e');
-      return 0;
+      throw OpenApiException('Failed to parse OpenAPI spec', e);
     }
 
     final isOpenApi3 = spec.containsKey('openapi');
     final isSwagger2 = spec.containsKey('swagger');
 
     if (!isOpenApi3 && !isSwagger2) {
-      logger.error('Invalid OpenAPI/Swagger spec: missing version field');
-      return 0;
+      throw const OpenApiException('Invalid OpenAPI/Swagger spec: missing version field');
     }
 
     logger.log('   Version: ${isOpenApi3 ? spec['openapi'] : spec['swagger']}');
@@ -396,13 +398,13 @@ class OpenApiImporter {
   }
 
   String _pathToKey(String path) => path
-      .replaceAll(RegExp(r'[{}]'), '')
+      .replaceAll(bracesPattern, '')
       .replaceAll('/', '-')
-      .replaceAll(RegExp(r'^-|-$'), '')
-      .replaceAll(RegExp(r'-+'), '-');
+      .replaceAll(leadingTrailingDashPattern, '')
+      .replaceAll(multipleDashPattern, '-');
 
   String _tagToFilename(String tag) =>
-      tag.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-$'), '');
+      tag.toLowerCase().replaceAll(nonAlphanumericPattern, '-').replaceAll(leadingTrailingDashPattern, '');
 
   /// Generate index page
   Future<void> _generateIndexPage(

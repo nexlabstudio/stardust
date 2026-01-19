@@ -1,3 +1,4 @@
+import '../../utils/patterns.dart';
 import 'base_component.dart';
 
 /// Builds embed components: YouTube, Vimeo, Zapp, CodePen, StackBlitz
@@ -51,14 +52,7 @@ class EmbedBuilder extends ComponentBuilder {
       return input;
     }
 
-    final patterns = [
-      RegExp(r'youtu\.be/([a-zA-Z0-9_-]+)'),
-      RegExp(r'youtube\.com/watch\?v=([a-zA-Z0-9_-]+)'),
-      RegExp(r'youtube\.com/embed/([a-zA-Z0-9_-]+)'),
-      RegExp(r'youtube\.com/v/([a-zA-Z0-9_-]+)'),
-    ];
-
-    for (final pattern in patterns) {
+    for (final pattern in youtubePatterns) {
       if (pattern.firstMatch(input)?.group(1) case final id?) {
         return id;
       }
@@ -97,8 +91,7 @@ class EmbedBuilder extends ComponentBuilder {
       return input;
     }
 
-    final pattern = RegExp(r'vimeo\.com/(?:video/)?(\d+)');
-    if (pattern.firstMatch(input)?.group(1) case final id?) {
+    if (vimeoPattern.firstMatch(input)?.group(1) case final id?) {
       return id;
     }
 

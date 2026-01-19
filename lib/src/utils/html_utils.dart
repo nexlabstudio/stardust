@@ -1,3 +1,5 @@
+import 'patterns.dart';
+
 /// Encodes special HTML characters to their entity equivalents.
 ///
 /// Converts: & < > " '
@@ -19,7 +21,7 @@ String decodeHtmlEntities(String text) => text
     .replaceAll('&#39;', "'");
 
 /// Strips all HTML tags from text.
-String stripHtml(String html) => html.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+String stripHtml(String html) => html.replaceAll(htmlTagPattern, '').trim();
 
 /// Encodes text for safe use in HTML attributes.
 ///

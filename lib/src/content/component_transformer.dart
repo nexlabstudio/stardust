@@ -1,4 +1,5 @@
 import '../config/config.dart';
+import '../utils/patterns.dart';
 import 'components/accordion_builder.dart';
 import 'components/api_builder.dart';
 import 'components/base_component.dart';
@@ -69,30 +70,20 @@ class ComponentTransformer {
 
     // Handle self-closing: <Component />
     if (builder.allowSelfClosing) {
-      final selfClosingPattern = RegExp(
-        '<$tagName([^>]*?)/>',
-        caseSensitive: false,
-        dotAll: true,
-      );
-
-      result = result.replaceAllMapped(selfClosingPattern, (match) {
+      result = result.replaceAllMapped(selfClosingComponentPattern(tagName), (match) {
         final attrs = parseAttributes(match.group(1) ?? '');
         return builder.build(tagName, attrs, '');
       });
     }
 
     // Handle open/close: <Component>...</Component>
-    final openClosePattern = RegExp(
-      '<$tagName([^>]*)>([\\s\\S]*?)</$tagName>',
-      caseSensitive: false,
-      dotAll: true,
-    );
+    final pattern = openCloseComponentPattern(tagName);
 
     // May need multiple passes for nested same-type components
     var previousResult = '';
     while (previousResult != result) {
       previousResult = result;
-      result = result.replaceAllMapped(openClosePattern, (match) {
+      result = result.replaceAllMapped(pattern, (match) {
         final attrs = parseAttributes(match.group(1) ?? '');
         final innerContent = match.group(2) ?? '';
         return builder.build(tagName, attrs, innerContent.trim());

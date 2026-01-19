@@ -1,5 +1,7 @@
 import 'package:yaml/yaml.dart';
 
+import '../utils/exceptions.dart';
+
 /// Parsed frontmatter and content from a markdown file
 class ParsedDocument {
   final Map<String, dynamic> frontmatter;
@@ -48,7 +50,7 @@ class FrontmatterParser {
     final frontmatterYaml = frontmatterLines.join('\n');
     final content = lines.sublist(endIndex + 1).join('\n').trimLeft();
 
-    Map<String, dynamic> frontmatter;
+    final Map<String, dynamic> frontmatter;
     try {
       final parsed = loadYaml(frontmatterYaml);
       if (parsed is Map) {
@@ -56,8 +58,8 @@ class FrontmatterParser {
       } else {
         frontmatter = {};
       }
-    } catch (e) {
-      frontmatter = {};
+    } on YamlException catch (e) {
+      throw ContentException('Invalid YAML frontmatter', cause: e);
     }
 
     return ParsedDocument(

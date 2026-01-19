@@ -3,6 +3,7 @@ import 'package:markdown/markdown.dart' as md;
 
 import '../config/config.dart';
 import '../utils/html_utils.dart';
+import '../utils/patterns.dart';
 import 'component_transformer.dart';
 import 'frontmatter_parser.dart';
 
@@ -88,24 +89,21 @@ class MarkdownParser {
     );
   }
 
-  String _applySyntaxHighlighting(String html) {
-    final codeBlockPattern = RegExp(r'<pre><code class="language-(\w+)">([\s\S]*?)</code></pre>');
+  String _applySyntaxHighlighting(String html) => html.replaceAllMapped(codeBlockPattern, (match) {
+        final language = match.group(1) ?? '';
+        final code = decodeHtmlEntities(match.group(2) ?? '');
 
-    return html.replaceAllMapped(codeBlockPattern, (match) {
-      final language = match.group(1) ?? '';
-      final code = decodeHtmlEntities(match.group(2) ?? '');
+        try {
+          final highlighted = highlight.parse(code, language: language);
+          final highlightedHtml = _renderHighlight(highlighted.nodes ?? []);
 
-      try {
-        final highlighted = highlight.parse(code, language: language);
-        final highlightedHtml = _renderHighlight(highlighted.nodes ?? []);
+          final copyButton =
+              config.code.copyButton ? '<button class="copy-button" aria-label="Copy code">Copy</button>' : '';
 
-        final copyButton =
-            config.code.copyButton ? '<button class="copy-button" aria-label="Copy code">Copy</button>' : '';
+          final lineNumbers =
+              config.code.lineNumbers ? '<div class="line-numbers">${_generateLineNumbers(code)}</div>' : '';
 
-        final lineNumbers =
-            config.code.lineNumbers ? '<div class="line-numbers">${_generateLineNumbers(code)}</div>' : '';
-
-        return '''
+          return '''
 <div class="code-block" data-language="$language">
 <div class="code-header">
 <span class="code-language">$language</span>
@@ -113,12 +111,11 @@ $copyButton
 </div>
 <pre class="code-pre">$lineNumbers<code class="language-$language hljs">$highlightedHtml</code></pre>
 </div>''';
-      } catch (e) {
-        // Fallback if highlighting fails
-        return match.group(0) ?? match.input;
-      }
-    });
-  }
+        } catch (e) {
+          // Fallback if highlighting fails
+          return match.group(0) ?? match.input;
+        }
+      });
 
   String _renderHighlight(List<dynamic> nodes) {
     final buffer = StringBuffer();
@@ -155,7 +152,6 @@ $copyButton
 
   List<TocEntry> _extractToc(String html, {int minDepth = 2, int maxDepth = 4}) {
     final toc = <TocEntry>[];
-    final headingPattern = RegExp(r'<h([1-6])[^>]*id="([^"]+)"[^>]*>(.*?)</h\1>', dotAll: true);
 
     for (final match in headingPattern.allMatches(html)) {
       final (levelStr, id, rawText) = (match.group(1), match.group(2), match.group(3));
