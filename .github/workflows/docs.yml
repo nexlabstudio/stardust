@@ -7,6 +7,8 @@ on:
       - 'docs/**'
       - 'stardust.yaml'
       - '.github/workflows/docs.yml'
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -24,18 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-
-      - name: Install dependencies
-        run: dart pub get
-
-      - name: Build Stardust
-        run: dart compile exe bin/stardust.dart -o stardust
+      - name: Install Stardust
+        run: curl -sSL https://raw.githubusercontent.com/nexlabstudio/stardust/dev/install.sh | bash
 
       - name: Build docs
-        run: ./stardust build
+        run: stardust build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
