@@ -2,6 +2,112 @@ import 'package:stardust/src/config/config.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('StardustConfig', () {
+    group('basePath', () {
+      test('returns empty string when no URL or explicit basePath', () {
+        const config = StardustConfig(name: 'Test');
+        expect(config.basePath, equals(''));
+      });
+
+      test('extracts path from URL', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.github.io/my-docs',
+        );
+        expect(config.basePath, equals('/my-docs'));
+      });
+
+      test('extracts path from URL with trailing slash', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.github.io/my-docs/',
+        );
+        expect(config.basePath, equals('/my-docs'));
+      });
+
+      test('returns empty for root URL', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.com',
+        );
+        expect(config.basePath, equals(''));
+      });
+
+      test('returns empty for URL with only slash path', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.com/',
+        );
+        expect(config.basePath, equals(''));
+      });
+
+      test('uses explicit basePath over URL', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.github.io/from-url',
+          build: BuildConfig(basePath: '/explicit-path'),
+        );
+        expect(config.basePath, equals('/explicit-path'));
+      });
+
+      test('adds leading slash to explicit basePath if missing', () {
+        const config = StardustConfig(
+          name: 'Test',
+          build: BuildConfig(basePath: 'no-slash'),
+        );
+        expect(config.basePath, equals('/no-slash'));
+      });
+
+      test('returns empty string in devMode', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.github.io/my-docs',
+          devMode: true,
+        );
+        expect(config.basePath, equals(''));
+      });
+    });
+
+    group('withDevMode', () {
+      test('creates copy with devMode enabled', () {
+        const config = StardustConfig(
+          name: 'Test',
+          description: 'Test description',
+          url: 'https://example.github.io/my-docs',
+        );
+
+        final devConfig = config.withDevMode();
+
+        expect(devConfig.devMode, isTrue);
+        expect(devConfig.name, equals('Test'));
+        expect(devConfig.description, equals('Test description'));
+        expect(devConfig.url, equals('https://example.github.io/my-docs'));
+        expect(devConfig.basePath, equals(''));
+      });
+
+      test('preserves all config fields', () {
+        final config = StardustConfig(
+          name: 'Test',
+          tagline: 'A tagline',
+          nav: const [NavItem(label: 'Home', href: '/')],
+          sidebar: const [
+            SidebarGroup(group: 'Guide', pages: [SidebarPage(slug: 'intro')])
+          ],
+          theme: ThemeConfig.fromYaml({'radius': '10px'}),
+          search: const SearchConfig(placeholder: 'Search...'),
+        );
+
+        final devConfig = config.withDevMode();
+
+        expect(devConfig.tagline, equals('A tagline'));
+        expect(devConfig.nav.length, equals(1));
+        expect(devConfig.sidebar.length, equals(1));
+        expect(devConfig.theme.radius, equals('10px'));
+        expect(devConfig.search.placeholder, equals('Search...'));
+      });
+    });
+  });
+
   group('ThemeConfig', () {
     test('fromYaml with null uses defaults', () {
       final config = ThemeConfig.fromYaml(null);
@@ -185,6 +291,19 @@ void main() {
       });
 
       expect(config.llms.enabled, isTrue);
+    });
+
+    test('fromYaml parses basePath', () {
+      final config = BuildConfig.fromYaml({
+        'basePath': '/docs',
+      });
+
+      expect(config.basePath, equals('/docs'));
+    });
+
+    test('basePath defaults to null', () {
+      final config = BuildConfig.fromYaml({});
+      expect(config.basePath, isNull);
     });
   });
 
