@@ -150,3 +150,6 @@ integrations:
     branch: dev
     path: website/docs/
     text: "Edit this page on GitHub"
+
+# seo:
+#   ogImage: /images/stardust-logo-large.svg

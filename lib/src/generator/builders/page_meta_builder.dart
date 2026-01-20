@@ -48,7 +48,8 @@ class PageMetaBuilder {
       final pagePath = switch (page.path) { '/' => '', final p => p };
       buffer.writeln('  <meta property="og:url" content="$baseUrl$pagePath">');
     }
-    if (config.seo.ogImage case final ogImage?) {
+    final ogImage = _getOgImage(page);
+    if (ogImage != null) {
       buffer.writeln('  <meta property="og:image" content="$ogImage">');
     }
 
@@ -97,7 +98,7 @@ class PageMetaBuilder {
       json.write(',"description":"${_escapeJson(desc)}"');
     }
 
-    if (config.seo.ogImage case final image?) {
+    if (_getOgImage(page) case final image?) {
       json.write(',"image":"$image"');
     }
 
@@ -144,6 +145,30 @@ class PageMetaBuilder {
     json.write('}');
 
     return '  <script type="application/ld+json">${json.toString()}</script>';
+  }
+
+  String? _getOgImage(Page page) {
+    if (page.frontmatter['ogImage'] case final String image?) {
+      return image;
+    }
+
+    if (config.seo.ogImage case final ogImage?) {
+      return ogImage;
+    }
+
+    if (config.url case final url?) {
+      final baseUrl = _normalizeUrl(url);
+      final fileName = _pagePathToOgFileName(page.path);
+      return '$baseUrl${config.basePath}/images/og/$fileName';
+    }
+
+    return null;
+  }
+
+  String _pagePathToOgFileName(String path) {
+    if (path == '/') return 'index.png';
+    final slug = path.substring(1).replaceAll('/', '-');
+    return '$slug.png';
   }
 
   String _normalizeUrl(String url) => switch (url) {

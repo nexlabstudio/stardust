@@ -1,12 +1,16 @@
 import 'dart:io';
 
+import 'dart:typed_data';
+
 abstract class FileSystem {
   Future<bool> directoryExists(String path);
   Future<bool> fileExists(String path);
   Future<void> createDirectory(String path, {bool recursive = false});
   Future<void> deleteDirectory(String path, {bool recursive = false});
   Future<String> readFile(String path);
+  Future<Uint8List> readFileBytes(String path);
   Future<void> writeFile(String path, String content);
+  Future<void> writeFileBytes(String path, Uint8List bytes);
   Future<void> copyFile(String source, String destination);
   Future<DateTime> lastModified(String path);
   Stream<FileSystemEntity> listDirectory(String path, {bool recursive = false});
@@ -38,10 +42,20 @@ class LocalFileSystem implements FileSystem {
   Future<String> readFile(String path) => File(path).readAsString();
 
   @override
+  Future<Uint8List> readFileBytes(String path) => File(path).readAsBytes();
+
+  @override
   Future<void> writeFile(String path, String content) async {
     final file = File(path);
     await file.parent.create(recursive: true);
     await file.writeAsString(content);
+  }
+
+  @override
+  Future<void> writeFileBytes(String path, Uint8List bytes) async {
+    final file = File(path);
+    await file.parent.create(recursive: true);
+    await file.writeAsBytes(bytes);
   }
 
   @override

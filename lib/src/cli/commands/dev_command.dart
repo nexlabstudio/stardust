@@ -9,6 +9,7 @@ import 'package:watcher/watcher.dart';
 import '../../config/config_loader.dart';
 import '../../core/file_system.dart';
 import '../../core/stardust_factory.dart';
+import '../../search/pagefind_runner.dart';
 import '../../utils/logger.dart';
 
 class DevCommand extends Command<int> {
@@ -75,6 +76,12 @@ class DevCommand extends Command<int> {
     final factory = StardustFactory(fileSystem: fileSystem, logger: logger);
     var generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
     await generator.generate();
+
+    // Build search index if enabled
+    if (config.search.enabled && config.search.provider == 'pagefind') {
+      logger.log('🔍 Building search index...');
+      await PagefindRunner.run(outputDir, logger: logger);
+    }
 
     // Create static file handler with live reload injection
     shelf.Handler createHandler() {
@@ -153,7 +160,8 @@ class DevCommand extends Command<int> {
 
     // Watch for changes
     final contentDir = config.content.dir;
-    final watcher = DirectoryWatcher(contentDir);
+    final assetsDir = config.build.assets.dir;
+    final contentWatcher = DirectoryWatcher(contentDir);
     final configWatcher = FileWatcher(configPath);
 
     final subscriptions = <StreamSubscription>[];
@@ -181,12 +189,20 @@ class DevCommand extends Command<int> {
       });
     }
 
-    subscriptions.add(watcher.events.listen((event) {
+    subscriptions.add(contentWatcher.events.listen((event) {
       if (event.path.endsWith('.md') || event.path.endsWith('.mdx')) {
         logger.log('📝 ${p.basename(event.path)} changed');
         rebuild();
       }
     }));
+
+    if (await fileSystem.directoryExists(assetsDir)) {
+      final assetsWatcher = DirectoryWatcher(assetsDir);
+      subscriptions.add(assetsWatcher.events.listen((event) {
+        logger.log('📦 ${p.basename(event.path)} changed');
+        rebuild();
+      }));
+    }
 
     subscriptions.add(configWatcher.events.listen((event) {
       logger.log('⚙️  Config changed');

@@ -1,15 +1,24 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:stardust/src/core/file_system.dart';
 
 class MockFileSystem implements FileSystem {
   final Map<String, String> files = {};
+  final Map<String, Uint8List> binaryFiles = {};
   final Set<String> directories = {};
   final Map<String, DateTime> modifiedTimes = {};
   final List<String> operations = [];
 
   void addFile(String path, String content, {DateTime? modified}) {
     files[path] = content;
+    modifiedTimes[path] = modified ?? DateTime.now();
+    final dir = path.substring(0, path.lastIndexOf('/'));
+    if (dir.isNotEmpty) directories.add(dir);
+  }
+
+  void addBinaryFile(String path, Uint8List bytes, {DateTime? modified}) {
+    binaryFiles[path] = bytes;
     modifiedTimes[path] = modified ?? DateTime.now();
     final dir = path.substring(0, path.lastIndexOf('/'));
     if (dir.isNotEmpty) directories.add(dir);
@@ -30,7 +39,7 @@ class MockFileSystem implements FileSystem {
   @override
   Future<bool> fileExists(String path) async {
     operations.add('fileExists:$path');
-    return files.containsKey(path);
+    return files.containsKey(path) || binaryFiles.containsKey(path);
   }
 
   @override
@@ -59,9 +68,28 @@ class MockFileSystem implements FileSystem {
   }
 
   @override
+  Future<Uint8List> readFileBytes(String path) async {
+    operations.add('readFileBytes:$path');
+    if (binaryFiles.containsKey(path)) {
+      return binaryFiles[path]!;
+    }
+    if (files.containsKey(path)) {
+      return Uint8List.fromList(files[path]!.codeUnits);
+    }
+    throw FileSystemException('File not found', path);
+  }
+
+  @override
   Future<void> writeFile(String path, String content) async {
     operations.add('writeFile:$path');
     files[path] = content;
+    modifiedTimes[path] = DateTime.now();
+  }
+
+  @override
+  Future<void> writeFileBytes(String path, Uint8List bytes) async {
+    operations.add('writeFileBytes:$path');
+    binaryFiles[path] = bytes;
     modifiedTimes[path] = DateTime.now();
   }
 
@@ -99,6 +127,7 @@ class MockFileSystem implements FileSystem {
 
   void reset() {
     files.clear();
+    binaryFiles.clear();
     directories.clear();
     modifiedTimes.clear();
     operations.clear();
