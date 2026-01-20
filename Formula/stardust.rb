@@ -1,5 +1,5 @@
 class Stardust < Formula
-  desc "Dart-native documentation framework. Beautiful docs, zero config."
+  desc "Dart-native documentation generator. Beautiful docs, zero config."
   homepage "https://github.com/nexlabstudio/stardust"
   version "0.3.0"
   license "Apache-2.0"

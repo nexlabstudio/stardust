@@ -1,11 +1,11 @@
 ---
-title: Introduction
-description: Stardust is a Dart-native documentation framework that generates beautiful, static documentation sites with zero configuration.
+title: Stardust
+description: A Dart-native documentation generator that creates beautiful, static documentation sites with zero configuration.
 ---
 
 # Introduction
 
-Stardust is a **Dart-native documentation framework** that generates beautiful, static documentation sites with zero configuration required.
+Stardust is a **Dart-native documentation generator** that creates beautiful, static documentation sites with zero configuration required.
 
 <Info>
 Stardust is built entirely in Dart — no Node.js, no npm, no JavaScript toolchain required.

@@ -10,12 +10,12 @@ Accordions let you hide content until the user wants to see it, perfect for FAQs
 ## Single Accordion
 
 <Accordion title="What is Stardust?">
-Stardust is a Dart-native documentation framework that generates beautiful, static documentation sites with zero configuration required.
+Stardust is a Dart-native documentation generator that creates beautiful, static documentation sites with zero configuration required.
 </Accordion>
 
 ```markdown
 <Accordion title="What is Stardust?">
-Stardust is a Dart-native documentation framework that generates beautiful, static documentation sites with zero configuration required.
+Stardust is a Dart-native documentation generator that creates beautiful, static documentation sites with zero configuration required.
 </Accordion>
 ```
 
