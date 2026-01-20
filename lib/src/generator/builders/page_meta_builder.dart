@@ -8,6 +8,23 @@ class PageMetaBuilder {
 
   PageMetaBuilder({required this.config});
 
+  String buildFavicon() {
+    final favicon = config.favicon;
+    if (favicon == null) return '';
+
+    final href = '${config.basePath}$favicon';
+    final ext = favicon.split('.').last.toLowerCase();
+
+    final type = switch (ext) {
+      'svg' => 'image/svg+xml',
+      'png' => 'image/png',
+      'ico' => 'image/x-icon',
+      _ => 'image/x-icon',
+    };
+
+    return '<link rel="icon" type="$type" href="$href">';
+  }
+
   String build(Page page) {
     final buffer = StringBuffer();
 

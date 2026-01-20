@@ -27,23 +27,6 @@ class PageBuilder {
     return List.filled(segments.length, '..').join('/');
   }
 
-  String _buildFavicon(String basePath) {
-    final favicon = config.favicon;
-    if (favicon == null) return '';
-
-    final href = '${config.basePath}$favicon';
-    final ext = favicon.split('.').last.toLowerCase();
-
-    final type = switch (ext) {
-      'svg' => 'image/svg+xml',
-      'png' => 'image/png',
-      'ico' => 'image/x-icon',
-      _ => 'image/x-icon',
-    };
-
-    return '<link rel="icon" type="$type" href="$href">';
-  }
-
   /// Build a complete HTML page
   String build(Page page, {required List<SidebarGroup> sidebar}) {
     final seoTitle = config.seo.titleTemplate.replaceAll('%s', page.title);
@@ -56,7 +39,7 @@ class PageBuilder {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>$seoTitle</title>
-  ${_buildFavicon(basePath)}
+  ${_metaBuilder.buildFavicon()}
   ${_metaBuilder.build(page)}
   ${_stylesBuilder.buildFonts()}
   ${_stylesBuilder.buildStyles()}

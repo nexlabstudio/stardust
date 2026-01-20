@@ -59,7 +59,7 @@ class PageLayoutBuilder {
 
   String _buildLogo() {
     final logo = config.logo;
-    
+
     if (logo == null) {
       return '';
     }
