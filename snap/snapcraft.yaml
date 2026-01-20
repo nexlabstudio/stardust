@@ -1,6 +1,6 @@
 name: stardust
 base: core22
-version: '0.2.2'
+version: '0.2.3'
 summary: Dart-native documentation framework
 description: |
   Stardust is a Dart-native documentation framework that generates
