@@ -189,6 +189,26 @@ void main() {
 
         expect(html, contains('API Reference | My Docs'));
       });
+
+      test('includes favicon link when configured', () {
+        const customConfig = StardustConfig(
+          name: 'My Docs',
+          favicon: '/images/favicon.svg',
+        );
+        final customBuilder = PageBuilder(config: customConfig);
+
+        const page = Page(
+          path: '/test',
+          sourcePath: 'content/test.md',
+          title: 'Test',
+          content: '<p>Content</p>',
+        );
+
+        final html = customBuilder.build(page, sidebar: []);
+
+        expect(html, contains('<link rel="icon"'));
+        expect(html, contains('href="/images/favicon.svg"'));
+      });
     });
   });
 

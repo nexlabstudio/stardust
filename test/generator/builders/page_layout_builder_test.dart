@@ -340,6 +340,35 @@ void main() {
 
         expect(result, contains('/edit/develop/docs/'));
       });
+
+      test('strips leading slash from relativePath when present', () {
+        const config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: 'docs'),
+          integrations: IntegrationsConfig(
+            editLink: EditLinkConfig(
+              enabled: true,
+              repo: 'https://github.com/user/repo',
+              branch: 'main',
+              path: 'content',
+            ),
+          ),
+        );
+        final builderWithEditLink = PageLayoutBuilder(config: config);
+
+        // sourcePath contains 'docs' followed by a path starting with '/'
+        final result = builderWithEditLink.buildEditLink(const Page(
+          path: '/guide/intro',
+          sourcePath: '/project/docs/guide/intro.md',
+          title: 'Intro',
+          content: '',
+          toc: [],
+          frontmatter: {},
+        ));
+
+        expect(result, contains('/edit/main/content/guide/intro.md'));
+        expect(result, isNot(contains('content//guide'))); // No double slash
+      });
     });
 
     group('buildPageNav', () {
@@ -448,6 +477,94 @@ void main() {
         final result = builderNoSocial.buildFooter();
 
         expect(result, isNot(contains('footer-social">')));
+      });
+    });
+
+    group('buildHeader with logo', () {
+      test('returns empty logo when not configured', () {
+        const config = StardustConfig(name: 'Test Site');
+        final builderNoLogo = PageLayoutBuilder(config: config);
+
+        final result = builderNoLogo.buildHeader();
+
+        expect(result, isNot(contains('logo-image')));
+      });
+
+      test('renders single logo image when only single is set', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          logo: LogoConfig(single: '/images/logo.svg'),
+        );
+        final builderWithLogo = PageLayoutBuilder(config: config);
+
+        final result = builderWithLogo.buildHeader();
+
+        expect(result, contains('logo-image'));
+        expect(result, contains('src="/images/logo.svg"'));
+        expect(result, contains('alt="Test Site"'));
+        expect(result, isNot(contains('logo-light')));
+        expect(result, isNot(contains('logo-dark')));
+      });
+
+      test('renders separate light and dark logos when both differ', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          logo: LogoConfig(
+            light: '/images/logo-light.svg',
+            dark: '/images/logo-dark.svg',
+          ),
+        );
+        final builderWithLogo = PageLayoutBuilder(config: config);
+
+        final result = builderWithLogo.buildHeader();
+
+        expect(result, contains('logo-image logo-light'));
+        expect(result, contains('logo-image logo-dark'));
+        expect(result, contains('src="/images/logo-light.svg"'));
+        expect(result, contains('src="/images/logo-dark.svg"'));
+      });
+
+      test('renders single logo when light and dark are the same', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          logo: LogoConfig(
+            light: '/images/logo.svg',
+            dark: '/images/logo.svg',
+          ),
+        );
+        final builderWithLogo = PageLayoutBuilder(config: config);
+
+        final result = builderWithLogo.buildHeader();
+
+        expect(result, contains('logo-image'));
+        expect(result, isNot(contains('logo-light')));
+        expect(result, isNot(contains('logo-dark')));
+      });
+
+      test('returns empty logo when only dark is set without single', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          logo: LogoConfig(dark: '/images/logo-dark.svg'),
+        );
+        final builderWithLogo = PageLayoutBuilder(config: config);
+
+        final result = builderWithLogo.buildHeader();
+
+        // effectiveLight is null, so no logo rendered
+        expect(result, isNot(contains('logo-image')));
+      });
+
+      test('prepends basePath to logo src', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          build: BuildConfig(basePath: '/docs'),
+          logo: LogoConfig(single: '/images/logo.svg'),
+        );
+        final builderWithLogo = PageLayoutBuilder(config: config);
+
+        final result = builderWithLogo.buildHeader();
+
+        expect(result, contains('src="/docs/images/logo.svg"'));
       });
     });
 

@@ -8,6 +8,80 @@ void main() {
     late PageMetaBuilder builder;
     late Page testPage;
 
+    group('buildFavicon', () {
+      test('returns empty string when favicon is not configured', () {
+        const config = StardustConfig(name: 'Test Site');
+        builder = PageMetaBuilder(config: config);
+
+        expect(builder.buildFavicon(), isEmpty);
+      });
+
+      test('builds SVG favicon with correct MIME type', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          favicon: '/images/favicon.svg',
+        );
+        builder = PageMetaBuilder(config: config);
+
+        final result = builder.buildFavicon();
+
+        expect(result, contains('rel="icon"'));
+        expect(result, contains('type="image/svg+xml"'));
+        expect(result, contains('href="/images/favicon.svg"'));
+      });
+
+      test('builds PNG favicon with correct MIME type', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          favicon: '/favicon.png',
+        );
+        builder = PageMetaBuilder(config: config);
+
+        final result = builder.buildFavicon();
+
+        expect(result, contains('type="image/png"'));
+        expect(result, contains('href="/favicon.png"'));
+      });
+
+      test('builds ICO favicon with correct MIME type', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          favicon: '/favicon.ico',
+        );
+        builder = PageMetaBuilder(config: config);
+
+        final result = builder.buildFavicon();
+
+        expect(result, contains('type="image/x-icon"'));
+        expect(result, contains('href="/favicon.ico"'));
+      });
+
+      test('defaults to x-icon for unknown extensions', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          favicon: '/favicon.unknown',
+        );
+        builder = PageMetaBuilder(config: config);
+
+        final result = builder.buildFavicon();
+
+        expect(result, contains('type="image/x-icon"'));
+      });
+
+      test('prepends basePath to favicon href', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          build: BuildConfig(basePath: '/docs'),
+          favicon: '/favicon.svg',
+        );
+        builder = PageMetaBuilder(config: config);
+
+        final result = builder.buildFavicon();
+
+        expect(result, contains('href="/docs/favicon.svg"'));
+      });
+    });
+
     group('with minimal config', () {
       setUp(() {
         const config = StardustConfig(name: 'Test Site');

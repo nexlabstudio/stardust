@@ -39,6 +39,7 @@ class PageBuilder {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>$seoTitle</title>
+  ${_metaBuilder.buildFavicon()}
   ${_metaBuilder.build(page)}
   ${_stylesBuilder.buildFonts()}
   ${_stylesBuilder.buildStyles()}
