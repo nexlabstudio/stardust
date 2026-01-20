@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as p;
 import 'package:stardust/src/config/config.dart';
 import 'package:stardust/src/generator/og_image_generator.dart';
 import 'package:stardust/src/models/page.dart';
@@ -69,9 +70,9 @@ void main() {
         expect(results.length, 2);
         expect(results['/'], '/images/og/index.png');
         expect(results['/getting-started'], '/images/og/getting-started.png');
-        expect(fileSystem.directories.contains('dist/images/og'), isTrue);
-        expect(fileSystem.binaryFiles.containsKey('dist/images/og/index.png'), isTrue);
-        expect(fileSystem.binaryFiles.containsKey('dist/images/og/getting-started.png'), isTrue);
+        expect(fileSystem.directories.contains(p.join('dist', 'images', 'og')), isTrue);
+        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'index.png')), isTrue);
+        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'getting-started.png')), isTrue);
       });
 
       test('handles nested paths correctly', () async {
@@ -104,15 +105,16 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        final ogDir = p.join('dist', 'images', 'og');
+        await fileSystem.createDirectory(ogDir, recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Welcome', content: ''),
-          'dist/images/og',
+          ogDir,
         );
 
         expect(result, '/images/og/index.png');
 
-        final bytes = fileSystem.binaryFiles['dist/images/og/index.png']!;
+        final bytes = fileSystem.binaryFiles[p.join('dist', 'images', 'og', 'index.png')]!;
         final image = img.decodePng(bytes);
         expect(image, isNotNull);
         expect(image!.width, 1200);
@@ -134,7 +136,7 @@ void main() {
 
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNull);
@@ -163,10 +165,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/api', sourcePath: 'api.md', title: 'API', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, '/docs/images/og/api.png');
@@ -193,10 +195,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -221,10 +223,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -243,10 +245,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(logs.any((log) => log.contains('SVG logos not supported')), isTrue);
@@ -269,10 +271,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(fileSystem.operations.any((op) => op.contains('logo-dark.png')), isTrue);
@@ -290,10 +292,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         // Should still generate image, just without logo
@@ -315,10 +317,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         // Should still generate image without logo
@@ -345,15 +347,15 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
         // Verify image was generated (colors are applied internally)
-        expect(fileSystem.binaryFiles.containsKey('dist/images/og/index.png'), isTrue);
+        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'index.png')), isTrue);
       });
 
       test('uses default colors when theme colors not specified', () async {
@@ -366,10 +368,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -387,7 +389,7 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(
             path: '/long-title',
@@ -396,7 +398,7 @@ void main() {
                 'This is an extremely long title that should wrap across multiple lines in the OG image because it exceeds the maximum width',
             content: '',
           ),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -412,7 +414,7 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(
             path: '/long-word',
@@ -420,7 +422,7 @@ void main() {
             title: 'Supercalifragilisticexpialidocious',
             content: '',
           ),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -436,7 +438,7 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final longTitle = List.generate(50, (i) => 'word$i').join(' ');
         final result = await generator.generate(
           Page(
@@ -445,7 +447,7 @@ void main() {
             title: longTitle,
             content: '',
           ),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -461,7 +463,7 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(
             path: '/special',
@@ -469,7 +471,7 @@ void main() {
             title: 'Title with special chars \u00A9 \u00AE \u2122',
             content: '',
           ),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -486,13 +488,13 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Home', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
-        expect(fileSystem.binaryFiles.containsKey('dist/images/og/index.png'), isTrue);
+        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'index.png')), isTrue);
       });
 
       test('converts nested path with slashes to dashes', () async {
@@ -504,13 +506,13 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         await generator.generate(
           const Page(path: '/docs/api/v2', sourcePath: 'docs/api/v2.md', title: 'API v2', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
-        expect(fileSystem.binaryFiles.containsKey('dist/images/og/docs-api-v2.png'), isTrue);
+        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'docs-api-v2.png')), isTrue);
       });
     });
 
@@ -531,10 +533,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -561,10 +563,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
@@ -589,10 +591,10 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        await fileSystem.createDirectory('dist/images/og', recursive: true);
+        await fileSystem.createDirectory(p.join('dist', 'images', 'og'), recursive: true);
         final result = await generator.generate(
           const Page(path: '/', sourcePath: 'index.md', title: 'Test', content: ''),
-          'dist/images/og',
+          p.join('dist', 'images', 'og'),
         );
 
         expect(result, isNotNull);
