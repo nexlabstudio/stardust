@@ -232,8 +232,9 @@ ${_buildResponsiveStyles()}
 
     .search-modal-title {
       font-weight: 600;
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
+      font-size: 1rem;
+      color: var(--color-text);
+      letter-spacing: -0.01em;
     }
 
     .search-modal-close {
@@ -253,7 +254,9 @@ ${_buildResponsiveStyles()}
     #pagefind-container {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 0;
+      min-height: 0;
     }
 
     .search-modal-footer {
@@ -276,85 +279,6 @@ ${_buildResponsiveStyles()}
       border-radius: 4px;
       font-family: var(--font-mono);
       font-size: 0.6875rem;
-    }
-
-    .pagefind-ui {
-      --pagefind-ui-scale: 1;
-      --pagefind-ui-primary: var(--color-primary);
-      --pagefind-ui-text: var(--color-text);
-      --pagefind-ui-background: var(--color-bg);
-      --pagefind-ui-border: var(--color-border);
-      --pagefind-ui-tag: var(--color-bg-secondary);
-      font-family: var(--font-sans);
-    }
-
-    .pagefind-ui__search-input {
-      font-family: var(--font-sans) !important;
-      font-size: 1rem !important;
-      padding: 0.875rem 1rem !important;
-      border-radius: 0 !important;
-      border: none !important;
-      border-bottom: 1px solid var(--color-border) !important;
-      background: transparent !important;
-    }
-
-    .pagefind-ui__search-input:focus {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    .pagefind-ui__search-clear {
-      top: 50% !important;
-      transform: translateY(-50%) !important;
-      right: 1rem !important;
-    }
-
-    .pagefind-ui__results-area {
-      margin-top: 0 !important;
-    }
-
-    .pagefind-ui__results {
-      padding: 0.5rem !important;
-    }
-
-    .pagefind-ui__result {
-      padding: 0.75rem !important;
-      border-radius: var(--radius) !important;
-      border: none !important;
-    }
-
-    .pagefind-ui__result:hover {
-      background: var(--color-bg-secondary) !important;
-    }
-
-    .pagefind-ui__result-link {
-      color: var(--color-text) !important;
-      font-weight: 600 !important;
-    }
-
-    .pagefind-ui__result-title {
-      font-weight: 600 !important;
-    }
-
-    .pagefind-ui__result-excerpt {
-      color: var(--color-text-secondary) !important;
-      font-size: 0.875rem !important;
-    }
-
-    mark.pagefind-ui__result-highlight {
-      background: color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
-      color: inherit !important;
-    }
-
-    .pagefind-ui__message {
-      padding: 2rem 1rem !important;
-      color: var(--color-text-secondary) !important;
-    }
-
-    .pagefind-ui__button {
-      background: var(--color-primary) !important;
-      color: white !important;
-      border-radius: var(--radius) !important;
     }''';
 
   String _buildLayoutStyles() => '''
