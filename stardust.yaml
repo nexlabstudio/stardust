@@ -2,6 +2,8 @@ name: Stardust
 description: The Dart-native documentation framework. Beautiful docs, zero config.
 url: https://stardust.nexlab.studio/
 
+logo: /images/stardust-logo.svg
+
 content:
   dir: docs/
 
@@ -124,7 +126,7 @@ code:
   lineNumbers: false
 
 search:
-  enabled: false
+  enabled: true
   provider: pagefind
   placeholder: "Search documentation..."
   hotkey: "/"
