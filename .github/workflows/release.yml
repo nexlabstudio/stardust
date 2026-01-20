@@ -151,7 +151,7 @@ jobs:
 
           cat > Formula/stardust.rb << 'FORMULA'
           class Stardust < Formula
-            desc "Dart-native documentation framework. Beautiful docs, zero config."
+            desc "Dart-native documentation generator. Beautiful docs, zero config."
             homepage "https://github.com/nexlabstudio/stardust"
             version "VERSION_PLACEHOLDER"
             license "Apache-2.0"
@@ -202,7 +202,7 @@ jobs:
           cat > scoop/stardust.json << EOF
           {
             "version": "${VERSION}",
-            "description": "Dart-native documentation framework. Beautiful docs, zero config.",
+            "description": "Dart-native documentation generator. Beautiful docs, zero config.",
             "homepage": "https://github.com/nexlabstudio/stardust",
             "license": "Apache-2.0",
             "architecture": {

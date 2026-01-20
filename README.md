@@ -1,6 +1,6 @@
 # Stardust
 
-**The Dart-native documentation framework. Beautiful docs, zero config.**
+**A Dart-native documentation generator. Beautiful docs, zero config.**
 
 [![CI](https://github.com/nexlabstudio/stardust/actions/workflows/ci.yml/badge.svg)](https://github.com/nexlabstudio/stardust/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/nexlabstudio/stardust/branch/dev/graph/badge.svg?token=XoNeoaL5pi)](https://codecov.io/gh/nexlabstudio/stardust)

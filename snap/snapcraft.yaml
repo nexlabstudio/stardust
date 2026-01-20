@@ -1,9 +1,9 @@
 name: stardust
 base: core22
 version: '0.3.0'
-summary: Dart-native documentation framework
+summary: Dart-native documentation generator
 description: |
-  Stardust is a Dart-native documentation framework that generates
+  Stardust is a Dart-native documentation generator that creates
   beautiful, static documentation sites with zero configuration required.
 
   Features:

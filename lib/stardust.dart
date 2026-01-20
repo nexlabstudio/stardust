@@ -1,2 +1,2 @@
-/// Stardust - A Dart-native documentation framework
+/// Stardust - A Dart-native documentation generator
 library;

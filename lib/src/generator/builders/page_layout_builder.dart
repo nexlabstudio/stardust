@@ -165,8 +165,8 @@ class PageLayoutBuilder {
   String buildSidebar(List<SidebarGroup> sidebar, String currentPath) {
     final groups = sidebar.map((group) {
       final links = group.pages.map((page) {
-        final pagePath = '/${page.slug}';
-        final isActive = pagePath == currentPath || (currentPath == '/' && page.slug == 'index');
+        final pagePath = page.slug == 'index' ? '/' : '/${page.slug}';
+        final isActive = pagePath == currentPath;
         final activeClass = isActive ? ' active' : '';
         final label = page.label ?? _titleCase(page.slug);
         return '<li><a href="${_prefixPath(pagePath)}" class="sidebar-link$activeClass">$label</a></li>';

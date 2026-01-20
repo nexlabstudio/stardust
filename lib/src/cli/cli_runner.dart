@@ -13,7 +13,7 @@ class StardustCliRunner extends CommandRunner<int> {
   StardustCliRunner()
       : super(
           'stardust',
-          'A Dart-native documentation framework. Beautiful docs, zero config.',
+          'A Dart-native documentation generator. Beautiful docs, zero config.',
         ) {
     addCommand(InitCommand());
     addCommand(BuildCommand());

@@ -11,6 +11,7 @@ import '../core/interfaces.dart';
 import '../models/page.dart';
 import '../utils/exceptions.dart';
 import '../utils/logger.dart';
+import 'og_image_generator.dart';
 import 'page_builder.dart';
 
 class SiteGenerator {
@@ -74,7 +75,25 @@ class SiteGenerator {
       await _generateLlms(pagesWithNav);
     }
 
+    if (config.seo.ogImage == null && !config.devMode) {
+      await _generateOgImages(pagesWithNav);
+    }
+
     return count;
+  }
+
+  Future<void> _generateOgImages(List<Page> pages) async {
+    logger.log('🖼️  Generating OG images...');
+
+    final generator = OgImageGenerator(
+      config: config,
+      outputDir: outputDir,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+
+    final results = await generator.generateAll(pages);
+    logger.log('   ✓ Generated ${results.length} OG images');
   }
 
   Future<List<File>> _findMarkdownFiles(String contentDir) async {

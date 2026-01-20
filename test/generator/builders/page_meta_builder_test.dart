@@ -163,7 +163,7 @@ void main() {
         final result = builder.build(rootPage);
 
         expect(result, contains('href="https://example.com"'));
-        expect(result, isNot(contains('https://example.com/')));
+        expect(result, contains('og:url" content="https://example.com"'));
       });
 
       test('normalizes URL with trailing slash', () {

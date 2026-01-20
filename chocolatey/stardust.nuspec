@@ -12,8 +12,8 @@
     <projectSourceUrl>https://github.com/nexlabstudio/stardust</projectSourceUrl>
     <bugTrackerUrl>https://github.com/nexlabstudio/stardust/issues</bugTrackerUrl>
     <tags>documentation dart static-site-generator docs markdown</tags>
-    <summary>Dart-native documentation framework</summary>
-    <description><![CDATA[Stardust is a Dart-native documentation framework that generates beautiful, static documentation sites with zero configuration required.
+    <summary>Dart-native documentation generator</summary>
+    <description><![CDATA[Stardust is a Dart-native documentation generator that creates beautiful, static documentation sites with zero configuration required.
 
 ## Features
 
