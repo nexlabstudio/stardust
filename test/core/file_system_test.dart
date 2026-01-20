@@ -15,7 +15,7 @@ void main() {
     });
 
     tearDown(() async {
-      if (await tempDir.exists()) {
+      if (tempDir.existsSync()) {
         await tempDir.delete(recursive: true);
       }
     });
@@ -52,14 +52,14 @@ void main() {
         final dirPath = '${tempDir.path}/new_dir';
         await fileSystem.createDirectory(dirPath);
 
-        expect(await Directory(dirPath).exists(), isTrue);
+        expect(await fileSystem.directoryExists(dirPath), isTrue);
       });
 
       test('creates nested directories with recursive flag', () async {
         final dirPath = '${tempDir.path}/nested/deep/dir';
         await fileSystem.createDirectory(dirPath, recursive: true);
 
-        expect(await Directory(dirPath).exists(), isTrue);
+        expect(await fileSystem.directoryExists(dirPath), isTrue);
       });
     });
 
@@ -69,7 +69,7 @@ void main() {
         await Directory(dirPath).create();
 
         await fileSystem.deleteDirectory(dirPath);
-        expect(await Directory(dirPath).exists(), isFalse);
+        expect(await fileSystem.directoryExists(dirPath), isFalse);
       });
 
       test('deletes directory with contents when recursive', () async {
@@ -78,7 +78,7 @@ void main() {
         await File('$dirPath/file.txt').writeAsString('content');
 
         await fileSystem.deleteDirectory(dirPath, recursive: true);
-        expect(await Directory(dirPath).exists(), isFalse);
+        expect(await fileSystem.directoryExists(dirPath), isFalse);
       });
 
       test('handles non-existent directory gracefully', () async {

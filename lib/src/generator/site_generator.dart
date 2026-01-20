@@ -75,7 +75,7 @@ class SiteGenerator {
       await _generateLlms(pagesWithNav);
     }
 
-    if (config.seo.ogImage == null) {
+    if (config.seo.ogImage == null && !config.devMode) {
       await _generateOgImages(pagesWithNav);
     }
 

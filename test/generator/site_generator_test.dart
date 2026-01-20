@@ -471,5 +471,70 @@ description: Guide description
         expect(llmsContent, contains('## Pages'));
       });
     });
+
+    group('OG image generation', () {
+      test('generates OG images in build mode', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+        );
+
+        final logs = <String>[];
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          logger: Logger(onLog: logs.add),
+        );
+
+        await generator.generate();
+
+        expect(logs.any((l) => l.contains('Generating OG images')), isTrue);
+        expect(Directory(p.join(outputDir, 'images', 'og')).existsSync(), isTrue);
+      });
+
+      test('skips OG images in dev mode', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+        ).withDevMode();
+
+        final logs = <String>[];
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          logger: Logger(onLog: logs.add),
+        );
+
+        await generator.generate();
+
+        expect(logs.any((l) => l.contains('Generating OG images')), isFalse);
+        expect(Directory(p.join(outputDir, 'images', 'og')).existsSync(), isFalse);
+      });
+
+      test('skips OG images when custom ogImage is configured', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+          seo: const SeoConfig(ogImage: '/images/custom-og.png'),
+        );
+
+        final logs = <String>[];
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          logger: Logger(onLog: logs.add),
+        );
+
+        await generator.generate();
+
+        expect(logs.any((l) => l.contains('Generating OG images')), isFalse);
+      });
+    });
   });
 }
