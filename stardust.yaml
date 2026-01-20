@@ -126,7 +126,7 @@ code:
   lineNumbers: false
 
 search:
-  enabled: true
+  enabled: false
   provider: pagefind
   placeholder: "Search documentation..."
   hotkey: "/"
