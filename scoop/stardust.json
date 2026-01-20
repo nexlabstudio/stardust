@@ -1,12 +1,12 @@
 {
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Dart-native documentation framework. Beautiful docs, zero config.",
   "homepage": "https://github.com/nexlabstudio/stardust",
   "license": "Apache-2.0",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/nexlabstudio/stardust/releases/download/v0.2.3/stardust-windows-x64.zip",
-      "hash": "b5c349bc34515a0531993604051d6c1e6a177d928bbe2e1d0ee93c698b878793"
+      "url": "https://github.com/nexlabstudio/stardust/releases/download/v0.3.0/stardust-windows-x64.zip",
+      "hash": "d8a99073fcd0c19404378f7200650456f7785a6f88725e80dd0b8dca7cbb2b9b"
     }
   },
   "bin": "stardust.exe",
