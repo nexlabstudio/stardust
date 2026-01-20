@@ -211,6 +211,19 @@ void main() {
         expect(result, contains('sidebar-link active'));
       });
 
+      test('generates root path href for index slug', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', pages: [
+            SidebarPage(slug: 'index', label: 'Home'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, contains('href="/"'));
+        expect(result, isNot(contains('href="/index"')));
+      });
+
       test('converts slug to title case when no label', () {
         const sidebar = [
           SidebarGroup(group: 'Guide', pages: [

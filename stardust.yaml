@@ -20,7 +20,7 @@ sidebar:
   - group: Getting Started
     icon: rocket
     pages:
-      - slug: ''
+      - slug: index
         label: Introduction
       - slug: installation
         label: Installation
