@@ -89,6 +89,11 @@ class PageScriptsBuilder {
     window.addEventListener('scroll', updateToc, { passive: true });
     updateToc();
 
+    const activeSidebarLink = document.querySelector('.sidebar-link.active');
+    if (activeSidebarLink) {
+      activeSidebarLink.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
+
     document.querySelectorAll('.code-group').forEach(group => {
       const buttons = group.querySelectorAll('.tab-button');
       const panels = group.querySelectorAll('.tab-panel');
