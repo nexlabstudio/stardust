@@ -536,5 +536,88 @@ description: Guide description
         expect(logs.any((l) => l.contains('Generating OG images')), isFalse);
       });
     });
+
+    group('redirect generation', () {
+      test('generates redirects from config', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+        await File(p.join(contentDir, 'new-page.md')).writeAsString('# New Page');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+          build: const BuildConfig(
+            redirects: [
+              RedirectConfig(from: '/old-page', to: '/new-page'),
+            ],
+          ),
+        );
+
+        final logs = <String>[];
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          logger: Logger(onLog: logs.add),
+        );
+
+        await generator.generate();
+
+        expect(logs.any((l) => l.contains('Generating redirects')), isTrue);
+        expect(File(p.join(outputDir, 'old-page', 'index.html')).existsSync(), isTrue);
+        expect(File(p.join(outputDir, '_redirects')).existsSync(), isTrue);
+        expect(File(p.join(outputDir, 'vercel.json')).existsSync(), isTrue);
+      });
+
+      test('generates redirects from frontmatter', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+        await File(p.join(contentDir, 'new-guide.md')).writeAsString('''
+---
+title: New Guide
+redirect_from:
+  - /old-guide
+  - /legacy/guide
+---
+# New Guide
+''');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+        );
+
+        final logs = <String>[];
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          logger: Logger(onLog: logs.add),
+        );
+
+        await generator.generate();
+
+        expect(logs.any((l) => l.contains('Generating redirects')), isTrue);
+        expect(File(p.join(outputDir, 'old-guide', 'index.html')).existsSync(), isTrue);
+        expect(File(p.join(outputDir, 'legacy', 'guide', 'index.html')).existsSync(), isTrue);
+      });
+
+      test('skips redirect generation when no redirects configured', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+        );
+
+        final logs = <String>[];
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          logger: Logger(onLog: logs.add),
+        );
+
+        await generator.generate();
+
+        expect(logs.any((l) => l.contains('Generating redirects')), isFalse);
+        expect(File(p.join(outputDir, '_redirects')).existsSync(), isFalse);
+      });
+    });
   });
 }

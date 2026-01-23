@@ -13,6 +13,7 @@ import '../utils/exceptions.dart';
 import '../utils/logger.dart';
 import 'og_image_generator.dart';
 import 'page_builder.dart';
+import 'redirect_generator.dart';
 
 class SiteGenerator {
   final StardustConfig config;
@@ -79,6 +80,8 @@ class SiteGenerator {
       await _generateOgImages(pagesWithNav);
     }
 
+    await _generateRedirects(pagesWithNav);
+
     return count;
   }
 
@@ -142,6 +145,12 @@ class SiteGenerator {
 
       final pagePath = slug == 'index' ? '/' : '/$slug';
 
+      final redirectFrom = switch (parsed.frontmatter['redirect_from']) {
+        final List list => list.whereType<String>().toList(),
+        final String single => [single],
+        _ => <String>[],
+      };
+
       return Page(
         path: pagePath,
         sourcePath: file.path,
@@ -150,6 +159,7 @@ class SiteGenerator {
         content: parsed.html,
         toc: parsed.toc,
         frontmatter: parsed.frontmatter,
+        redirectFrom: redirectFrom,
       );
     } catch (e) {
       logger.error('  ❌ Error parsing ${file.path}: $e');
@@ -225,6 +235,7 @@ class SiteGenerator {
         prev: prev,
         next: next,
         breadcrumbs: _buildBreadcrumbs(page.path),
+        redirectFrom: page.redirectFrom,
       ));
     }
 
@@ -377,5 +388,21 @@ class SiteGenerator {
 
     await fileSystem.writeFile(p.join(outputDir, 'llms.txt'), buffer.toString());
     logger.log('🤖 Generated llms.txt');
+  }
+
+  Future<void> _generateRedirects(List<Page> pages) async {
+    final hasConfigRedirects = config.build.redirects.isNotEmpty;
+    final hasFrontmatterRedirects = pages.any((p) => p.redirectFrom.isNotEmpty);
+
+    if (!hasConfigRedirects && !hasFrontmatterRedirects) return;
+
+    final generator = RedirectGenerator(
+      outputDir: outputDir,
+      basePath: config.basePath,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+
+    await generator.generateAll(configRedirects: config.build.redirects, pages: pages);
   }
 }

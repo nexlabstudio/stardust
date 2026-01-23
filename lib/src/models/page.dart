@@ -32,6 +32,9 @@ class Page {
   /// Breadcrumb trail
   final List<PageLink> breadcrumbs;
 
+  /// Paths that should redirect to this page
+  final List<String> redirectFrom;
+
   const Page({
     required this.path,
     required this.sourcePath,
@@ -43,6 +46,7 @@ class Page {
     this.prev,
     this.next,
     this.breadcrumbs = const [],
+    this.redirectFrom = const [],
   });
 
   /// Output file path (e.g., 'getting-started/index.html')
