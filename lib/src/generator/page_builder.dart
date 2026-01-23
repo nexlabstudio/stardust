@@ -1,5 +1,6 @@
 import '../config/config.dart';
 import '../models/page.dart';
+import 'builders/page_analytics_builder.dart';
 import 'builders/page_layout_builder.dart';
 import 'builders/page_meta_builder.dart';
 import 'builders/page_scripts_builder.dart';
@@ -13,12 +14,14 @@ class PageBuilder {
   late final PageStylesBuilder _stylesBuilder;
   late final PageLayoutBuilder _layoutBuilder;
   late final PageScriptsBuilder _scriptsBuilder;
+  late final PageAnalyticsBuilder _analyticsBuilder;
 
   PageBuilder({required this.config}) {
     _metaBuilder = PageMetaBuilder(config: config);
     _stylesBuilder = PageStylesBuilder(config: config);
     _layoutBuilder = PageLayoutBuilder(config: config);
     _scriptsBuilder = PageScriptsBuilder(config: config);
+    _analyticsBuilder = PageAnalyticsBuilder(analytics: config.integrations.analytics);
   }
 
   String _getBasePath(String pagePath) {
@@ -41,6 +44,7 @@ class PageBuilder {
   <title>$seoTitle</title>
   ${_metaBuilder.buildFavicon()}
   ${_metaBuilder.build(page)}
+  ${_analyticsBuilder.build()}
   ${_stylesBuilder.buildFonts()}
   ${_stylesBuilder.buildStyles()}
   ${_scriptsBuilder.buildPagefindStyles(basePath)}

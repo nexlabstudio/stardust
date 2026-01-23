@@ -4,7 +4,9 @@
   "title": "Stardust Configuration",
   "description": "Configuration schema for Stardust documentation generator",
   "type": "object",
-  "required": ["name"],
+  "required": [
+    "name"
+  ],
   "additionalProperties": false,
   "properties": {
     "name": {
@@ -50,7 +52,6 @@
       "format": "uri",
       "description": "Production URL of your documentation site"
     },
-
     "content": {
       "type": "object",
       "description": "Content source configuration",
@@ -71,7 +72,10 @@
           "items": {
             "type": "string"
           },
-          "default": ["**/*.md", "**/*.mdx"],
+          "default": [
+            "**/*.md",
+            "**/*.mdx"
+          ],
           "description": "Glob patterns for files to include"
         },
         "exclude": {
@@ -84,7 +88,6 @@
         }
       }
     },
-
     "nav": {
       "type": "array",
       "description": "Top navigation items",
@@ -92,7 +95,6 @@
         "$ref": "#/$defs/navItem"
       }
     },
-
     "sidebar": {
       "type": "array",
       "description": "Sidebar navigation structure",
@@ -100,7 +102,6 @@
         "$ref": "#/$defs/sidebarGroup"
       }
     },
-
     "toc": {
       "type": "object",
       "description": "Table of contents configuration",
@@ -128,7 +129,6 @@
         }
       }
     },
-
     "theme": {
       "type": "object",
       "description": "Theme configuration",
@@ -153,16 +153,24 @@
             "background": {
               "type": "object",
               "properties": {
-                "light": { "type": "string" },
-                "dark": { "type": "string" }
+                "light": {
+                  "type": "string"
+                },
+                "dark": {
+                  "type": "string"
+                }
               },
               "additionalProperties": false
             },
             "text": {
               "type": "object",
               "properties": {
-                "light": { "type": "string" },
-                "dark": { "type": "string" }
+                "light": {
+                  "type": "string"
+                },
+                "dark": {
+                  "type": "string"
+                }
               },
               "additionalProperties": false
             }
@@ -178,7 +186,11 @@
             },
             "default": {
               "type": "string",
-              "enum": ["light", "dark", "system"],
+              "enum": [
+                "light",
+                "dark",
+                "system"
+              ],
               "default": "system"
             }
           }
@@ -213,7 +225,6 @@
         }
       }
     },
-
     "code": {
       "type": "object",
       "description": "Code block configuration",
@@ -227,8 +238,12 @@
             {
               "type": "object",
               "properties": {
-                "light": { "type": "string" },
-                "dark": { "type": "string" }
+                "light": {
+                  "type": "string"
+                },
+                "dark": {
+                  "type": "string"
+                }
               },
               "additionalProperties": false
             }
@@ -259,7 +274,6 @@
         }
       }
     },
-
     "components": {
       "type": "object",
       "description": "Component configuration",
@@ -273,7 +287,6 @@
         }
       }
     },
-
     "search": {
       "type": "object",
       "description": "Search configuration",
@@ -285,7 +298,11 @@
         },
         "provider": {
           "type": "string",
-          "enum": ["pagefind", "algolia", "custom"],
+          "enum": [
+            "pagefind",
+            "algolia",
+            "custom"
+          ],
           "default": "pagefind"
         },
         "placeholder": {
@@ -300,15 +317,24 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "appId": { "type": "string" },
-            "apiKey": { "type": "string" },
-            "indexName": { "type": "string" }
+            "appId": {
+              "type": "string"
+            },
+            "apiKey": {
+              "type": "string"
+            },
+            "indexName": {
+              "type": "string"
+            }
           },
-          "required": ["appId", "apiKey", "indexName"]
+          "required": [
+            "appId",
+            "apiKey",
+            "indexName"
+          ]
         }
       }
     },
-
     "seo": {
       "type": "object",
       "description": "SEO configuration",
@@ -323,7 +349,10 @@
         },
         "twitterCard": {
           "type": "string",
-          "enum": ["summary", "summary_large_image"],
+          "enum": [
+            "summary",
+            "summary_large_image"
+          ],
           "default": "summary_large_image"
         },
         "twitterHandle": {
@@ -335,23 +364,45 @@
         }
       }
     },
-
     "social": {
       "type": "object",
       "description": "Social links",
       "additionalProperties": false,
       "properties": {
-        "github": { "type": "string", "format": "uri" },
-        "discord": { "type": "string", "format": "uri" },
-        "twitter": { "type": "string", "format": "uri" },
-        "youtube": { "type": "string", "format": "uri" },
-        "linkedin": { "type": "string", "format": "uri" },
-        "mastodon": { "type": "string", "format": "uri" },
-        "slack": { "type": "string", "format": "uri" },
-        "pubdev": { "type": "string", "format": "uri" }
+        "github": {
+          "type": "string",
+          "format": "uri"
+        },
+        "discord": {
+          "type": "string",
+          "format": "uri"
+        },
+        "twitter": {
+          "type": "string",
+          "format": "uri"
+        },
+        "youtube": {
+          "type": "string",
+          "format": "uri"
+        },
+        "linkedin": {
+          "type": "string",
+          "format": "uri"
+        },
+        "mastodon": {
+          "type": "string",
+          "format": "uri"
+        },
+        "slack": {
+          "type": "string",
+          "format": "uri"
+        },
+        "pubdev": {
+          "type": "string",
+          "format": "uri"
+        }
       }
     },
-
     "header": {
       "type": "object",
       "description": "Header configuration",
@@ -377,23 +428,32 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "text": { "type": "string" },
-            "link": { "type": "string" },
+            "text": {
+              "type": "string"
+            },
+            "link": {
+              "type": "string"
+            },
             "dismissible": {
               "type": "boolean",
               "default": true
             },
             "style": {
               "type": "string",
-              "enum": ["info", "warning", "success"],
+              "enum": [
+                "info",
+                "warning",
+                "success"
+              ],
               "default": "info"
             }
           },
-          "required": ["text"]
+          "required": [
+            "text"
+          ]
         }
       }
     },
-
     "footer": {
       "type": "object",
       "description": "Footer configuration",
@@ -408,26 +468,37 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "group": { "type": "string" },
+              "group": {
+                "type": "string"
+              },
               "items": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "label": { "type": "string" },
-                    "href": { "type": "string" }
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
                   },
-                  "required": ["label", "href"],
+                  "required": [
+                    "label",
+                    "href"
+                  ],
                   "additionalProperties": false
                 }
               }
             },
-            "required": ["group", "items"]
+            "required": [
+              "group",
+              "items"
+            ]
           }
         }
       }
     },
-
     "versions": {
       "type": "object",
       "description": "Versioning configuration",
@@ -453,17 +524,27 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "version": { "type": "string" },
-              "label": { "type": "string" },
-              "path": { "type": "string" },
-              "banner": { "type": "string" }
+              "version": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "banner": {
+                "type": "string"
+              }
             },
-            "required": ["version", "path"]
+            "required": [
+              "version",
+              "path"
+            ]
           }
         }
       }
     },
-
     "i18n": {
       "type": "object",
       "description": "Internationalization configuration",
@@ -483,20 +564,29 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "code": { "type": "string" },
-              "label": { "type": "string" },
+              "code": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
               "dir": {
                 "type": "string",
-                "enum": ["ltr", "rtl"],
+                "enum": [
+                  "ltr",
+                  "rtl"
+                ],
                 "default": "ltr"
               }
             },
-            "required": ["code", "label"]
+            "required": [
+              "code",
+              "label"
+            ]
           }
         }
       }
     },
-
     "integrations": {
       "type": "object",
       "description": "Third-party integrations",
@@ -561,11 +651,63 @@
             "posthog": {
               "type": "object",
               "properties": {
-                "key": { "type": "string" },
-                "host": { "type": "string", "format": "uri" }
+                "key": {
+                  "type": "string"
+                },
+                "host": {
+                  "type": "string",
+                  "format": "uri"
+                }
               },
-              "required": ["key"],
+              "required": [
+                "key"
+              ],
               "additionalProperties": false
+            },
+            "custom": {
+              "type": "array",
+              "description": "Custom analytics providers",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Provider name for identification"
+                  },
+                  "src": {
+                    "type": "string",
+                    "description": "External script URL"
+                  },
+                  "script": {
+                    "type": "string",
+                    "description": "Inline script content"
+                  },
+                  "async": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "defer": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "oneOf": [
+                  {
+                    "required": [
+                      "src"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "script"
+                    ]
+                  }
+                ]
+              }
             }
           }
         },
@@ -575,22 +717,35 @@
           "properties": {
             "provider": {
               "type": "string",
-              "enum": ["giscus", "disqus"]
+              "enum": [
+                "giscus",
+                "disqus"
+              ]
             },
             "giscus": {
               "type": "object",
               "properties": {
-                "repo": { "type": "string" },
-                "repoId": { "type": "string" },
-                "category": { "type": "string" },
-                "categoryId": { "type": "string" }
+                "repo": {
+                  "type": "string"
+                },
+                "repoId": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "categoryId": {
+                  "type": "string"
+                }
               },
               "additionalProperties": false
             },
             "disqus": {
               "type": "object",
               "properties": {
-                "shortname": { "type": "string" }
+                "shortname": {
+                  "type": "string"
+                }
               },
               "additionalProperties": false
             }
@@ -598,7 +753,6 @@
         }
       }
     },
-
     "build": {
       "type": "object",
       "description": "Build configuration",
@@ -626,7 +780,15 @@
             },
             "changefreq": {
               "type": "string",
-              "enum": ["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"],
+              "enum": [
+                "always",
+                "hourly",
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly",
+                "never"
+              ],
               "default": "weekly"
             },
             "priority": {
@@ -647,12 +809,18 @@
             },
             "allow": {
               "type": "array",
-              "items": { "type": "string" },
-              "default": ["/"]
+              "items": {
+                "type": "string"
+              },
+              "default": [
+                "/"
+              ]
             },
             "disallow": {
               "type": "array",
-              "items": { "type": "string" },
+              "items": {
+                "type": "string"
+              },
               "default": []
             }
           }
@@ -694,9 +862,15 @@
                   "type": "array",
                   "items": {
                     "type": "string",
-                    "enum": ["webp", "avif", "original"]
+                    "enum": [
+                      "webp",
+                      "avif",
+                      "original"
+                    ]
                   },
-                  "default": ["original"]
+                  "default": [
+                    "original"
+                  ]
                 }
               }
             }
@@ -708,20 +882,31 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "from": { "type": "string" },
-              "to": { "type": "string" },
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
               "status": {
                 "type": "integer",
-                "enum": [301, 302, 307, 308],
+                "enum": [
+                  301,
+                  302,
+                  307,
+                  308
+                ],
                 "default": 301
               }
             },
-            "required": ["from", "to"]
+            "required": [
+              "from",
+              "to"
+            ]
           }
         }
       }
     },
-
     "dev": {
       "type": "object",
       "description": "Development server configuration",
@@ -741,13 +926,17 @@
         },
         "watch": {
           "type": "array",
-          "items": { "type": "string" },
-          "default": ["docs/", "public/"]
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "docs/",
+            "public/"
+          ]
         }
       }
     }
   },
-
   "$defs": {
     "navItem": {
       "type": "object",
@@ -767,9 +956,11 @@
           "type": "string"
         }
       },
-      "required": ["label", "href"]
+      "required": [
+        "label",
+        "href"
+      ]
     },
-
     "sidebarGroup": {
       "type": "object",
       "additionalProperties": false,
@@ -797,10 +988,16 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                  "slug": { "type": "string" },
-                  "label": { "type": "string" }
+                  "slug": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
                 },
-                "required": ["slug"]
+                "required": [
+                  "slug"
+                ]
               }
             ]
           }
@@ -814,16 +1011,23 @@
             },
             "order": {
               "type": "string",
-              "enum": ["alphabetical", "filename", "frontmatter"],
+              "enum": [
+                "alphabetical",
+                "filename",
+                "frontmatter"
+              ],
               "default": "filename"
             }
           },
-          "required": ["dir"]
+          "required": [
+            "dir"
+          ]
         }
       },
-      "required": ["group"]
+      "required": [
+        "group"
+      ]
     },
-
     "calloutConfig": {
       "type": "object",
       "additionalProperties": false,

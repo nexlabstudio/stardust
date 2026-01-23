@@ -107,6 +107,39 @@ integrations:
     plausible: myproject.com
 ```
 
+### Custom Analytics
+
+Add any analytics provider using custom scripts:
+
+```yaml
+integrations:
+  analytics:
+    custom:
+      # External script
+      - name: Fathom
+        src: https://cdn.usefathom.com/script.js
+        defer: true
+
+      # Inline script
+      - name: Custom Tracker
+        script: |
+          window.myTracker = { init: true };
+```
+
+#### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `name` | string | required | Provider name (used in HTML comments) |
+| `src` | string | - | External script URL |
+| `script` | string | - | Inline script content |
+| `async` | boolean | `true` | Load script asynchronously |
+| `defer` | boolean | `false` | Defer script execution |
+
+<Note>
+Provide either `src` (external) or `script` (inline), not both.
+</Note>
+
 ## Comments
 
 Add discussions to your documentation pages.
@@ -222,6 +255,12 @@ integrations:
   analytics:
     google: G-XXXXXXXXXX
     plausible: myproject.com
+    custom:
+      - name: Fathom
+        src: https://cdn.usefathom.com/script.js
+      - name: Custom Tracker
+        script: |
+          window.myTracker = { init: true };
 
   comments:
     provider: giscus

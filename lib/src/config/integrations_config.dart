@@ -71,8 +71,9 @@ class AnalyticsConfig {
   final String? google;
   final String? plausible;
   final PosthogConfig? posthog;
+  final List<CustomAnalyticsConfig> custom;
 
-  const AnalyticsConfig({this.google, this.plausible, this.posthog});
+  const AnalyticsConfig({this.google, this.plausible, this.posthog, this.custom = const []});
 
   factory AnalyticsConfig.fromYaml(Map yaml) => AnalyticsConfig(
         google: yaml['google'] as String?,
@@ -81,6 +82,36 @@ class AnalyticsConfig {
           final Map p => PosthogConfig.fromYaml(p),
           _ => null,
         },
+        custom: switch (yaml['custom']) {
+          final List list => list.whereType<Map>().map(CustomAnalyticsConfig.fromYaml).toList(),
+          _ => const [],
+        },
+      );
+
+  bool get hasAny => google != null || plausible != null || posthog != null || custom.isNotEmpty;
+}
+
+class CustomAnalyticsConfig {
+  final String name;
+  final String? src;
+  final String? script;
+  final bool async;
+  final bool defer;
+
+  const CustomAnalyticsConfig({
+    required this.name,
+    this.src,
+    this.script,
+    this.async = true,
+    this.defer = false,
+  });
+
+  factory CustomAnalyticsConfig.fromYaml(Map yaml) => CustomAnalyticsConfig(
+        name: yaml['name'] as String? ?? 'Custom',
+        src: yaml['src'] as String?,
+        script: yaml['script'] as String?,
+        async: yaml['async'] as bool? ?? true,
+        defer: yaml['defer'] as bool? ?? false,
       );
 }
 
