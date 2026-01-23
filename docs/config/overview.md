@@ -112,6 +112,9 @@ build:
   cleanUrls: true
   sitemap:
     enabled: true
+  redirects:
+    - from: /old-page
+      to: /new-page
 
 integrations:
   editLink:

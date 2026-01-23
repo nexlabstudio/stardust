@@ -115,6 +115,21 @@ hidden: true
 ---
 ```
 
+### redirect_from
+
+Redirect old URLs to this page. Useful when you rename or move pages.
+
+```yaml
+---
+title: Getting Started
+redirect_from:
+  - /quick-start
+  - /docs/introduction
+---
+```
+
+See [Redirects](/features/redirects) for more options including wildcards and custom status codes.
+
 ## Complete Example
 
 Here's a page using all available frontmatter fields:

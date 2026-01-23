@@ -86,6 +86,8 @@ sidebar:
         label: OpenAPI Import
       - slug: features/llm-output
         label: LLM-Friendly Output
+      - slug: features/redirects
+        label: Redirects
 
   - group: CLI Reference
     icon: terminal
