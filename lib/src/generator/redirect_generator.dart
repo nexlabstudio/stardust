@@ -70,15 +70,13 @@ class RedirectGenerator {
     final from = redirect.from;
     final to = redirect.to;
 
-    String outputPath;
     if (from == '/') {
       logger.error('   ⚠️  Cannot redirect from "/" - conflicts with index page');
       return;
-    } else if (from.endsWith('/')) {
-      outputPath = p.join(outputDir, from.substring(1), 'index.html');
-    } else {
-      outputPath = p.join(outputDir, from.substring(1), 'index.html');
     }
+
+    final segments = from.substring(1).split('/').where((s) => s.isNotEmpty).toList();
+    final outputPath = p.joinAll([outputDir, ...segments, 'index.html']);
 
     final destinationUrl = basePath.isEmpty ? to : '$basePath$to';
 
