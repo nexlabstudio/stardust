@@ -146,7 +146,7 @@ class SiteGenerator {
       final pagePath = slug == 'index' ? '/' : '/$slug';
 
       final redirectFrom = switch (parsed.frontmatter['redirect_from']) {
-        final List<String> list => list,
+        final List list => list.whereType<String>().toList(),
         final String single => [single],
         _ => <String>[],
       };
@@ -235,6 +235,7 @@ class SiteGenerator {
         prev: prev,
         next: next,
         breadcrumbs: _buildBreadcrumbs(page.path),
+        redirectFrom: page.redirectFrom,
       ));
     }
 
