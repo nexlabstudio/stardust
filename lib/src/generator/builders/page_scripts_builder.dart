@@ -148,6 +148,34 @@ class PageScriptsBuilder {
       }
     }
 
+    const versionBanner = document.getElementById('version-banner');
+    if (versionBanner) {
+      const key = 'stardust-dismiss-version-' + versionBanner.dataset.version;
+      if (localStorage.getItem(key) === 'dismissed') {
+        versionBanner.classList.add('dismissed');
+      }
+      const btn = versionBanner.querySelector('.version-banner-dismiss');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          versionBanner.classList.add('dismissed');
+          localStorage.setItem(key, 'dismissed');
+        });
+      }
+    }
+
+    (function() {
+      const dropdown = document.getElementById('version-dropdown');
+      if (!dropdown) return;
+      const trigger = dropdown.querySelector('.version-dropdown-trigger');
+      trigger.addEventListener('click', () => dropdown.classList.toggle('open'));
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') dropdown.classList.remove('open');
+      });
+    })();
+
     document.querySelectorAll('.code-group').forEach(group => {
       const buttons = group.querySelectorAll('.tab-button');
       const panels = group.querySelectorAll('.tab-panel');

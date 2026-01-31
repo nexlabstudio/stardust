@@ -22,8 +22,11 @@ class PageLayoutBuilder {
     final socialLinks = _buildSocialLinks();
     final logoHtml = _buildLogo();
     final announcement = _buildAnnouncement();
+    final versionBanner = _buildVersionBanner();
+    final versionDropdown = _buildVersionDropdown();
 
     return '''
+    $versionBanner
     $announcement
     <header class="header">
       <div class="header-inner">
@@ -42,6 +45,7 @@ class PageLayoutBuilder {
           $navLinks
         </nav>
         <div class="header-actions">
+          $versionDropdown
           ${config.search.enabled ? '''
           <button class="search-button" id="search-trigger">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -90,6 +94,55 @@ class PageLayoutBuilder {
     <div class="announcement announcement-$style" id="announcement">
       $content$dismissBtn
     </div>''';
+  }
+
+  String _buildVersionBanner() {
+    final versions = config.versions;
+    if (versions == null || !versions.enabled) return '';
+
+    final currentEntry = versions.list.where((e) => e.version == versions.current).firstOrNull;
+    if (currentEntry == null || currentEntry.banner == null) return '';
+
+    return '''
+    <div class="version-banner" id="version-banner" data-version="${currentEntry.version}">
+      <span class="version-banner-content">${currentEntry.banner}</span>
+      <button class="version-banner-dismiss" aria-label="Dismiss banner">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>''';
+  }
+
+  String _buildVersionDropdown() {
+    final versions = config.versions;
+    if (versions == null || !versions.enabled || !versions.dropdown) return '';
+    if (versions.list.isEmpty) return '';
+
+    final currentLabel =
+        versions.list.where((e) => e.version == versions.current).map((e) => e.label ?? 'v${e.version}').firstOrNull ??
+            versions.current ??
+            '';
+
+    final items = versions.list.map((entry) {
+      final label = entry.label ?? 'v${entry.version}';
+      final active = entry.version == versions.current ? ' active' : '';
+      return '<a href="${entry.path}" class="version-dropdown-item$active">$label</a>';
+    }).join('\n        ');
+
+    return '''
+      <div class="version-dropdown" id="version-dropdown">
+        <button class="version-dropdown-trigger" aria-label="Select version">
+          $currentLabel
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="version-dropdown-menu">
+          $items
+        </div>
+      </div>''';
   }
 
   String _buildLogo() {
