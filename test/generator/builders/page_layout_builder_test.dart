@@ -966,6 +966,26 @@ void main() {
         expect(result, contains('v1.0'));
       });
 
+      test('falls back to current string when no matching entry in list', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '3.0',
+            list: [
+              VersionEntry(version: '2.0', path: '/v2/'),
+              VersionEntry(version: '1.0', path: '/v1/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('version-dropdown-trigger'));
+        expect(result, contains('3.0'));
+      });
+
       test('lists all versions with correct paths', () {
         const config = StardustConfig(
           name: 'Test',
