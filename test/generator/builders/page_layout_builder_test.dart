@@ -680,6 +680,46 @@ void main() {
       });
     });
 
+    group('mobile menu', () {
+      test('header includes mobile menu toggle button', () {
+        final result = builder.buildHeader();
+
+        expect(result, contains('mobile-menu-toggle'));
+        expect(result, contains('id="mobile-menu-toggle"'));
+        expect(result, contains('aria-label="Toggle menu"'));
+      });
+
+      test('mobile menu toggle has hamburger icon', () {
+        final result = builder.buildHeader();
+
+        expect(result, contains('<line x1="3" y1="6"'));
+        expect(result, contains('<line x1="3" y1="12"'));
+        expect(result, contains('<line x1="3" y1="18"'));
+      });
+
+      test('hamburger is before logo in header', () {
+        final result = builder.buildHeader();
+
+        final hamburgerIndex = result.indexOf('mobile-menu-toggle');
+        final logoIndex = result.indexOf('class="logo"');
+        expect(hamburgerIndex, lessThan(logoIndex));
+      });
+
+      test('sidebar contains close button', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', pages: [
+            SidebarPage(slug: 'intro'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, contains('sidebar-close'));
+        expect(result, contains('id="sidebar-close"'));
+        expect(result, contains('aria-label="Close menu"'));
+      });
+    });
+
     group('header with disabled features', () {
       test('hides search when disabled', () {
         const config = StardustConfig(

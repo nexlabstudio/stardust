@@ -25,6 +25,13 @@ class PageLayoutBuilder {
     return '''
     <header class="header">
       <div class="header-inner">
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
         <a href="${_prefixPath('/')}" class="logo">
           $logoHtml
           ${config.header.showName ? '<span class="logo-text">${config.name}</span>' : ''}
@@ -207,6 +214,12 @@ class PageLayoutBuilder {
 
     return '''
       <aside class="sidebar">
+        <button class="sidebar-close" id="sidebar-close" aria-label="Close menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
         $groups
       </aside>
 ''';

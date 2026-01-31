@@ -52,6 +52,7 @@ class PageBuilder {
 <body>
   <div class="layout">
     ${_layoutBuilder.buildHeader()}
+    <div class="mobile-overlay" id="mobile-overlay"></div>
     <div class="main-container">
       ${_layoutBuilder.buildSidebar(sidebar, page.path)}
       <main class="content">

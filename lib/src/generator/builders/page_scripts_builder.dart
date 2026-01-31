@@ -107,6 +107,31 @@ class PageScriptsBuilder {
       activeSidebarLink.scrollIntoView({ block: 'center', behavior: 'instant' });
     }
 
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileSidebar = document.querySelector('.sidebar');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+    if (menuToggle && mobileSidebar && mobileOverlay) {
+      const closeMenu = () => {
+        mobileSidebar.classList.remove('open');
+        mobileOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      };
+      menuToggle.addEventListener('click', () => {
+        const isOpen = mobileSidebar.classList.toggle('open');
+        mobileOverlay.classList.toggle('active');
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+      });
+      mobileOverlay.addEventListener('click', closeMenu);
+      const sidebarClose = document.getElementById('sidebar-close');
+      if (sidebarClose) sidebarClose.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileSidebar.classList.contains('open')) closeMenu();
+      });
+      mobileSidebar.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', closeMenu);
+      });
+    }
+
     document.querySelectorAll('.code-group').forEach(group => {
       const buttons = group.querySelectorAll('.tab-button');
       const panels = group.querySelectorAll('.tab-panel');
