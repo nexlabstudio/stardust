@@ -199,6 +199,10 @@ Stardust exposes CSS variables you can override:
 
   /* Spacing */
   --radius: 8px;
+
+  /* Version banner */
+  --version-banner-color: #b45309;
+  --version-banner-bg: color-mix(in srgb, #f59e0b 10%, var(--color-bg));
 }
 ```
 
@@ -293,6 +297,20 @@ Use your browser's DevTools to inspect elements and discover classes. Here are t
 | `.announcement-content` | Announcement text/link |
 | `.announcement-dismiss` | Dismiss button |
 | `.announcement.dismissed` | Hidden state after dismiss |
+
+**Versioning**
+
+| Class | Element |
+|-------|---------|
+| `.version-dropdown` | Version selector container |
+| `.version-dropdown-trigger` | Dropdown button showing current version |
+| `.version-dropdown-menu` | Dropdown menu (hidden until `.open`) |
+| `.version-dropdown-item` | Individual version link |
+| `.version-dropdown-item.active` | Currently active version |
+| `.version-banner` | Version warning banner |
+| `.version-banner-content` | Banner text wrapper |
+| `.version-banner-dismiss` | Banner dismiss button |
+| `.version-banner.dismissed` | Hidden state after dismiss |
 
 **Navigation**
 
