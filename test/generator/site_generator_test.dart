@@ -619,5 +619,66 @@ redirect_from:
         expect(File(p.join(outputDir, '_redirects')).existsSync(), isFalse);
       });
     });
+
+    group('custom CSS file', () {
+      test('resolves cssFile content before building pages', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('''
+---
+title: Home
+---
+
+# Home
+''');
+
+        final cssFilePath = p.join(tempDir.path, 'custom.css');
+        await File(cssFilePath).writeAsString('.from-file { color: blue; }');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+          theme: ThemeConfig(
+            custom: CustomThemeConfig(cssFile: cssFilePath),
+          ),
+        );
+
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          logger: Logger(onLog: (_) {}),
+        );
+
+        await generator.generate();
+
+        final html = await File(p.join(outputDir, 'index.html')).readAsString();
+        expect(html, contains('.from-file { color: blue; }'));
+      });
+
+      test('skips missing cssFile without error', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('''
+---
+title: Home
+---
+
+# Home
+''');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+          theme: const ThemeConfig(
+            custom: CustomThemeConfig(cssFile: '/nonexistent/style.css'),
+          ),
+        );
+
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          logger: Logger(onLog: (_) {}),
+        );
+
+        final count = await generator.generate();
+        expect(count, equals(1));
+      });
+    });
   });
 }
