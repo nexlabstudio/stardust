@@ -235,6 +235,105 @@ void main() {
 
         expect(result, contains('Getting Started'));
       });
+
+      test('renders emoji icon when set', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', icon: '🚀', pages: [
+            SidebarPage(slug: 'intro'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, contains('sidebar-group-icon'));
+        expect(result, contains('🚀'));
+      });
+
+      test('renders Lucide icon when set', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', icon: 'rocket', pages: [
+            SidebarPage(slug: 'intro'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, contains('sidebar-group-icon'));
+        expect(result, contains('data-lucide="rocket"'));
+      });
+
+      test('does not render icon when null', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', pages: [
+            SidebarPage(slug: 'intro'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, isNot(contains('sidebar-group-icon')));
+      });
+
+      test('renders collapsible group with chevron', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', pages: [
+            SidebarPage(slug: 'intro'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, contains('data-collapsible="true"'));
+        expect(result, contains('sidebar-chevron'));
+      });
+
+      test('does not render collapsible for empty group', () {
+        const sidebar = [
+          SidebarGroup(group: 'Empty'),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, isNot(contains('data-collapsible')));
+        expect(result, isNot(contains('sidebar-chevron')));
+      });
+
+      test('adds collapsed class when collapsed is true', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', collapsed: true, pages: [
+            SidebarPage(slug: 'intro'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, contains('sidebar-group collapsed'));
+      });
+
+      test('forces expand when collapsed group contains active page', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', collapsed: true, pages: [
+            SidebarPage(slug: 'intro'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/intro');
+
+        expect(result, isNot(contains('sidebar-group collapsed')));
+      });
+
+      test('renders group label wrapper', () {
+        const sidebar = [
+          SidebarGroup(group: 'Guide', pages: [
+            SidebarPage(slug: 'intro'),
+          ]),
+        ];
+
+        final result = builder.buildSidebar(sidebar, '/other');
+
+        expect(result, contains('sidebar-group-label'));
+        expect(result, contains('Guide'));
+      });
     });
 
     group('buildEditLink', () {

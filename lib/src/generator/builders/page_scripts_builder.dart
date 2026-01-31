@@ -89,6 +89,19 @@ class PageScriptsBuilder {
     window.addEventListener('scroll', updateToc, { passive: true });
     updateToc();
 
+    document.querySelectorAll('.sidebar-group').forEach(group => {
+      const title = group.querySelector('.sidebar-group-title');
+      if (!title || !title.hasAttribute('data-collapsible')) return;
+      const key = 'sidebar-' + title.textContent.trim();
+      const stored = localStorage.getItem(key);
+      if (stored === 'true') group.classList.add('collapsed');
+      else if (stored === 'false') group.classList.remove('collapsed');
+      title.addEventListener('click', () => {
+        group.classList.toggle('collapsed');
+        localStorage.setItem(key, group.classList.contains('collapsed'));
+      });
+    });
+
     const activeSidebarLink = document.querySelector('.sidebar-link.active');
     if (activeSidebarLink) {
       activeSidebarLink.scrollIntoView({ block: 'center', behavior: 'instant' });
