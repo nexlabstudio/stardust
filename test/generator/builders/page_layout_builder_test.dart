@@ -882,6 +882,231 @@ void main() {
       });
     });
 
+    group('version dropdown', () {
+      test('renders dropdown when versions enabled', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '2.0',
+            dropdown: true,
+            list: [
+              VersionEntry(version: '2.0', label: 'v2.0 (Latest)', path: '/v2/'),
+              VersionEntry(version: '1.0', path: '/v1/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('version-dropdown'));
+        expect(result, contains('version-dropdown-trigger'));
+        expect(result, contains('version-dropdown-menu'));
+      });
+
+      test('does not render when versions not configured', () {
+        final result = builder.buildHeader();
+
+        expect(result, isNot(contains('version-dropdown')));
+      });
+
+      test('does not render when dropdown is false', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '2.0',
+            dropdown: false,
+            list: [
+              VersionEntry(version: '2.0', path: '/v2/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, isNot(contains('version-dropdown')));
+      });
+
+      test('shows current version label', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '2.0',
+            list: [
+              VersionEntry(version: '2.0', label: 'Latest', path: '/v2/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('Latest'));
+      });
+
+      test('falls back to v{version} when no label', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '1.0',
+            list: [
+              VersionEntry(version: '1.0', path: '/v1/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('v1.0'));
+      });
+
+      test('falls back to current string when no matching entry in list', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '3.0',
+            list: [
+              VersionEntry(version: '2.0', path: '/v2/'),
+              VersionEntry(version: '1.0', path: '/v1/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('version-dropdown-trigger'));
+        expect(result, contains('3.0'));
+      });
+
+      test('lists all versions with correct paths', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '2.0',
+            list: [
+              VersionEntry(version: '2.0', path: '/v2/'),
+              VersionEntry(version: '1.0', path: '/v1/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('href="/v2/"'));
+        expect(result, contains('href="/v1/"'));
+      });
+
+      test('marks current version as active', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '2.0',
+            list: [
+              VersionEntry(version: '2.0', label: 'v2.0', path: '/v2/'),
+              VersionEntry(version: '1.0', label: 'v1.0', path: '/v1/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('version-dropdown-item active'));
+      });
+    });
+
+    group('version banner', () {
+      test('renders banner when current version has banner text', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '1.0',
+            list: [
+              VersionEntry(version: '1.0', path: '/v1/', banner: 'This is an old version.'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('version-banner'));
+        expect(result, contains('This is an old version.'));
+      });
+
+      test('does not render when no banner text', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '2.0',
+            list: [
+              VersionEntry(version: '2.0', path: '/v2/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, isNot(contains('version-banner')));
+      });
+
+      test('does not render when versions not configured', () {
+        final result = builder.buildHeader();
+
+        expect(result, isNot(contains('version-banner')));
+      });
+
+      test('includes dismiss button', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '1.0',
+            list: [
+              VersionEntry(version: '1.0', path: '/v1/', banner: 'Old version'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('version-banner-dismiss'));
+      });
+
+      test('contains data-version attribute', () {
+        const config = StardustConfig(
+          name: 'Test',
+          versions: VersionsConfig(
+            enabled: true,
+            current: '1.0',
+            list: [
+              VersionEntry(version: '1.0', path: '/v1/', banner: 'Old version'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('data-version="1.0"'));
+      });
+    });
+
     group('header with disabled features', () {
       test('hides search when disabled', () {
         const config = StardustConfig(

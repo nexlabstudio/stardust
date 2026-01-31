@@ -88,6 +88,8 @@ sidebar:
         label: LLM-Friendly Output
       - slug: features/redirects
         label: Redirects
+      - slug: features/versioning
+        label: Versioning
 
   - group: CLI Reference
     icon: terminal
@@ -181,6 +183,19 @@ integrations:
     branch: dev
     path: website/docs/
     text: "Edit this page on GitHub"
+
+# versions:
+#   enabled: true
+#   current: "1.0"
+#   dropdown: true
+#   list:
+#     - version: "2.0"
+#       label: "v2.0 (Latest)"
+#       path: /v2/
+#     - version: "1.0"
+#       label: "v1.0"
+#       path: /
+#       banner: "You are viewing docs for v1.0. <a href=\"/v2/\">Switch to the latest version</a>."
 
 # seo:
 #   ogImage: /images/stardust-logo-large.svg
