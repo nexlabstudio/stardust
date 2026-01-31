@@ -132,6 +132,22 @@ class PageScriptsBuilder {
       });
     }
 
+    const announcement = document.getElementById('announcement');
+    if (announcement) {
+      const text = announcement.textContent.trim();
+      const key = 'stardust-dismiss-' + text.substring(0, 50).replace(/\\s+/g, '-').toLowerCase();
+      if (localStorage.getItem(key) === 'dismissed') {
+        announcement.classList.add('dismissed');
+      }
+      const dismissBtn = announcement.querySelector('.announcement-dismiss');
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+          announcement.classList.add('dismissed');
+          localStorage.setItem(key, 'dismissed');
+        });
+      }
+    }
+
     document.querySelectorAll('.code-group').forEach(group => {
       const buttons = group.querySelectorAll('.tab-button');
       const panels = group.querySelectorAll('.tab-panel');

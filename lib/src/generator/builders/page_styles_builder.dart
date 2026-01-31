@@ -53,6 +53,7 @@ class PageStylesBuilder {
     }
 
 ${_buildBaseStyles()}
+${_buildAnnouncementStyles()}
 ${_buildHeaderStyles()}
 ${_buildSearchStyles()}
 ${_buildLayoutStyles()}
@@ -90,6 +91,59 @@ ${_buildCustomStyles()}
     if (buffer.isEmpty) return '';
     return '\n    /* Custom styles */\n    $buffer';
   }
+
+  String _buildAnnouncementStyles() => '''
+    .announcement {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .announcement-info {
+      background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg));
+      color: var(--color-primary);
+    }
+
+    .announcement-warning {
+      background: color-mix(in srgb, #f59e0b 10%, var(--color-bg));
+      color: #b45309;
+    }
+
+    .announcement-success {
+      background: color-mix(in srgb, #10b981 10%, var(--color-bg));
+      color: #059669;
+    }
+
+    .announcement-content {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .announcement-content:hover {
+      text-decoration: underline;
+    }
+
+    .announcement-dismiss {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 0.25rem;
+      opacity: 0.7;
+    }
+
+    .announcement-dismiss:hover {
+      opacity: 1;
+    }
+
+    .announcement.dismissed {
+      display: none;
+    }''';
 
   String _buildBaseStyles() => '''
     * {
@@ -2206,6 +2260,50 @@ ${_buildCustomStyles()}
 
     .footer-powered a:hover {
       color: var(--color-primary);
+    }
+
+    .footer-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 2rem;
+      width: 100%;
+      max-width: 90rem;
+      padding: 0 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .footer-link-group-title {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text);
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-links ul {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.375rem;
+    }
+
+    .footer-links a {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+      color: var(--color-primary);
+    }
+
+    .footer-copyright {
+      font-size: 0.8125rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.75rem;
     }''';
 
   String _buildSocialStyles() => '''
