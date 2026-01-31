@@ -21,8 +21,10 @@ class PageLayoutBuilder {
 
     final socialLinks = _buildSocialLinks();
     final logoHtml = _buildLogo();
+    final announcement = _buildAnnouncement();
 
     return '''
+    $announcement
     <header class="header">
       <div class="header-inner">
         <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
@@ -63,6 +65,31 @@ class PageLayoutBuilder {
       </div>
     </header>
 ''';
+  }
+
+  String _buildAnnouncement() {
+    final announcement = config.header.announcement;
+    if (announcement == null) return '';
+
+    final style = announcement.style;
+    final content = switch (announcement.link) {
+      final String link => '<a href="$link" class="announcement-content">${announcement.text}</a>',
+      null => '<span class="announcement-content">${announcement.text}</span>',
+    };
+    final dismissBtn = announcement.dismissible
+        ? '''
+      <button class="announcement-dismiss" aria-label="Dismiss announcement">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>'''
+        : '';
+
+    return '''
+    <div class="announcement announcement-$style" id="announcement">
+      $content$dismissBtn
+    </div>''';
   }
 
   String _buildLogo() {
@@ -317,9 +344,13 @@ class PageLayoutBuilder {
 
   String buildFooter() {
     final footerSocial = _buildFooterSocialLinks();
+    final footerLinks = _buildFooterLinks();
+    final copyright = config.footer.copyright;
 
     return '''
     <footer class="footer">
+      $footerLinks
+      ${copyright != null ? '<div class="footer-copyright">$copyright</div>' : ''}
       $footerSocial
       <div class="footer-powered">
         Powered by
@@ -330,6 +361,26 @@ class PageLayoutBuilder {
       </div>
     </footer>
 ''';
+  }
+
+  String _buildFooterLinks() {
+    final links = config.footer.links;
+    if (links.isEmpty) return '';
+
+    final groups = links.map((group) {
+      final items =
+          group.items.map((item) => '<li><a href="${item.href}">${item.label}</a></li>').join('\n            ');
+
+      return '''
+        <div class="footer-link-group">
+          <h4 class="footer-link-group-title">${group.group}</h4>
+          <ul>
+            $items
+          </ul>
+        </div>''';
+    }).join('\n');
+
+    return '<div class="footer-links">\n$groups\n      </div>';
   }
 
   String _titleCase(String text) => text

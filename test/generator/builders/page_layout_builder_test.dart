@@ -720,6 +720,168 @@ void main() {
       });
     });
 
+    group('footer links', () {
+      test('renders footer link groups when configured', () {
+        const config = StardustConfig(
+          name: 'Test',
+          footer: FooterConfig(links: [
+            FooterLinkGroup(group: 'Product', items: [
+              FooterLink(label: 'Docs', href: '/docs'),
+              FooterLink(label: 'Pricing', href: '/pricing'),
+            ]),
+            FooterLinkGroup(group: 'Company', items: [
+              FooterLink(label: 'About', href: '/about'),
+            ]),
+          ]),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildFooter();
+
+        expect(result, contains('footer-links'));
+        expect(result, contains('footer-link-group'));
+        expect(result, contains('footer-link-group-title'));
+        expect(result, contains('Product'));
+        expect(result, contains('Company'));
+      });
+
+      test('renders links with correct href', () {
+        const config = StardustConfig(
+          name: 'Test',
+          footer: FooterConfig(links: [
+            FooterLinkGroup(group: 'Nav', items: [
+              FooterLink(label: 'Home', href: '/'),
+            ]),
+          ]),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildFooter();
+
+        expect(result, contains('href="/"'));
+        expect(result, contains('Home'));
+      });
+
+      test('renders copyright when configured', () {
+        const config = StardustConfig(
+          name: 'Test',
+          footer: FooterConfig(copyright: '© 2024 Acme'),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildFooter();
+
+        expect(result, contains('footer-copyright'));
+        expect(result, contains('© 2024 Acme'));
+      });
+
+      test('does not render footer-links when no links configured', () {
+        final result = builder.buildFooter();
+
+        expect(result, isNot(contains('footer-links')));
+      });
+
+      test('does not render copyright when not configured', () {
+        final result = builder.buildFooter();
+
+        expect(result, isNot(contains('footer-copyright')));
+      });
+    });
+
+    group('announcement', () {
+      test('renders announcement bar when configured', () {
+        const config = StardustConfig(
+          name: 'Test',
+          header: HeaderConfig(
+            announcement: AnnouncementConfig(text: 'Hello world'),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('announcement'));
+        expect(result, contains('Hello world'));
+      });
+
+      test('renders as link when link is set', () {
+        const config = StardustConfig(
+          name: 'Test',
+          header: HeaderConfig(
+            announcement: AnnouncementConfig(text: 'New!', link: '/blog'),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('<a href="/blog"'));
+        expect(result, contains('announcement-content'));
+      });
+
+      test('renders as span when no link', () {
+        const config = StardustConfig(
+          name: 'Test',
+          header: HeaderConfig(
+            announcement: AnnouncementConfig(text: 'Notice'),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('<span class="announcement-content">'));
+      });
+
+      test('includes dismiss button when dismissible', () {
+        const config = StardustConfig(
+          name: 'Test',
+          header: HeaderConfig(
+            announcement: AnnouncementConfig(text: 'Hi', dismissible: true),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('announcement-dismiss'));
+      });
+
+      test('omits dismiss button when not dismissible', () {
+        const config = StardustConfig(
+          name: 'Test',
+          header: HeaderConfig(
+            announcement: AnnouncementConfig(text: 'Hi', dismissible: false),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, isNot(contains('announcement-dismiss')));
+      });
+
+      test('applies correct style class', () {
+        const config = StardustConfig(
+          name: 'Test',
+          header: HeaderConfig(
+            announcement: AnnouncementConfig(text: 'Warn', style: 'warning'),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('announcement-warning'));
+      });
+
+      test('does not render announcement when not configured', () {
+        final result = builder.buildHeader();
+
+        expect(result, isNot(contains('announcement')));
+      });
+    });
+
     group('header with disabled features', () {
       test('hides search when disabled', () {
         const config = StardustConfig(

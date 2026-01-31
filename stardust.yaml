@@ -113,6 +113,35 @@ sidebar:
       - slug: deployment/netlify
         label: Netlify
 
+header:
+  announcement:
+    text: "Stardust v1.0 is here! A Dart-native docs generator with zero config."
+    link: https://github.com/nexlabstudio/stardust
+    dismissible: true
+    style: info
+
+footer:
+  copyright: "© 2026 Nexlab Studio. All rights reserved."
+  links:
+    - group: Resources
+      items:
+        - label: Documentation
+          href: /
+        - label: Components
+          href: /components/callouts
+        - label: Quick Start
+          href: /quickstart
+    - group: Community
+      items:
+        - label: GitHub
+          href: https://github.com/nexlabstudio/stardust
+        - label: Issues
+          href: https://github.com/nexlabstudio/stardust/issues
+    - group: More
+      items:
+        - label: CLI Reference
+          href: /cli/init
+
 theme:
   colors:
     primary: "#6366f1"
