@@ -1,5 +1,6 @@
 import '../../config/config.dart';
 import '../../content/markdown_parser.dart';
+import '../../content/utils/icon_utils.dart';
 import '../../models/page.dart';
 
 /// Builds layout components: header, sidebar, footer, navigation
@@ -172,9 +173,31 @@ class PageLayoutBuilder {
         return '<li><a href="${_prefixPath(pagePath)}" class="sidebar-link$activeClass">$label</a></li>';
       }).join('\n          ');
 
+      final hasActiveChild = group.pages.any((page) {
+        final pagePath = page.slug == 'index' ? '/' : '/${page.slug}';
+        return pagePath == currentPath;
+      });
+
+      final isCollapsed = group.collapsed && !hasActiveChild;
+      final collapsedClass = isCollapsed ? ' collapsed' : '';
+
+      final iconHtml = switch (group.icon) {
+        final icon? => '<span class="sidebar-group-icon">${resolveIcon(icon, '16')}</span>',
+        null => '',
+      };
+
+      final isCollapsible = group.pages.isNotEmpty;
+      final chevron = isCollapsible
+          ? '<svg class="sidebar-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>'
+          : '';
+      final collapsibleAttr = isCollapsible ? ' data-collapsible="true"' : '';
+
       return '''
-      <div class="sidebar-group">
-        <div class="sidebar-group-title">${group.group}</div>
+      <div class="sidebar-group$collapsedClass">
+        <div class="sidebar-group-title"$collapsibleAttr>
+          <span class="sidebar-group-label">$iconHtml${group.group}</span>
+          $chevron
+        </div>
         <ul class="sidebar-links">
           $links
         </ul>
