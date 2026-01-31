@@ -11,14 +11,14 @@ class PageBuilder {
   final StardustConfig config;
 
   late final PageMetaBuilder _metaBuilder;
-  late final PageStylesBuilder _stylesBuilder;
+  late final PageStylesBuilder stylesBuilder;
   late final PageLayoutBuilder _layoutBuilder;
   late final PageScriptsBuilder _scriptsBuilder;
   late final PageAnalyticsBuilder _analyticsBuilder;
 
   PageBuilder({required this.config}) {
     _metaBuilder = PageMetaBuilder(config: config);
-    _stylesBuilder = PageStylesBuilder(config: config);
+    stylesBuilder = PageStylesBuilder(config: config);
     _layoutBuilder = PageLayoutBuilder(config: config);
     _scriptsBuilder = PageScriptsBuilder(config: config);
     _analyticsBuilder = PageAnalyticsBuilder(analytics: config.integrations.analytics);
@@ -45,8 +45,8 @@ class PageBuilder {
   ${_metaBuilder.buildFavicon()}
   ${_metaBuilder.build(page)}
   ${_analyticsBuilder.build()}
-  ${_stylesBuilder.buildFonts()}
-  ${_stylesBuilder.buildStyles()}
+  ${stylesBuilder.buildFonts()}
+  ${stylesBuilder.buildStyles()}
   ${_scriptsBuilder.buildPagefindStyles(basePath)}
 </head>
 <body>

@@ -219,7 +219,11 @@
           "properties": {
             "css": {
               "type": "string",
-              "description": "Path to custom CSS file"
+              "description": "Inline custom CSS styles"
+            },
+            "cssFile": {
+              "type": "string",
+              "description": "Path to a custom CSS file"
             }
           }
         }

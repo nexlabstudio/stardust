@@ -36,6 +36,12 @@ class SiteGenerator {
 
   /// Generate the static site, returns number of pages generated
   Future<int> generate() async {
+    // Resolve custom CSS file content before building pages
+    final cssFile = config.theme.custom?.cssFile;
+    if (cssFile case final cssFile? when cssFile.isNotEmpty && await fileSystem.fileExists(cssFile)) {
+      pageBuilder.stylesBuilder.resolvedCssFileContent = await fileSystem.readFile(cssFile);
+    }
+
     final contentDir = p.join(Directory.current.path, config.content.dir);
     final files = await _findMarkdownFiles(contentDir);
 
