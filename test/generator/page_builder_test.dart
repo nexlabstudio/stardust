@@ -99,6 +99,8 @@ void main() {
         final html = builder.build(page, sidebar: []);
 
         expect(html, contains('class="layout"'));
+        expect(html, contains('class="mobile-overlay"'));
+        expect(html, contains('id="mobile-overlay"'));
         expect(html, contains('class="main-container"'));
         expect(html, contains('<main'));
       });
