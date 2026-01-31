@@ -4,6 +4,9 @@ import '../../config/config.dart';
 class PageStylesBuilder {
   final StardustConfig config;
 
+  /// Pre-resolved CSS file content, set externally before building
+  String? resolvedCssFileContent;
+
   PageStylesBuilder({required this.config});
 
   String buildFonts() {
@@ -62,8 +65,30 @@ ${_buildFooterStyles()}
 ${_buildSocialStyles()}
 ${_buildSyntaxHighlighting()}
 ${_buildResponsiveStyles()}
+${_buildCustomStyles()}
   </style>
 ''';
+  }
+
+  String _buildCustomStyles() {
+    final custom = config.theme.custom;
+    if (custom == null) return '';
+
+    final buffer = StringBuffer();
+
+    // Include pre-resolved CSS file content
+    if (resolvedCssFileContent case final String content when content.isNotEmpty) {
+      buffer.write(content);
+    }
+
+    // Append inline CSS
+    if (custom.css case final String css when css.isNotEmpty) {
+      if (buffer.isNotEmpty) buffer.writeln();
+      buffer.write(css);
+    }
+
+    if (buffer.isEmpty) return '';
+    return '\n    /* Custom styles */\n    $buffer';
   }
 
   String _buildBaseStyles() => '''

@@ -117,8 +117,12 @@ class FontsConfig {
 
 class CustomThemeConfig {
   final String? css;
+  final String? cssFile;
 
-  const CustomThemeConfig({this.css});
+  const CustomThemeConfig({this.css, this.cssFile});
 
-  factory CustomThemeConfig.fromYaml(Map yaml) => CustomThemeConfig(css: yaml['css'] as String?);
+  factory CustomThemeConfig.fromYaml(Map yaml) => CustomThemeConfig(
+        css: yaml['css'] as String?,
+        cssFile: yaml['cssFile'] as String?,
+      );
 }
