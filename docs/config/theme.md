@@ -270,6 +270,30 @@ Use your browser's DevTools to inspect elements and discover classes. Here are t
 | `.badge` | Badge component |
 | `.tree` | File tree component |
 
+**Footer**
+
+| Class | Element |
+|-------|---------|
+| `.footer` | Page footer container |
+| `.footer-links` | Footer link groups grid |
+| `.footer-link-group` | Individual link group column |
+| `.footer-link-group-title` | Group heading (e.g. "Resources") |
+| `.footer-copyright` | Copyright text |
+| `.footer-social` | Social links row |
+| `.footer-powered` | "Powered by Stardust" text |
+
+**Announcement**
+
+| Class | Element |
+|-------|---------|
+| `.announcement` | Announcement bar container |
+| `.announcement-info` | Info style (primary color tint) |
+| `.announcement-warning` | Warning style (amber tint) |
+| `.announcement-success` | Success style (green tint) |
+| `.announcement-content` | Announcement text/link |
+| `.announcement-dismiss` | Dismiss button |
+| `.announcement.dismissed` | Hidden state after dismiss |
+
 **Navigation**
 
 | Class | Element |
