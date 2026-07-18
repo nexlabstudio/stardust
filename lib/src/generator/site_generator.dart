@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:crypto/crypto.dart';
 
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
@@ -42,6 +45,8 @@ class SiteGenerator {
     if (cssFile case final cssFile? when cssFile.isNotEmpty && await fileSystem.fileExists(cssFile)) {
       pageBuilder.stylesBuilder.resolvedCssFileContent = await fileSystem.readFile(cssFile);
     }
+
+    await _writeSharedAssets();
 
     final contentDir = p.join(Directory.current.path, config.content.dir);
     final files = await _findMarkdownFiles(contentDir);
@@ -91,6 +96,19 @@ class SiteGenerator {
 
     return count;
   }
+
+  /// Write the shared stylesheet and script once; pages link them by content hash.
+  Future<void> _writeSharedAssets() async {
+    final css = pageBuilder.stylesBuilder.buildCss();
+    final js = pageBuilder.scriptsBuilder.buildAppJs();
+
+    await fileSystem.writeFile(p.join(outputDir, 'assets', 'styles.css'), css);
+    await fileSystem.writeFile(p.join(outputDir, 'assets', 'app.js'), js);
+
+    pageBuilder.assetVersions = (css: _contentHash(css), js: _contentHash(js));
+  }
+
+  String _contentHash(String content) => sha256.convert(utf8.encode(content)).toString().substring(0, 8);
 
   Future<void> _generateOgImages(List<Page> pages) async {
     logger.log('🖼️  Generating OG images...');

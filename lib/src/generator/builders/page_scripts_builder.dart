@@ -19,6 +19,12 @@ class PageScriptsBuilder {
 
   String buildScripts() => '''
   <script>
+${buildAppJs()}
+  </script>
+''';
+
+  /// The site's shared JavaScript, written once per build to assets/app.js.
+  String buildAppJs() => '''
     const themeToggle = document.getElementById('theme-toggle');
     const html = document.documentElement;
 
@@ -287,7 +293,6 @@ class PageScriptsBuilder {
       };
       document.head.appendChild(script);
     })();
-  </script>
 ''';
 
   String buildPagefindStyles(String basePath) {
@@ -295,34 +300,7 @@ class PageScriptsBuilder {
       return '';
     }
 
-    return '''
-  <link href="${encodeHtmlAttribute(basePath)}/_pagefind/pagefind-ui.css" rel="stylesheet">
-  <style>
-    :root {
-      --pagefind-ui-primary: var(--color-primary);
-      --pagefind-ui-text: var(--color-text);
-      --pagefind-ui-background: var(--color-bg);
-      --pagefind-ui-border: var(--color-border);
-      --pagefind-ui-tag: var(--color-bg-secondary);
-      --pagefind-ui-border-width: 1px;
-      --pagefind-ui-border-radius: 8px;
-      --pagefind-ui-font: var(--font-sans);
-    }
-
-    .dark {
-      --pagefind-ui-primary: var(--color-primary);
-      --pagefind-ui-text: var(--color-text);
-      --pagefind-ui-background: var(--color-bg);
-      --pagefind-ui-border: var(--color-border);
-      --pagefind-ui-tag: var(--color-bg-secondary);
-    }
-
-    .pagefind-ui {
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-  </style>
-''';
+    return '  <link href="${encodeHtmlAttribute(basePath)}/_pagefind/pagefind-ui.css" rel="stylesheet">';
   }
 
   String buildSearchModal(String basePath) {

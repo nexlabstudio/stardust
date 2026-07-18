@@ -14,14 +14,18 @@ class PageBuilder {
   late final PageMetaBuilder _metaBuilder;
   late final PageStylesBuilder stylesBuilder;
   late final PageLayoutBuilder _layoutBuilder;
-  late final PageScriptsBuilder _scriptsBuilder;
+  late final PageScriptsBuilder scriptsBuilder;
   late final PageAnalyticsBuilder _analyticsBuilder;
+
+  /// Content hashes for the shared assets, set by the site generator after
+  /// writing assets/styles.css and assets/app.js; used for cache busting.
+  ({String css, String js})? assetVersions;
 
   PageBuilder({required this.config}) {
     _metaBuilder = PageMetaBuilder(config: config);
     stylesBuilder = PageStylesBuilder(config: config);
     _layoutBuilder = PageLayoutBuilder(config: config);
-    _scriptsBuilder = PageScriptsBuilder(config: config);
+    scriptsBuilder = PageScriptsBuilder(config: config);
     _analyticsBuilder = PageAnalyticsBuilder(analytics: config.integrations.analytics);
   }
 
@@ -36,6 +40,10 @@ class PageBuilder {
     final seoTitle = config.seo.titleTemplate.replaceAll('%s', page.title);
     final basePath = _getBasePath(page.path);
     final pagefindAttr = page.frontmatter['search'] == false ? '' : ' data-pagefind-body';
+    final (cssQuery, jsQuery) = switch (assetVersions) {
+      (:final css, :final js)? => ('?v=$css', '?v=$js'),
+      null => ('', ''),
+    };
 
     return '''
 <!DOCTYPE html>
@@ -44,13 +52,13 @@ class PageBuilder {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${encodeHtml(seoTitle)}</title>
-  ${_scriptsBuilder.buildThemeInit()}
+  ${scriptsBuilder.buildThemeInit()}
   ${_metaBuilder.buildFavicon()}
   ${_metaBuilder.build(page)}
   ${_analyticsBuilder.build()}
   ${stylesBuilder.buildFonts()}
-  ${stylesBuilder.buildStyles()}
-  ${_scriptsBuilder.buildPagefindStyles(basePath)}
+  <link rel="stylesheet" href="$basePath/assets/styles.css$cssQuery">
+  ${scriptsBuilder.buildPagefindStyles(basePath)}
 </head>
 <body>
   <div class="layout">
@@ -69,8 +77,8 @@ class PageBuilder {
     </div>
     ${_layoutBuilder.buildFooter()}
   </div>
-  ${_scriptsBuilder.buildSearchModal(basePath)}
-  ${_scriptsBuilder.buildScripts()}
+  ${scriptsBuilder.buildSearchModal(basePath)}
+  <script src="$basePath/assets/app.js$jsQuery" defer></script>
 </body>
 </html>
 ''';

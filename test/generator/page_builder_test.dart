@@ -198,7 +198,7 @@ void main() {
         expect(html, isNot(contains('dark-mode-')));
         final head = html.substring(0, html.indexOf('</head>'));
         expect(head, contains("classList.toggle('dark', dark)"));
-        expect(head.indexOf('classList.toggle'), lessThan(head.indexOf('<style')));
+        expect(head.indexOf('classList.toggle'), lessThan(head.indexOf('rel="stylesheet"')));
       });
     });
 

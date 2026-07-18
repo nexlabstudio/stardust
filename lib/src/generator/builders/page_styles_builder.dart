@@ -20,7 +20,14 @@ class PageStylesBuilder {
 ''';
   }
 
-  String buildStyles() {
+  String buildStyles() => '''
+  <style>
+${buildCss()}
+  </style>
+''';
+
+  /// The site's full stylesheet, written once per build to assets/styles.css.
+  String buildCss() {
     final primary = config.theme.colors.primary;
     final bgLight = config.theme.colors.background?.light ?? '#ffffff';
     final bgDark = config.theme.colors.background?.dark ?? '#0f172a';
@@ -31,7 +38,6 @@ class PageStylesBuilder {
     final radius = config.theme.radius;
 
     return '''
-  <style>
     :root {
       --color-primary: $primary;
       --color-bg: $bgLight;
@@ -68,8 +74,38 @@ ${_buildFooterStyles()}
 ${_buildSocialStyles()}
 ${_buildSyntaxHighlighting()}
 ${_buildResponsiveStyles()}
+${_buildPagefindOverrides()}
 ${_buildCustomStyles()}
-  </style>
+''';
+  }
+
+  String _buildPagefindOverrides() {
+    if (!config.search.enabled || config.search.provider != 'pagefind') return '';
+
+    return '''
+    :root {
+      --pagefind-ui-primary: var(--color-primary);
+      --pagefind-ui-text: var(--color-text);
+      --pagefind-ui-background: var(--color-bg);
+      --pagefind-ui-border: var(--color-border);
+      --pagefind-ui-tag: var(--color-bg-secondary);
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 8px;
+      --pagefind-ui-font: var(--font-sans);
+    }
+
+    .dark {
+      --pagefind-ui-primary: var(--color-primary);
+      --pagefind-ui-text: var(--color-text);
+      --pagefind-ui-background: var(--color-bg);
+      --pagefind-ui-border: var(--color-border);
+      --pagefind-ui-tag: var(--color-bg-secondary);
+    }
+
+    .pagefind-ui {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 ''';
   }
 

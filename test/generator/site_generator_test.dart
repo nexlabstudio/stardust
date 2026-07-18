@@ -323,6 +323,29 @@ llm: false
         expect(llmsContent, isNot(contains('Internal Notes')));
       });
 
+      test('writes shared assets once and links them with content hashes', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+        await File(p.join(contentDir, 'other.md')).writeAsString('# Other');
+
+        final config = StardustConfig(name: 'Test Site', content: ContentConfig(dir: contentDir));
+        await SiteGenerator(config: config, outputDir: outputDir).generate();
+
+        final css = File(p.join(outputDir, 'assets', 'styles.css'));
+        final js = File(p.join(outputDir, 'assets', 'app.js'));
+        expect(css.existsSync(), isTrue);
+        expect(js.existsSync(), isTrue);
+        expect(css.readAsStringSync(), contains('--color-primary'));
+        expect(js.readAsStringSync(), contains('themeToggle'));
+
+        final html = File(p.join(outputDir, 'index.html')).readAsStringSync();
+        expect(html, contains(RegExp(r'assets/styles\.css\?v=[0-9a-f]{8}')));
+        expect(html, contains(RegExp(r'assets/app\.js\?v=[0-9a-f]{8}')));
+        expect(html, isNot(contains('--color-primary')));
+
+        final other = File(p.join(outputDir, 'other', 'index.html')).readAsStringSync();
+        expect(other, contains(RegExp(r'\.\./assets/styles\.css\?v=[0-9a-f]{8}')));
+      });
+
       test('copies public assets when directory exists', () async {
         final indexFile = File(p.join(contentDir, 'index.md'));
         await indexFile.writeAsString('# Home');
@@ -680,8 +703,8 @@ title: Home
 
         await generator.generate();
 
-        final html = await File(p.join(outputDir, 'index.html')).readAsString();
-        expect(html, contains('.from-file { color: blue; }'));
+        final sharedCss = await File(p.join(outputDir, 'assets', 'styles.css')).readAsString();
+        expect(sharedCss, contains('.from-file { color: blue; }'));
       });
 
       test('skips missing cssFile without error', () async {
