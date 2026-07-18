@@ -51,14 +51,27 @@ class OpenApiCommand extends Command<int> {
       return 1;
     }
 
-    final specPath = rest.first;
+    final source = rest.first;
     final outputDir = args['output'] as String;
     final groupByStr = args['group-by'] as String;
 
-    // Check if spec file exists
-    if (!File(specPath).existsSync()) {
-      stderr.writeln('❌ Error: OpenAPI spec not found: $specPath');
-      return 1;
+    File? downloadedSpec;
+    final String specPath;
+    if (source.startsWith('http://') || source.startsWith('https://')) {
+      stdout.writeln('🌐 Downloading spec from $source...');
+      try {
+        downloadedSpec = await _downloadSpec(source);
+      } catch (e) {
+        stderr.writeln('❌ Error: Failed to download spec: $e');
+        return 1;
+      }
+      specPath = downloadedSpec.path;
+    } else {
+      specPath = source;
+      if (!File(specPath).existsSync()) {
+        stderr.writeln('❌ Error: OpenAPI spec not found: $specPath');
+        return 1;
+      }
     }
 
     stdout.writeln('🔄 Importing OpenAPI spec...');
@@ -95,6 +108,30 @@ class OpenApiCommand extends Command<int> {
     } catch (e) {
       stderr.writeln('❌ Import failed: $e');
       return 1;
+    } finally {
+      if (downloadedSpec case final spec? when spec.existsSync()) {
+        await spec.delete();
+      }
+    }
+  }
+
+  Future<File> _downloadSpec(String url) async {
+    final client = HttpClient();
+    try {
+      final request = await client.getUrl(Uri.parse(url));
+      final response = await request.close();
+      if (response.statusCode != 200) {
+        throw HttpException('HTTP ${response.statusCode}', uri: Uri.parse(url));
+      }
+      final ext = switch (p.extension(Uri.parse(url).path)) {
+        '' => '.yaml',
+        final ext => ext,
+      };
+      final file = File(p.join(Directory.systemTemp.path, 'stardust-openapi-spec$ext'));
+      await response.pipe(file.openWrite());
+      return file;
+    } finally {
+      client.close();
     }
   }
 }

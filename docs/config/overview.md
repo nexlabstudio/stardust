@@ -135,7 +135,7 @@ dev:
 |---------|-------------|
 | [Theme](/config/theme) | Colors, fonts, dark mode, and visual styling |
 | [Navigation](/config/navigation) | Top nav, sidebar, and page structure |
-| [Search](/config/search) | Search configuration with Pagefind or Algolia |
+| [Search](/config/search) | Search configuration with Pagefind |
 | [SEO](/config/seo) | Meta tags, Open Graph, sitemap, and robots.txt |
 | [Integrations](/config/integrations) | Analytics, comments, edit links, and more |
 

@@ -11,50 +11,20 @@ void main() {
       expect(config.provider, equals('pagefind'));
       expect(config.placeholder, equals('Search docs...'));
       expect(config.hotkey, equals('/'));
-      expect(config.algolia, isNull);
     });
 
     test('fromYaml parses all fields', () {
       final config = SearchConfig.fromYaml({
         'enabled': false,
-        'provider': 'algolia',
+        'provider': 'pagefind',
         'placeholder': 'Search...',
         'hotkey': 'k',
       });
 
       expect(config.enabled, isFalse);
-      expect(config.provider, equals('algolia'));
+      expect(config.provider, equals('pagefind'));
       expect(config.placeholder, equals('Search...'));
       expect(config.hotkey, equals('k'));
-    });
-
-    test('fromYaml parses algolia config', () {
-      final config = SearchConfig.fromYaml({
-        'algolia': {
-          'appId': 'APP123',
-          'apiKey': 'KEY456',
-          'indexName': 'docs',
-        },
-      });
-
-      expect(config.algolia, isNotNull);
-      expect(config.algolia!.appId, equals('APP123'));
-      expect(config.algolia!.apiKey, equals('KEY456'));
-      expect(config.algolia!.indexName, equals('docs'));
-    });
-  });
-
-  group('AlgoliaConfig', () {
-    test('fromYaml parses all fields', () {
-      final config = AlgoliaConfig.fromYaml({
-        'appId': 'myapp',
-        'apiKey': 'mykey',
-        'indexName': 'myindex',
-      });
-
-      expect(config.appId, equals('myapp'));
-      expect(config.apiKey, equals('mykey'));
-      expect(config.indexName, equals('myindex'));
     });
   });
 

@@ -9,7 +9,7 @@ Stardust can generate a consolidated text file optimized for consumption by AI a
 
 ## What Is It?
 
-When enabled, Stardust generates a `/llms.txt` file containing all your documentation in a single, structured text format. This makes it easy for AI tools to:
+When enabled, Stardust generates a `/llms.txt` file following the [llms.txt convention](https://llmstxt.org/): a structured index of your documentation with a link and description for every page. This makes it easy for AI tools to:
 
 - Understand your project's documentation
 - Answer questions about your API or features
@@ -28,27 +28,28 @@ After building, you'll have `dist/llms.txt` alongside your regular documentation
 
 ## Output Format
 
-The generated file includes:
+The generated file mirrors your sidebar structure, with a linked entry per page:
 
 ```
 # Project Name
 
-## Introduction
-[Content from index.md]
+> Project description
 
-## Installation
-[Content from installation.md]
+Website: https://example.com
+
+## Getting Started
+
+- [Introduction](/): What this project does and why.
+- [Installation](/installation): Install on macOS, Linux, or Windows.
 
 ## API Reference
-[Content from api/index.md]
 
-### GET /users
-[Endpoint documentation]
+- [Users](/api/users): Manage user accounts.
 
 ...
 ```
 
-Each page is clearly delimited with its title and full content, making it easy for LLMs to parse and reference.
+Each entry links to the page and carries its frontmatter description, so an AI tool can discover and fetch exactly the pages it needs. A single-file `llms-full.txt` variant with complete page content is planned.
 
 ## Use Cases
 
@@ -126,13 +127,7 @@ llm: false
 
 ## File Size Considerations
 
-| Documentation Size | Approximate llms.txt Size |
-|--------------------|--------------------------|
-| 20 pages | 50-100 KB |
-| 100 pages | 250-500 KB |
-| 500 pages | 1-2 MB |
-
-Most LLMs can handle several hundred KB of context effectively.
+llms.txt is an index — one line per page — so it stays small (a few KB) even for large sites.
 
 ## Why This Matters
 

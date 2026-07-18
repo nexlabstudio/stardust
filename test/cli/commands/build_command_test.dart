@@ -109,6 +109,27 @@ void main() {
       expect(fileSystem.files.keys, contains(p.join('out', BuildCommand.buildMarker)));
     });
 
+    test('uses build.outDir when --output is not passed', () async {
+      await File(configPath).writeAsString(
+          'name: Test\ncontent:\n  dir: ${p.dirname(configPath)}/content\nbuild:\n  outDir: from-config\n');
+
+      final code = await runner.run(['build', '-c', configPath, '--skip-search']);
+
+      expect(code, 0);
+      expect(fileSystem.files.keys, contains(p.join('from-config', BuildCommand.buildMarker)));
+    });
+
+    test('--output overrides build.outDir', () async {
+      await File(configPath).writeAsString(
+          'name: Test\ncontent:\n  dir: ${p.dirname(configPath)}/content\nbuild:\n  outDir: from-config\n');
+
+      final code = await runner.run(['build', '-c', configPath, '-o', 'from-flag', '--skip-search']);
+
+      expect(code, 0);
+      expect(fileSystem.files.keys, contains(p.join('from-flag', BuildCommand.buildMarker)));
+      expect(fileSystem.files.keys, isNot(contains(p.join('from-config', BuildCommand.buildMarker))));
+    });
+
     test('--no-clean skips deletion entirely', () async {
       fileSystem.addDirectory('out');
       fileSystem.addFile('out/index.html', '<html></html>');

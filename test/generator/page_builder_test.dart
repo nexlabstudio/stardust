@@ -158,6 +158,33 @@ void main() {
         expect(html, contains('Setup'));
       });
 
+      test('marks the article as pagefind body by default', () {
+        const page = Page(
+          path: '/test',
+          sourcePath: 'content/test.md',
+          title: 'Test',
+          content: '<p>Content</p>',
+        );
+
+        final html = builder.build(page, sidebar: []);
+
+        expect(html, contains('<article class="prose" data-pagefind-body>'));
+      });
+
+      test('search: false frontmatter removes the pagefind body attribute', () {
+        const page = Page(
+          path: '/test',
+          sourcePath: 'content/test.md',
+          title: 'Test',
+          content: '<p>Content</p>',
+          frontmatter: {'search': false},
+        );
+
+        final html = builder.build(page, sidebar: []);
+
+        expect(html, isNot(contains('data-pagefind-body')));
+      });
+
       test('applies theme with a blocking script in head, before styles', () {
         const page = Page(
           path: '/test',

@@ -82,10 +82,8 @@ class LocaleConfig {
 }
 
 class I18nStrings {
-  final String searchPlaceholder;
   final String navPrevious;
   final String navNext;
-  final String tocTitle;
   final String footerPoweredBy;
   final String themeToggle;
   final String menuToggle;
@@ -100,10 +98,8 @@ class I18nStrings {
   final String localeSelect;
 
   const I18nStrings({
-    this.searchPlaceholder = 'Search documentation...',
     this.navPrevious = '← Previous',
     this.navNext = 'Next →',
-    this.tocTitle = 'On this page',
     this.footerPoweredBy = 'Powered by',
     this.themeToggle = 'Toggle dark mode',
     this.menuToggle = 'Toggle menu',
@@ -119,10 +115,8 @@ class I18nStrings {
   });
 
   static const _keyMap = {
-    'search.placeholder': 'searchPlaceholder',
     'nav.previous': 'navPrevious',
     'nav.next': 'navNext',
-    'toc.title': 'tocTitle',
     'footer.poweredBy': 'footerPoweredBy',
     'theme.toggle': 'themeToggle',
     'menu.toggle': 'menuToggle',
@@ -149,10 +143,8 @@ class I18nStrings {
     }
 
     return I18nStrings(
-      searchPlaceholder: overrides['searchPlaceholder'] ?? 'Search documentation...',
       navPrevious: overrides['navPrevious'] ?? '← Previous',
       navNext: overrides['navNext'] ?? 'Next →',
-      tocTitle: overrides['tocTitle'] ?? 'On this page',
       footerPoweredBy: overrides['footerPoweredBy'] ?? 'Powered by',
       themeToggle: overrides['themeToggle'] ?? 'Toggle dark mode',
       menuToggle: overrides['menuToggle'] ?? 'Toggle menu',

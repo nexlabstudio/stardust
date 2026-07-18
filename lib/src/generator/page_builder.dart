@@ -35,6 +35,7 @@ class PageBuilder {
   String build(Page page, {required List<SidebarGroup> sidebar}) {
     final seoTitle = config.seo.titleTemplate.replaceAll('%s', page.title);
     final basePath = _getBasePath(page.path);
+    final pagefindAttr = page.frontmatter['search'] == false ? '' : ' data-pagefind-body';
 
     return '''
 <!DOCTYPE html>
@@ -58,7 +59,7 @@ class PageBuilder {
     <div class="main-container">
       ${_layoutBuilder.buildSidebar(sidebar, page.path)}
       <main class="content">
-        <article class="prose">
+        <article class="prose"$pagefindAttr>
           ${page.content}
         </article>
         ${_layoutBuilder.buildEditLink(page)}

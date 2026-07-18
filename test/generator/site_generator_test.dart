@@ -292,6 +292,37 @@ description: The home page
         expect(llmsContent, contains('Website: https://example.com'));
       });
 
+      test('llms.txt excludes pages with llm: false frontmatter', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('''
+---
+title: Home
+---
+
+# Welcome
+''');
+        await File(p.join(contentDir, 'internal.md')).writeAsString('''
+---
+title: Internal Notes
+llm: false
+---
+
+# Secret
+''');
+
+        final config = StardustConfig(
+          name: 'Test Site',
+          content: ContentConfig(dir: contentDir),
+          build: const BuildConfig(llms: LlmsConfig(enabled: true)),
+        );
+        final generator = SiteGenerator(config: config, outputDir: outputDir);
+
+        await generator.generate();
+
+        final llmsContent = await File(p.join(outputDir, 'llms.txt')).readAsString();
+        expect(llmsContent, contains('[Home](/)'));
+        expect(llmsContent, isNot(contains('Internal Notes')));
+      });
+
       test('copies public assets when directory exists', () async {
         final indexFile = File(p.join(contentDir, 'index.md'));
         await indexFile.writeAsString('# Home');

@@ -346,7 +346,8 @@ class SiteGenerator {
 
   Future<void> _generateLlms(List<Page> pages) async {
     final buffer = StringBuffer();
-    final pagesByPath = {for (final page in pages) page.path: page};
+    final visiblePages = pages.where((page) => page.frontmatter['llm'] != false).toList();
+    final pagesByPath = {for (final page in visiblePages) page.path: page};
 
     buffer.writeln('# ${config.name}');
     buffer.writeln('');
@@ -384,7 +385,7 @@ class SiteGenerator {
       buffer.writeln('## Pages');
       buffer.writeln('');
 
-      for (final page in pages) {
+      for (final page in visiblePages) {
         buffer.write('- [${page.title}](${page.path})');
         if (page.description case final desc?) {
           buffer.write(': $desc');

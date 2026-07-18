@@ -38,8 +38,7 @@ class BuildCommand extends Command<int> {
     argParser.addOption(
       'output',
       abbr: 'o',
-      help: 'Output directory',
-      defaultsTo: 'dist',
+      help: 'Output directory (defaults to build.outDir from stardust.yaml, or dist/)',
     );
     argParser.addFlag(
       'clean',
@@ -67,7 +66,6 @@ class BuildCommand extends Command<int> {
     final logger = loggerFactory();
     final stopwatch = Stopwatch()..start();
     final configPath = args['config'] as String;
-    final outputDir = args['output'] as String;
     final clean = args['clean'] as bool;
     final verbose = args['verbose'] as bool;
     final skipSearch = args['skip-search'] as bool;
@@ -81,6 +79,13 @@ class BuildCommand extends Command<int> {
       return 1;
     }
 
+    if (verbose) logger.log('📄 Loading config from $configPath');
+    final config = await ConfigLoader.load(configPath);
+    final outputDir = p.normalize(switch (args['output']) {
+      final String output when args.wasParsed('output') => output,
+      _ => config.build.outDir,
+    });
+
     final cleanRequested = clean && await fileSystem.directoryExists(outputDir);
     if (cleanRequested) {
       if (await _unsafeCleanReason(outputDir) case final reason?) {
@@ -88,12 +93,7 @@ class BuildCommand extends Command<int> {
         logger.error('   Use --no-clean, pick a different --output, or delete the directory manually.');
         return 1;
       }
-    }
 
-    if (verbose) logger.log('📄 Loading config from $configPath');
-    final config = await ConfigLoader.load(configPath);
-
-    if (cleanRequested) {
       if (verbose) logger.log('🧹 Cleaning output directory');
       await fileSystem.deleteDirectory(outputDir, recursive: true);
     }

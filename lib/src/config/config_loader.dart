@@ -25,6 +25,11 @@ class ConfigLoader {
       throw const ConfigException('Config must have a "name" field');
     }
 
+    final search = SearchConfig.fromYaml(yaml['search'] as Map?);
+    if (search.provider != 'pagefind') {
+      throw ConfigException('search.provider "${search.provider}" is not supported — only "pagefind" is available');
+    }
+
     return StardustConfig(
       name: name,
       description: yaml['description'] as String?,
@@ -39,7 +44,7 @@ class ConfigLoader {
       theme: ThemeConfig.fromYaml(yaml['theme'] as Map?),
       code: CodeConfig.fromYaml(yaml['code'] as Map?),
       components: ComponentsConfig.fromYaml(yaml['components'] as Map?),
-      search: SearchConfig.fromYaml(yaml['search'] as Map?),
+      search: search,
       seo: SeoConfig.fromYaml(yaml['seo'] as Map?),
       social: SocialConfig.fromYaml(yaml['social'] as Map?),
       header: HeaderConfig.fromYaml(yaml['header'] as Map?),

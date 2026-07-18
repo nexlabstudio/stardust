@@ -1,11 +1,11 @@
 ---
 title: Search Configuration
-description: Configure full-text search with Pagefind or Algolia.
+description: Configure full-text search with Pagefind.
 ---
 
 # Search Configuration
 
-Stardust includes powerful full-text search powered by [Pagefind](https://pagefind.app/), with optional Algolia integration.
+Stardust includes powerful full-text search powered by [Pagefind](https://pagefind.app/) — no external service or API keys required.
 
 ## Default Search (Pagefind)
 
@@ -55,33 +55,6 @@ Or hide just the search button while keeping functionality:
 header:
   showSearch: false
 ```
-
-## Algolia Search
-
-For larger documentation sites, you can use Algolia DocSearch:
-
-```yaml
-search:
-  enabled: true
-  provider: algolia
-  algolia:
-    appId: YOUR_APP_ID
-    apiKey: YOUR_SEARCH_API_KEY
-    indexName: YOUR_INDEX_NAME
-```
-
-<Warning>
-Only use public search-only API keys in your configuration. Never expose admin API keys.
-</Warning>
-
-### Applying for DocSearch
-
-[Algolia DocSearch](https://docsearch.algolia.com/) is free for open-source documentation:
-
-1. Apply at [docsearch.algolia.com/apply](https://docsearch.algolia.com/apply)
-2. Wait for approval (typically 1-2 weeks)
-3. Receive your credentials via email
-4. Add them to your configuration
 
 ## Search Behavior
 
@@ -169,7 +142,7 @@ During development (`stardust dev`), search uses a temporary index that updates 
 ```yaml
 search:
   enabled: true
-  provider: pagefind  # or 'algolia'
+  provider: pagefind
   placeholder: "Search docs..."
   hotkey: "/"
 

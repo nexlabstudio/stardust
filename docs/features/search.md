@@ -103,21 +103,6 @@ Pagefind creates an extremely efficient index:
 
 Users only download chunks relevant to their search query.
 
-## Algolia Alternative
-
-For very large documentation sites (1000+ pages) or advanced features like AI search, you can use Algolia:
-
-```yaml
-search:
-  provider: algolia
-  algolia:
-    appId: YOUR_APP_ID
-    apiKey: YOUR_SEARCH_API_KEY
-    indexName: YOUR_INDEX_NAME
-```
-
-[Apply for free DocSearch](https://docsearch.algolia.com/apply) for open-source projects.
-
 ## Development Mode
 
 During `stardust dev`, search uses a temporary index that updates as you edit. The full optimized index is generated during `stardust build`.

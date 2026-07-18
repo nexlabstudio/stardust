@@ -5,6 +5,16 @@ import 'package:test/test.dart';
 
 void main() {
   group('ConfigLoader', () {
+    test('parse rejects unsupported search provider', () {
+      expect(
+        () => ConfigLoader.parse({
+          'name': 'Test',
+          'search': {'provider': 'algolia'}
+        }),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
     group('parse', () {
       test('parses minimal config with only name', () {
         final config = ConfigLoader.parse({'name': 'Test'});

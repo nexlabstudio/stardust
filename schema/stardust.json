@@ -73,7 +73,9 @@
             "type": "string"
           },
           "default": [
+            "*.md",
             "**/*.md",
+            "*.mdx",
             "**/*.mdx"
           ],
           "description": "Glob patterns for files to include"
@@ -252,7 +254,10 @@
               "additionalProperties": false
             }
           ],
-          "default": "github-dark"
+          "default": {
+            "light": "github-light",
+            "dark": "github-dark"
+          }
         },
         "lineNumbers": {
           "type": "boolean",
@@ -303,9 +308,7 @@
         "provider": {
           "type": "string",
           "enum": [
-            "pagefind",
-            "algolia",
-            "custom"
+            "pagefind"
           ],
           "default": "pagefind"
         },
@@ -316,26 +319,6 @@
         "hotkey": {
           "type": "string",
           "default": "/"
-        },
-        "algolia": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "appId": {
-              "type": "string"
-            },
-            "apiKey": {
-              "type": "string"
-            },
-            "indexName": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "appId",
-            "apiKey",
-            "indexName"
-          ]
         }
       }
     },
@@ -920,6 +903,10 @@
               "to"
             ]
           }
+        },
+        "basePath": {
+          "type": "string",
+          "description": "Base path prefix when the site is served from a subdirectory (e.g. /docs). Derived from url if not set."
         }
       }
     },
@@ -1009,6 +996,10 @@
                   },
                   "label": {
                     "type": "string"
+                  },
+                  "icon": {
+                    "type": "string",
+                    "description": "Lucide icon name or emoji shown next to the page label"
                   }
                 },
                 "required": [
