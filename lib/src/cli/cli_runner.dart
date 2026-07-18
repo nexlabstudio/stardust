@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
+import '../utils/exceptions.dart';
 import '../version.dart';
 import 'commands/build_command.dart';
 import 'commands/dev_command.dart';
@@ -40,6 +41,9 @@ class StardustCliRunner extends CommandRunner<int> {
 
       final result = await runCommand(argResults);
       return result ?? 0;
+    } on ConfigException catch (e) {
+      stderr.writeln('❌ ${e.message}');
+      return 1;
     } on UsageException catch (e) {
       stderr.writeln(e.message);
       stderr.writeln('');

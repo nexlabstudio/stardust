@@ -80,7 +80,7 @@ class BuildCommand extends Command<int> {
     }
 
     if (verbose) logger.log('📄 Loading config from $configPath');
-    final config = await ConfigLoader.load(configPath);
+    final config = await ConfigLoader.load(configPath, logger: logger);
     final outputDir = p.normalize(switch (args['output']) {
       final String output when args.wasParsed('output') => output,
       _ => config.build.outDir,

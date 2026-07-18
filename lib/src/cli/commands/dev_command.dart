@@ -69,7 +69,7 @@ class DevCommand extends Command<int> {
       return 1;
     }
 
-    var config = (await ConfigLoader.load(configPath)).withDevMode();
+    var config = (await ConfigLoader.load(configPath, logger: logger)).withDevMode();
     const outputDir = '.stardust';
 
     logger.log('🔨 Building site...');
@@ -178,7 +178,7 @@ class DevCommand extends Command<int> {
 
         try {
           if (reloadConfig) {
-            config = (await ConfigLoader.load(configPath)).withDevMode();
+            config = (await ConfigLoader.load(configPath, logger: logger)).withDevMode();
             generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
           }
 
