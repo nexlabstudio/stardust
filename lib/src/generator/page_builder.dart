@@ -1,5 +1,6 @@
 import '../config/config.dart';
 import '../models/page.dart';
+import '../utils/html_utils.dart';
 import 'builders/page_analytics_builder.dart';
 import 'builders/page_layout_builder.dart';
 import 'builders/page_meta_builder.dart';
@@ -41,7 +42,7 @@ class PageBuilder {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>$seoTitle</title>
+  <title>${encodeHtml(seoTitle)}</title>
   ${_metaBuilder.buildFavicon()}
   ${_metaBuilder.build(page)}
   ${_analyticsBuilder.build()}

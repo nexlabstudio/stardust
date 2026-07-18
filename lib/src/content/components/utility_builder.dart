@@ -24,13 +24,13 @@ class UtilityBuilder extends ComponentBuilder {
     String iconHtml = '';
     if (icon != null) {
       if (isEmoji(icon)) {
-        iconHtml = '<span class="badge-icon">$icon</span>';
+        iconHtml = '<span class="badge-icon">${encodeHtml(icon)}</span>';
       } else {
         iconHtml = '<span class="badge-icon">${getLucideIcon(icon, '14')}</span>';
       }
     }
 
-    return '<span class="badge badge-$variant badge-$size">$iconHtml$content</span>';
+    return '<span class="badge badge-${encodeHtmlAttribute(variant)} badge-${encodeHtmlAttribute(size)}">$iconHtml$content</span>';
   }
 
   String _buildIcon(Map<String, String> attributes, String content) {
@@ -38,10 +38,10 @@ class UtilityBuilder extends ComponentBuilder {
     final size = attributes['size'] ?? '20';
     final color = attributes['color'];
 
-    final styleAttr = color != null ? ' style="color: $color;"' : '';
+    final styleAttr = color != null ? ' style="color: ${sanitizeCssValue(color)};"' : '';
 
     if (isEmoji(name)) {
-      return '<span class="icon icon-emoji" style="font-size: ${size}px;"$styleAttr>$name</span>';
+      return '<span class="icon icon-emoji" style="font-size: ${int.tryParse(size) ?? 20}px;"$styleAttr>${encodeHtml(name)}</span>';
     }
 
     final svg = getLucideIcon(name, size);
@@ -54,7 +54,7 @@ class UtilityBuilder extends ComponentBuilder {
 
     final escapedTip = encodeHtml(tip);
 
-    return '''<span class="tooltip tooltip-$position" data-tooltip="$escapedTip">$content</span>''';
+    return '''<span class="tooltip tooltip-${encodeHtmlAttribute(position)}" data-tooltip="$escapedTip">$content</span>''';
   }
 
   String _buildUpdate(Map<String, String> attributes, String content) {
@@ -65,14 +65,14 @@ class UtilityBuilder extends ComponentBuilder {
 
     final typeClass = 'update-$type';
 
-    final versionHtml = version != null ? '<span class="update-version">v$version</span>' : '';
+    final versionHtml = version != null ? '<span class="update-version">v${encodeHtml(version)}</span>' : '';
 
-    final dateHtml = date != null ? '<span class="update-date">$date</span>' : '';
+    final dateHtml = date != null ? '<span class="update-date">${encodeHtml(date)}</span>' : '';
 
     return '''
-<div class="update $typeClass">
+<div class="update ${encodeHtmlAttribute(typeClass)}">
   <div class="update-header">
-    <span class="update-label">$label</span>
+    <span class="update-label">${encodeHtml(label)}</span>
     $versionHtml
     $dateHtml
   </div>

@@ -10,6 +10,7 @@ import '../core/file_system.dart';
 import '../core/interfaces.dart';
 import '../models/page.dart';
 import '../utils/exceptions.dart';
+import '../utils/html_utils.dart';
 import '../utils/logger.dart';
 import 'og_image_generator.dart';
 import 'page_builder.dart';
@@ -302,7 +303,7 @@ class SiteGenerator {
     for (final page in pages) {
       final url = '${config.url}${page.path}';
       buffer.writeln('  <url>');
-      buffer.writeln('    <loc>$url</loc>');
+      buffer.writeln('    <loc>${encodeXml(url)}</loc>');
 
       if (await fileSystem.fileExists(page.sourcePath)) {
         final lastMod = await fileSystem.lastModified(page.sourcePath);
@@ -311,7 +312,7 @@ class SiteGenerator {
         buffer.writeln('    <lastmod>$formatted</lastmod>');
       }
 
-      buffer.writeln('    <changefreq>${config.build.sitemap.changefreq}</changefreq>');
+      buffer.writeln('    <changefreq>${encodeXml(config.build.sitemap.changefreq)}</changefreq>');
       buffer.writeln('    <priority>${config.build.sitemap.priority}</priority>');
       buffer.writeln('  </url>');
     }

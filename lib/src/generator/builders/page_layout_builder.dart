@@ -2,6 +2,7 @@ import '../../config/config.dart';
 import '../../content/markdown_parser.dart';
 import '../../content/utils/icon_utils.dart';
 import '../../models/page.dart';
+import '../../utils/html_utils.dart';
 
 /// Builds layout components: header, sidebar, footer, navigation
 class PageLayoutBuilder {
@@ -16,7 +17,7 @@ class PageLayoutBuilder {
     final navLinks = config.nav.map((item) {
       final external = item.external ? ' target="_blank" rel="noopener"' : '';
       final href = item.external ? item.href : _prefixPath(item.href);
-      return '<a href="$href"$external>${item.label}</a>';
+      return '<a href="${encodeHtmlAttribute(href)}"$external>${encodeHtml(item.label)}</a>';
     }).join('\n          ');
 
     final socialLinks = _buildSocialLinks();
@@ -31,7 +32,7 @@ class PageLayoutBuilder {
     $announcement
     <header class="header">
       <div class="header-inner">
-        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="${config.i18nStrings.menuToggle}">
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="${encodeHtmlAttribute(config.i18nStrings.menuToggle)}">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
             <line x1="3" y1="12" x2="21" y2="12"/>
@@ -40,7 +41,7 @@ class PageLayoutBuilder {
         </button>
         <a href="${_prefixPath('/')}" class="logo">
           $logoHtml
-          ${config.header.showName ? '<span class="logo-text">${config.name}</span>' : ''}
+          ${config.header.showName ? '<span class="logo-text">${encodeHtml(config.name)}</span>' : ''}
         </a>
         <nav class="nav">
           $navLinks
@@ -54,12 +55,12 @@ class PageLayoutBuilder {
               <circle cx="11" cy="11" r="8"/>
               <path d="M21 21l-4.35-4.35"/>
             </svg>
-            <span>${config.search.placeholder}</span>
-            <kbd>${config.search.hotkey}</kbd>
+            <span>${encodeHtml(config.search.placeholder)}</span>
+            <kbd>${encodeHtml(config.search.hotkey)}</kbd>
           </button>
           ''' : ''}
           ${config.theme.darkMode.enabled ? '''
-          <button class="theme-toggle" id="theme-toggle" aria-label="${config.i18nStrings.themeToggle}">
+          <button class="theme-toggle" id="theme-toggle" aria-label="${encodeHtmlAttribute(config.i18nStrings.themeToggle)}">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="5"/>
               <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
@@ -79,12 +80,13 @@ class PageLayoutBuilder {
 
     final style = announcement.style;
     final content = switch (announcement.link) {
-      final String link => '<a href="$link" class="announcement-content">${announcement.text}</a>',
-      null => '<span class="announcement-content">${announcement.text}</span>',
+      final String link =>
+        '<a href="${encodeHtmlAttribute(link)}" class="announcement-content">${encodeHtml(announcement.text)}</a>',
+      null => '<span class="announcement-content">${encodeHtml(announcement.text)}</span>',
     };
     final dismissBtn = announcement.dismissible
         ? '''
-      <button class="announcement-dismiss" aria-label="${config.i18nStrings.announcementDismiss}">
+      <button class="announcement-dismiss" aria-label="${encodeHtmlAttribute(config.i18nStrings.announcementDismiss)}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -93,7 +95,7 @@ class PageLayoutBuilder {
         : '';
 
     return '''
-    <div class="announcement announcement-$style" id="announcement">
+    <div class="announcement announcement-${encodeHtmlAttribute(style)}" id="announcement">
       $content$dismissBtn
     </div>''';
   }
@@ -105,10 +107,11 @@ class PageLayoutBuilder {
     final currentEntry = versions.list.where((e) => e.version == versions.current).firstOrNull;
     if (currentEntry == null || currentEntry.banner == null) return '';
 
+    // banner is documented as raw HTML and is deliberately not escaped
     return '''
-    <div class="version-banner" id="version-banner" data-version="${currentEntry.version}">
+    <div class="version-banner" id="version-banner" data-version="${encodeHtmlAttribute(currentEntry.version)}">
       <span class="version-banner-content">${currentEntry.banner}</span>
-      <button class="version-banner-dismiss" aria-label="${config.i18nStrings.versionDismiss}">
+      <button class="version-banner-dismiss" aria-label="${encodeHtmlAttribute(config.i18nStrings.versionDismiss)}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -130,13 +133,13 @@ class PageLayoutBuilder {
     final items = versions.list.map((entry) {
       final label = entry.label ?? 'v${entry.version}';
       final active = entry.version == versions.current ? ' active' : '';
-      return '<a href="${entry.path}" class="version-dropdown-item$active">$label</a>';
+      return '<a href="${encodeHtmlAttribute(entry.path)}" class="version-dropdown-item$active">${encodeHtml(label)}</a>';
     }).join('\n        ');
 
     return '''
       <div class="version-dropdown" id="version-dropdown">
-        <button class="version-dropdown-trigger" aria-label="${config.i18nStrings.versionSelect}">
-          $currentLabel
+        <button class="version-dropdown-trigger" aria-label="${encodeHtmlAttribute(config.i18nStrings.versionSelect)}">
+          ${encodeHtml(currentLabel)}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
@@ -157,13 +160,13 @@ class PageLayoutBuilder {
 
     final items = i18n.locales.map((locale) {
       final active = locale.code == i18n.defaultLocale ? ' active' : '';
-      return '<a href="${locale.path}" class="locale-dropdown-item$active">${locale.label}</a>';
+      return '<a href="${encodeHtmlAttribute(locale.path)}" class="locale-dropdown-item$active">${encodeHtml(locale.label)}</a>';
     }).join('\n        ');
 
     return '''
       <div class="locale-dropdown" id="locale-dropdown">
-        <button class="locale-dropdown-trigger" aria-label="${config.i18nStrings.localeSelect}">
-          $currentLabel
+        <button class="locale-dropdown-trigger" aria-label="${encodeHtmlAttribute(config.i18nStrings.localeSelect)}">
+          ${encodeHtml(currentLabel)}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
@@ -186,11 +189,11 @@ class PageLayoutBuilder {
 
     if (lightLogo != null && darkLogo != null && lightLogo != darkLogo) {
       return '''
-        <img src="${_prefixPath(lightLogo)}" alt="${config.name}" class="logo-image logo-light" />
-        <img src="${_prefixPath(darkLogo)}" alt="${config.name}" class="logo-image logo-dark" />
+        <img src="${encodeHtmlAttribute(_prefixPath(lightLogo))}" alt="${encodeHtmlAttribute(config.name)}" class="logo-image logo-light" />
+        <img src="${encodeHtmlAttribute(_prefixPath(darkLogo))}" alt="${encodeHtmlAttribute(config.name)}" class="logo-image logo-dark" />
       ''';
     } else if (lightLogo != null) {
-      return '<img src="${_prefixPath(lightLogo)}" alt="${config.name}" class="logo-image" />';
+      return '<img src="${encodeHtmlAttribute(_prefixPath(lightLogo))}" alt="${encodeHtmlAttribute(config.name)}" class="logo-image" />';
     }
 
     return '';
@@ -201,7 +204,7 @@ class PageLayoutBuilder {
 
     if (config.social.pubdev case final pubdev?) {
       links.add('''
-        <a href="$pubdev" target="_blank" rel="noopener" class="social-badge" aria-label="pub.dev">
+        <a href="${encodeHtmlAttribute(pubdev)}" target="_blank" rel="noopener" class="social-badge" aria-label="pub.dev">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" d="M4.105 4.105S9.158 1.58 11.684.316a3.079 3.079 0 0 1 1.481-.315c.766.047 1.677.788 1.677.788L24 9.948v9.789h-4.263V24H9.789l-9-9C.303 14.5 0 13.795 0 13.105c0-.319.18-.818.316-1.105l3.789-7.895zm.679.679v11.787c.002.543.021 1.024.498 1.508L10.204 23h8.533v-4.263L4.784 4.784zm12.055-.678c-.899-.896-1.809-1.78-2.74-2.643-.302-.267-.567-.468-1.07-.462-.37.014-.87.195-.87.195L6.341 4.105l10.498.001z"/>
           </svg>
@@ -212,7 +215,7 @@ class PageLayoutBuilder {
 
     if (config.social.github case final github?) {
       links.add('''
-        <a href="$github" target="_blank" rel="noopener" class="social-link" aria-label="GitHub">
+        <a href="${encodeHtmlAttribute(github)}" target="_blank" rel="noopener" class="social-link" aria-label="GitHub">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
           </svg>
@@ -222,7 +225,7 @@ class PageLayoutBuilder {
 
     if (config.social.discord case final discord?) {
       links.add('''
-        <a href="$discord" target="_blank" rel="noopener" class="social-link" aria-label="Discord">
+        <a href="${encodeHtmlAttribute(discord)}" target="_blank" rel="noopener" class="social-link" aria-label="Discord">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
           </svg>
@@ -238,7 +241,7 @@ class PageLayoutBuilder {
 
     if (config.social.pubdev case final pubdev?) {
       links.add('''
-        <a href="$pubdev" target="_blank" rel="noopener" class="footer-social-link" aria-label="pub.dev">
+        <a href="${encodeHtmlAttribute(pubdev)}" target="_blank" rel="noopener" class="footer-social-link" aria-label="pub.dev">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" d="M4.105 4.105S9.158 1.58 11.684.316a3.079 3.079 0 0 1 1.481-.315c.766.047 1.677.788 1.677.788L24 9.948v9.789h-4.263V24H9.789l-9-9C.303 14.5 0 13.795 0 13.105c0-.319.18-.818.316-1.105l3.789-7.895zm.679.679v11.787c.002.543.021 1.024.498 1.508L10.204 23h8.533v-4.263L4.784 4.784zm12.055-.678c-.899-.896-1.809-1.78-2.74-2.643-.302-.267-.567-.468-1.07-.462-.37.014-.87.195-.87.195L6.341 4.105l10.498.001z"/>
           </svg>
@@ -248,7 +251,7 @@ class PageLayoutBuilder {
 
     if (config.social.github case final github?) {
       links.add('''
-        <a href="$github" target="_blank" rel="noopener" class="footer-social-link" aria-label="GitHub">
+        <a href="${encodeHtmlAttribute(github)}" target="_blank" rel="noopener" class="footer-social-link" aria-label="GitHub">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
           </svg>
@@ -258,7 +261,7 @@ class PageLayoutBuilder {
 
     if (config.social.twitter case final twitter?) {
       links.add('''
-        <a href="$twitter" target="_blank" rel="noopener" class="footer-social-link" aria-label="Twitter">
+        <a href="${encodeHtmlAttribute(twitter)}" target="_blank" rel="noopener" class="footer-social-link" aria-label="Twitter">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
@@ -268,7 +271,7 @@ class PageLayoutBuilder {
 
     if (config.social.discord case final discord?) {
       links.add('''
-        <a href="$discord" target="_blank" rel="noopener" class="footer-social-link" aria-label="Discord">
+        <a href="${encodeHtmlAttribute(discord)}" target="_blank" rel="noopener" class="footer-social-link" aria-label="Discord">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
           </svg>
@@ -286,7 +289,7 @@ class PageLayoutBuilder {
         final isActive = pagePath == currentPath;
         final activeClass = isActive ? ' active' : '';
         final label = page.label ?? _titleCase(page.slug);
-        return '<li><a href="${_prefixPath(pagePath)}" class="sidebar-link$activeClass">$label</a></li>';
+        return '<li><a href="${encodeHtmlAttribute(_prefixPath(pagePath))}" class="sidebar-link$activeClass">${encodeHtml(label)}</a></li>';
       }).join('\n          ');
 
       final hasActiveChild = group.pages.any((page) {
@@ -311,7 +314,7 @@ class PageLayoutBuilder {
       return '''
       <div class="sidebar-group$collapsedClass">
         <div class="sidebar-group-title"$collapsibleAttr>
-          <span class="sidebar-group-label">$iconHtml${group.group}</span>
+          <span class="sidebar-group-label">$iconHtml${encodeHtml(group.group)}</span>
           $chevron
         </div>
         <ul class="sidebar-links">
@@ -323,7 +326,7 @@ class PageLayoutBuilder {
 
     return '''
       <aside class="sidebar">
-        <button class="sidebar-close" id="sidebar-close" aria-label="${config.i18nStrings.menuClose}">
+        <button class="sidebar-close" id="sidebar-close" aria-label="${encodeHtmlAttribute(config.i18nStrings.menuClose)}">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -340,13 +343,13 @@ class PageLayoutBuilder {
     }
 
     final links = toc
-        .map(
-            (entry) => '<li><a href="#${entry.id}" class="toc-link" data-level="${entry.level}">${entry.text}</a></li>')
+        .map((entry) =>
+            '<li><a href="#${encodeHtmlAttribute(entry.id)}" class="toc-link" data-level="${entry.level}">${entry.text}</a></li>')
         .join('\n          ');
 
     return '''
       <aside class="toc">
-        <div class="toc-title">${config.toc.title}</div>
+        <div class="toc-title">${encodeHtml(config.toc.title)}</div>
         <ul class="toc-list">
           $links
         </ul>
@@ -383,12 +386,12 @@ class PageLayoutBuilder {
 
     return '''
         <div class="edit-link">
-          <a href="$editUrl" target="_blank" rel="noopener">
+          <a href="${encodeHtmlAttribute(editUrl)}" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
-            ${editConfig.text}
+            ${encodeHtml(editConfig.text)}
           </a>
         </div>
 ''';
@@ -400,9 +403,9 @@ class PageLayoutBuilder {
 
     if (page.prev case final prev?) {
       buffer.writeln('''
-        <a href="${_prefixPath(prev.path)}" class="page-nav-link prev">
-          <span class="page-nav-label">${config.i18nStrings.navPrevious}</span>
-          <span class="page-nav-title">${prev.title}</span>
+        <a href="${encodeHtmlAttribute(_prefixPath(prev.path))}" class="page-nav-link prev">
+          <span class="page-nav-label">${encodeHtml(config.i18nStrings.navPrevious)}</span>
+          <span class="page-nav-title">${encodeHtml(prev.title)}</span>
         </a>
 ''');
     } else {
@@ -411,9 +414,9 @@ class PageLayoutBuilder {
 
     if (page.next case final next?) {
       buffer.writeln('''
-        <a href="${_prefixPath(next.path)}" class="page-nav-link next">
-          <span class="page-nav-label">${config.i18nStrings.navNext}</span>
-          <span class="page-nav-title">${next.title}</span>
+        <a href="${encodeHtmlAttribute(_prefixPath(next.path))}" class="page-nav-link next">
+          <span class="page-nav-label">${encodeHtml(config.i18nStrings.navNext)}</span>
+          <span class="page-nav-title">${encodeHtml(next.title)}</span>
         </a>
 ''');
     } else {
@@ -432,10 +435,10 @@ class PageLayoutBuilder {
     return '''
     <footer class="footer">
       $footerLinks
-      ${copyright != null ? '<div class="footer-copyright">$copyright</div>' : ''}
+      ${copyright != null ? '<div class="footer-copyright">${encodeHtml(copyright)}</div>' : ''}
       $footerSocial
       <div class="footer-powered">
-        ${config.i18nStrings.footerPoweredBy}
+        ${encodeHtml(config.i18nStrings.footerPoweredBy)}
         <svg class="footer-hex" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/>
         </svg>
@@ -450,12 +453,13 @@ class PageLayoutBuilder {
     if (links.isEmpty) return '';
 
     final groups = links.map((group) {
-      final items =
-          group.items.map((item) => '<li><a href="${item.href}">${item.label}</a></li>').join('\n            ');
+      final items = group.items
+          .map((item) => '<li><a href="${encodeHtmlAttribute(item.href)}">${encodeHtml(item.label)}</a></li>')
+          .join('\n            ');
 
       return '''
         <div class="footer-link-group">
-          <h4 class="footer-link-group-title">${group.group}</h4>
+          <h4 class="footer-link-group-title">${encodeHtml(group.group)}</h4>
           <ul>
             $items
           </ul>

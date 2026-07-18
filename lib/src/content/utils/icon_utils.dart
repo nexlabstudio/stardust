@@ -1,3 +1,4 @@
+import '../../utils/html_utils.dart';
 import '../../utils/patterns.dart';
 
 /// Check if a string is an emoji
@@ -5,8 +6,9 @@ bool isEmoji(String text) => emojiPattern.hasMatch(text);
 
 /// Get a Lucide icon element for the given icon name
 String getLucideIcon(String name, String size) {
-  final iconName = name.toLowerCase().replaceAll('_', '-');
-  return '<i data-lucide="$iconName" style="width: ${size}px; height: ${size}px;"></i>';
+  final iconName = encodeHtmlAttribute(name.toLowerCase().replaceAll('_', '-'));
+  final px = int.tryParse(size) ?? 20;
+  return '<i data-lucide="$iconName" style="width: ${px}px; height: ${px}px;"></i>';
 }
 
 /// Resolve an icon - returns emoji as-is or converts to Lucide icon

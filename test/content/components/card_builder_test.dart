@@ -181,4 +181,28 @@ void main() {
       expect(result, equals('content'));
     });
   });
+
+  group('escaping regressions', () {
+    final builder = CardBuilder();
+
+    test('javascript: href is stripped from cards', () {
+      final result = builder.build('Card', {'title': 'T', 'href': 'javascript:alert(1)'}, 'body');
+
+      expect(result, isNot(contains('javascript:')));
+      expect(result, contains('href=""'));
+    });
+
+    test('card title HTML is escaped', () {
+      final result = builder.build('Card', {'title': '<img src=x onerror=alert(1)>'}, 'body');
+
+      expect(result, isNot(contains('<img src=x')));
+      expect(result, contains('&lt;img'));
+    });
+
+    test('non-numeric columns fall back to the default', () {
+      final result = builder.build('Cards', {'cols': ';}body{display:none'}, '<Card title="a">x</Card>');
+
+      expect(result, contains('--cards-columns: 2'));
+    });
+  });
 }

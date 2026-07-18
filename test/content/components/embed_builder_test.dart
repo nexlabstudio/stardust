@@ -233,7 +233,7 @@ void main() {
       test('uses custom default tab', () {
         final result = builder.build('CodePen', {'id': 'abc', 'user': 'user', 'defaultTab': 'html,result'}, '');
 
-        expect(result, contains('default-tab=html,result'));
+        expect(result, contains('default-tab=html%2Cresult'));
       });
 
       test('uses result as default tab', () {
@@ -311,7 +311,7 @@ void main() {
       test('includes file parameter when provided', () {
         final result = builder.build('StackBlitz', {'id': 'test', 'file': 'src/index.ts'}, '');
 
-        expect(result, contains('file=src/index.ts'));
+        expect(result, contains('file=src%2Findex.ts'));
       });
 
       test('supports hideNavigation option', () {

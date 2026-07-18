@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import '../config/build_config.dart';
 import '../core/file_system.dart';
 import '../models/page.dart';
+import '../utils/html_utils.dart';
 import '../utils/logger.dart';
 
 /// Generates redirect files for various platforms
@@ -75,22 +76,23 @@ class RedirectGenerator {
       return;
     }
 
-    final segments = from.substring(1).split('/').where((s) => s.isNotEmpty).toList();
+    final segments = from.split('/').where((s) => s.isNotEmpty).toList();
     final outputPath = p.joinAll([outputDir, ...segments, 'index.html']);
 
-    final destinationUrl = basePath.isEmpty ? to : '$basePath$to';
+    final destinationUrl = sanitizeUrl(basePath.isEmpty ? to : '$basePath$to');
+    final attrUrl = encodeHtmlAttribute(destinationUrl);
 
     final html = '''<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=$destinationUrl">
-  <link rel="canonical" href="$destinationUrl">
+  <meta http-equiv="refresh" content="0; url=$attrUrl">
+  <link rel="canonical" href="$attrUrl">
   <title>Redirecting...</title>
 </head>
 <body>
-  <p>Redirecting to <a href="$destinationUrl">$destinationUrl</a>...</p>
-  <script>window.location.href = "$destinationUrl";</script>
+  <p>Redirecting to <a href="$attrUrl">${encodeHtml(destinationUrl)}</a>...</p>
+  <script>window.location.href = "${encodeJsString(destinationUrl)}";</script>
 </body>
 </html>
 ''';

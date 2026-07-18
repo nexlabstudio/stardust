@@ -1,3 +1,4 @@
+import '../../utils/html_utils.dart';
 import 'base_component.dart';
 
 /// Builds API documentation components: Api, Field, ParamField, ResponseField
@@ -22,15 +23,15 @@ class ApiBuilder extends ComponentBuilder {
 
     final methodClass = 'api-method-${method.toLowerCase()}';
 
-    final titleHtml = title != null ? '<div class="api-title">$title</div>' : '';
+    final titleHtml = title != null ? '<div class="api-title">${encodeHtml(title)}</div>' : '';
 
-    final authHtml = auth != null ? '<span class="api-auth">🔒 $auth</span>' : '';
+    final authHtml = auth != null ? '<span class="api-auth">🔒 ${encodeHtml(auth)}</span>' : '';
 
     return '''
 <div class="api-endpoint">
   <div class="api-header">
-    <span class="api-method $methodClass">$method</span>
-    <code class="api-path">$path</code>
+    <span class="api-method ${encodeHtmlAttribute(methodClass)}">${encodeHtml(method)}</span>
+    <code class="api-path">${encodeHtml(path)}</code>
     $authHtml
   </div>
   $titleHtml
@@ -56,14 +57,15 @@ $content
 
     final deprecatedBadge = deprecated ? '<span class="field-badge field-deprecated">deprecated</span>' : '';
 
-    final defaultHtml =
-        defaultValue != null ? '<span class="field-default">Default: <code>$defaultValue</code></span>' : '';
+    final defaultHtml = defaultValue != null
+        ? '<span class="field-default">Default: <code>${encodeHtml(defaultValue)}</code></span>'
+        : '';
 
     return '''
 <div class="field${deprecated ? ' field-is-deprecated' : ''}">
   <div class="field-header">
-    <code class="field-name">$name</code>
-    <span class="field-type">$type</span>
+    <code class="field-name">${encodeHtml(name)}</code>
+    <span class="field-type">${encodeHtml(type)}</span>
     $requiredBadge
     $deprecatedBadge
   </div>
@@ -88,16 +90,17 @@ $content
         ? '<span class="field-badge field-required">required</span>'
         : '<span class="field-badge field-optional">optional</span>';
 
-    final paramTypeBadge = '<span class="field-badge field-param-type">$paramType</span>';
+    final paramTypeBadge = '<span class="field-badge field-param-type">${encodeHtml(paramType)}</span>';
 
-    final defaultHtml =
-        defaultValue != null ? '<span class="field-default">Default: <code>$defaultValue</code></span>' : '';
+    final defaultHtml = defaultValue != null
+        ? '<span class="field-default">Default: <code>${encodeHtml(defaultValue)}</code></span>'
+        : '';
 
     return '''
 <div class="field field-param">
   <div class="field-header">
-    <code class="field-name">$name</code>
-    <span class="field-type">$type</span>
+    <code class="field-name">${encodeHtml(name)}</code>
+    <span class="field-type">${encodeHtml(type)}</span>
     $paramTypeBadge
     $requiredBadge
   </div>
@@ -121,8 +124,8 @@ $content
     return '''
 <div class="field field-response">
   <div class="field-header">
-    <code class="field-name">$name</code>
-    <span class="field-type">$type</span>
+    <code class="field-name">${encodeHtml(name)}</code>
+    <span class="field-type">${encodeHtml(type)}</span>
     $nullableBadge
   </div>
   <div class="field-description">

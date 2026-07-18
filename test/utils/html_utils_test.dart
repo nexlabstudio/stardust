@@ -112,4 +112,72 @@ void main() {
       expect(encodeHtmlAttribute(input), equals(encodeHtml(input)));
     });
   });
+
+  group('encodeJsString', () {
+    test('escapes quotes and backslashes', () {
+      expect(encodeJsString("l'aide"), equals(r"l\'aide"));
+      expect(encodeJsString(r'a\b'), equals(r'a\\b'));
+      expect(encodeJsString('say "hi"'), equals(r'say \"hi\"'));
+    });
+
+    test('neutralizes </script> breakout', () {
+      expect(encodeJsString('</script><script>alert(1)</script>'), isNot(contains('</script>')));
+      expect(encodeJsString('</script>'), equals(r'\x3C/script>'));
+    });
+
+    test('escapes newlines and separators', () {
+      expect(encodeJsString('a\nb\rc'), equals(r'a\nb\rc'));
+      expect(encodeJsString('a\u2028b'), equals(r'a\u2028b'));
+    });
+  });
+
+  group('encodeXml', () {
+    test('escapes the five xml specials', () {
+      expect(encodeXml('a&b<c>d"e\'f'), equals('a&amp;b&lt;c&gt;d&quot;e&apos;f'));
+    });
+  });
+
+  group('isSafeUrl / sanitizeUrl', () {
+    test('allows http, https, mailto, tel, and relative urls', () {
+      expect(isSafeUrl('https://example.com'), isTrue);
+      expect(isSafeUrl('http://example.com'), isTrue);
+      expect(isSafeUrl('mailto:a@b.com'), isTrue);
+      expect(isSafeUrl('tel:+123'), isTrue);
+      expect(isSafeUrl('/docs/page'), isTrue);
+      expect(isSafeUrl('#anchor'), isTrue);
+      expect(isSafeUrl('../up'), isTrue);
+      expect(isSafeUrl(''), isTrue);
+    });
+
+    test('rejects javascript, data, and vbscript schemes', () {
+      expect(isSafeUrl('javascript:alert(1)'), isFalse);
+      expect(isSafeUrl('JavaScript:alert(1)'), isFalse);
+      expect(isSafeUrl(' javascript:alert(1)'), isFalse);
+      expect(isSafeUrl('data:text/html,<script>'), isFalse);
+      expect(isSafeUrl('vbscript:x'), isFalse);
+    });
+
+    test('sanitizeUrl empties unsafe urls and keeps safe ones', () {
+      expect(sanitizeUrl('javascript:alert(1)'), equals(''));
+      expect(sanitizeUrl('/docs'), equals('/docs'));
+    });
+  });
+
+  group('sanitizeCssValue', () {
+    test('keeps ordinary size values', () {
+      expect(sanitizeCssValue('500px'), equals('500px'));
+      expect(sanitizeCssValue('16/9'), equals('16/9'));
+      expect(sanitizeCssValue('50%'), equals('50%'));
+    });
+
+    test('strips breakout characters', () {
+      expect(sanitizeCssValue('red;} body{display:none'), isNot(contains(';')));
+      expect(sanitizeCssValue('url(evil)'), isNot(contains('(')));
+      expect(sanitizeCssValue('"><script>', fallback: '1rem'), equals('script'));
+    });
+
+    test('falls back when nothing survives', () {
+      expect(sanitizeCssValue(';{}', fallback: '1rem'), equals('1rem'));
+    });
+  });
 }

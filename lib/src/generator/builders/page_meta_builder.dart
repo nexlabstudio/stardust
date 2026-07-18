@@ -22,7 +22,7 @@ class PageMetaBuilder {
       _ => 'image/x-icon',
     };
 
-    return '<link rel="icon" type="$type" href="$href">';
+    return '<link rel="icon" type="$type" href="${encodeHtmlAttribute(href)}">';
   }
 
   String build(Page page) {
@@ -31,7 +31,7 @@ class PageMetaBuilder {
     if (config.url case final url?) {
       final baseUrl = _normalizeUrl(url);
       final pagePath = switch (page.path) { '/' => '', final p => p };
-      buffer.writeln('  <link rel="canonical" href="$baseUrl$pagePath">');
+      buffer.writeln('  <link rel="canonical" href="${encodeHtmlAttribute('$baseUrl$pagePath')}">');
     }
 
     if (page.description case final description?) {
@@ -46,16 +46,16 @@ class PageMetaBuilder {
     if (config.url case final url?) {
       final baseUrl = _normalizeUrl(url);
       final pagePath = switch (page.path) { '/' => '', final p => p };
-      buffer.writeln('  <meta property="og:url" content="$baseUrl$pagePath">');
+      buffer.writeln('  <meta property="og:url" content="${encodeHtmlAttribute('$baseUrl$pagePath')}">');
     }
     final ogImage = _getOgImage(page);
     if (ogImage != null) {
-      buffer.writeln('  <meta property="og:image" content="$ogImage">');
+      buffer.writeln('  <meta property="og:image" content="${encodeHtmlAttribute(ogImage)}">');
     }
 
     buffer.writeln('  <meta name="twitter:card" content="${config.seo.twitterCard}">');
     if (config.seo.twitterHandle case final handle?) {
-      buffer.writeln('  <meta name="twitter:site" content="$handle">');
+      buffer.writeln('  <meta name="twitter:site" content="${encodeHtmlAttribute(handle)}">');
     }
 
     if (config.seo.structuredData) {
@@ -78,7 +78,8 @@ class PageMetaBuilder {
 
     for (final locale in i18n.locales) {
       final localePath = locale.path.endsWith('/') ? locale.path.substring(0, locale.path.length - 1) : locale.path;
-      buffer.writeln('  <link rel="alternate" hreflang="${locale.code}" href="$baseUrl$localePath$pagePath">');
+      buffer.writeln(
+          '  <link rel="alternate" hreflang="${encodeHtmlAttribute(locale.code)}" href="${encodeHtmlAttribute('$baseUrl$localePath$pagePath')}">');
     }
 
     // x-default points to the default locale
@@ -87,7 +88,8 @@ class PageMetaBuilder {
       final defaultPath = defaultLocale.path.endsWith('/')
           ? defaultLocale.path.substring(0, defaultLocale.path.length - 1)
           : defaultLocale.path;
-      buffer.writeln('  <link rel="alternate" hreflang="x-default" href="$baseUrl$defaultPath$pagePath">');
+      buffer.writeln(
+          '  <link rel="alternate" hreflang="x-default" href="${encodeHtmlAttribute('$baseUrl$defaultPath$pagePath')}">');
     }
 
     return buffer.toString();
@@ -120,14 +122,14 @@ class PageMetaBuilder {
       ..write('{"@context":"https://schema.org"')
       ..write(',"@type":"Article"')
       ..write(',"headline":"${_escapeJson(page.title)}"')
-      ..write(',"url":"$pageUrl"');
+      ..write(',"url":"${_escapeJson(pageUrl)}"');
 
     if (page.description case final desc?) {
       json.write(',"description":"${_escapeJson(desc)}"');
     }
 
     if (_getOgImage(page) case final image?) {
-      json.write(',"image":"$image"');
+      json.write(',"image":"${_escapeJson(image)}"');
     }
 
     json
@@ -147,10 +149,11 @@ class PageMetaBuilder {
     final items = <String>[];
     for (final (index, crumb) in page.breadcrumbs.indexed) {
       final crumbUrl = '$baseUrl${crumb.path}';
-      items.add('{"@type":"ListItem","position":${index + 1},"name":"${_escapeJson(crumb.title)}","item":"$crumbUrl"}');
+      items.add(
+          '{"@type":"ListItem","position":${index + 1},"name":"${_escapeJson(crumb.title)}","item":"${_escapeJson(crumbUrl)}"}');
     }
     items.add(
-        '{"@type":"ListItem","position":${page.breadcrumbs.length + 1},"name":"${_escapeJson(page.title)}","item":"$pageUrl"}');
+        '{"@type":"ListItem","position":${page.breadcrumbs.length + 1},"name":"${_escapeJson(page.title)}","item":"${_escapeJson(pageUrl)}"}');
 
     json
       ..write(items.join(','))
@@ -164,7 +167,7 @@ class PageMetaBuilder {
       ..write('{"@context":"https://schema.org"')
       ..write(',"@type":"WebSite"')
       ..write(',"name":"${_escapeJson(config.name)}"')
-      ..write(',"url":"$baseUrl"');
+      ..write(',"url":"${_escapeJson(baseUrl)}"');
 
     if (config.description case final desc?) {
       json.write(',"description":"${_escapeJson(desc)}"');
@@ -209,5 +212,6 @@ class PageMetaBuilder {
       .replaceAll('"', '\\"')
       .replaceAll('\n', '\\n')
       .replaceAll('\r', '\\r')
-      .replaceAll('\t', '\\t');
+      .replaceAll('\t', '\\t')
+      .replaceAll('<', '\\u003C');
 }

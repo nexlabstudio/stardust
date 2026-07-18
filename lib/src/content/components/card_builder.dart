@@ -1,3 +1,4 @@
+import '../../utils/html_utils.dart';
 import '../utils/attribute_parser.dart';
 import '../utils/icon_utils.dart';
 import 'base_component.dart';
@@ -16,7 +17,7 @@ class CardBuilder extends ComponentBuilder {
       };
 
   String _buildCards(Map<String, String> attributes, String content) {
-    final columns = attributes['cols'] ?? attributes['columns'] ?? '2';
+    final columns = int.tryParse(attributes['cols'] ?? attributes['columns'] ?? '') ?? 2;
     final cards = extractChildComponents(content, 'Card');
 
     final cardsHtml = StringBuffer();
@@ -39,11 +40,11 @@ $cardsHtml</div>
     switch (icon) {
       case _?:
         iconHtml = isEmoji(icon)
-            ? '<span class="card-icon">$icon</span>'
+            ? '<span class="card-icon">${encodeHtml(icon)}</span>'
             : '<span class="card-icon">${getLucideIcon(icon, '20')}</span>';
     }
 
-    final titleHtml = title.isNotEmpty ? '<h3 class="card-title">$iconHtml$title</h3>' : '';
+    final titleHtml = title.isNotEmpty ? '<h3 class="card-title">$iconHtml${encodeHtml(title)}</h3>' : '';
 
     final cardContent = '''
 $titleHtml
@@ -56,7 +57,7 @@ $content
 
     if (href case final href?) {
       return '''
-<a href="$href" class="card card-link">
+<a href="${encodeHtmlAttribute(sanitizeUrl(href))}" class="card card-link">
 $cardContent</a>
 ''';
     }
@@ -68,7 +69,7 @@ $cardContent</div>
   }
 
   String _buildTiles(Map<String, String> attributes, String content) {
-    final columns = attributes['columns'] ?? '3';
+    final columns = int.tryParse(attributes['columns'] ?? '') ?? 3;
     final tiles = extractChildComponents(content, 'Tile');
 
     if (tiles.isEmpty) {
@@ -95,11 +96,11 @@ $tilesHtml</div>
     switch (icon) {
       case _?:
         iconHtml = isEmoji(icon)
-            ? '<div class="tile-icon">$icon</div>'
+            ? '<div class="tile-icon">${encodeHtml(icon)}</div>'
             : '<div class="tile-icon">${getLucideIcon(icon, '24')}</div>';
     }
 
-    final titleHtml = title.isNotEmpty ? '<h4 class="tile-title">$title</h4>' : '';
+    final titleHtml = title.isNotEmpty ? '<h4 class="tile-title">${encodeHtml(title)}</h4>' : '';
 
     final tileContent = '''
 $iconHtml
@@ -113,7 +114,7 @@ $content
 
     if (href case final href?) {
       return '''
-<a href="$href" class="tile tile-link">
+<a href="${encodeHtmlAttribute(sanitizeUrl(href))}" class="tile tile-link">
 $tileContent</a>
 ''';
     }

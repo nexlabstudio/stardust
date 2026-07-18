@@ -1,3 +1,4 @@
+import '../../utils/html_utils.dart';
 import '../../utils/patterns.dart';
 import 'base_component.dart';
 
@@ -27,17 +28,20 @@ class EmbedBuilder extends ComponentBuilder {
     }
 
     final videoId = _extractYouTubeId(id);
+    if (!youtubeIdPattern.hasMatch(videoId)) {
+      return '<div class="embed-error">YouTube: Invalid video ID</div>';
+    }
 
     var embedUrl = 'https://www.youtube.com/embed/$videoId';
     if (start case final start?) {
-      embedUrl += '?start=$start';
+      embedUrl += '?start=${Uri.encodeQueryComponent(start)}';
     }
 
     return '''
-<div class="embed embed-youtube" style="aspect-ratio: $aspectRatio">
+<div class="embed embed-youtube" style="aspect-ratio: ${sanitizeCssValue(aspectRatio, fallback: '16/9')}">
   <iframe
-    src="$embedUrl"
-    title="$title"
+    src="${encodeHtmlAttribute(embedUrl)}"
+    title="${encodeHtmlAttribute(title)}"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     allowfullscreen
@@ -71,12 +75,15 @@ class EmbedBuilder extends ComponentBuilder {
     }
 
     final videoId = _extractVimeoId(id);
+    if (!vimeoIdPattern.hasMatch(videoId)) {
+      return '<div class="embed-error">Vimeo: Invalid video ID</div>';
+    }
 
     return '''
-<div class="embed embed-vimeo" style="aspect-ratio: $aspectRatio">
+<div class="embed embed-vimeo" style="aspect-ratio: ${sanitizeCssValue(aspectRatio, fallback: '16/9')}">
   <iframe
     src="https://player.vimeo.com/video/$videoId"
-    title="$title"
+    title="${encodeHtmlAttribute(title)}"
     frameborder="0"
     allow="autoplay; fullscreen; picture-in-picture"
     allowfullscreen
@@ -108,12 +115,13 @@ class EmbedBuilder extends ComponentBuilder {
       return '<div class="embed-error">Zapp: Missing project ID</div>';
     }
 
-    final embedUrl = 'https://zapp.run/edit/$id?theme=$theme&lazy=$lazy';
+    final embedUrl =
+        'https://zapp.run/edit/${Uri.encodeComponent(id)}?theme=${Uri.encodeQueryComponent(theme)}&lazy=$lazy';
 
     return '''
-<div class="embed embed-zapp" style="height: $height">
+<div class="embed embed-zapp" style="height: ${sanitizeCssValue(height, fallback: '500px')}">
   <iframe
-    src="$embedUrl"
+    src="${encodeHtmlAttribute(embedUrl)}"
     title="Zapp Dart/Flutter Playground"
     frameborder="0"
     allow="clipboard-write"
@@ -127,7 +135,7 @@ class EmbedBuilder extends ComponentBuilder {
     final id = attributes['id'] ?? '';
     final user = attributes['user'] ?? '';
     final title = attributes['title'] ?? 'CodePen';
-    final height = attributes['height'] ?? '400';
+    final height = int.tryParse(attributes['height'] ?? '') ?? 400;
     final defaultTab = attributes['defaultTab'] ?? 'result';
     final theme = attributes['theme'] ?? 'dark';
     final editable = attributes['editable'] == 'true';
@@ -137,13 +145,14 @@ class EmbedBuilder extends ComponentBuilder {
     }
 
     final editableParam = editable ? '&editable=true' : '';
-    final embedUrl = 'https://codepen.io/$user/embed/$id?default-tab=$defaultTab&theme-id=$theme$editableParam';
+    final embedUrl = 'https://codepen.io/${Uri.encodeComponent(user)}/embed/${Uri.encodeComponent(id)}'
+        '?default-tab=${Uri.encodeQueryComponent(defaultTab)}&theme-id=${Uri.encodeQueryComponent(theme)}$editableParam';
 
     return '''
 <div class="embed embed-codepen" style="height: ${height}px">
   <iframe
-    src="$embedUrl"
-    title="$title"
+    src="${encodeHtmlAttribute(embedUrl)}"
+    title="${encodeHtmlAttribute(title)}"
     frameborder="0"
     allowtransparency="true"
     allowfullscreen="true"
@@ -167,17 +176,18 @@ class EmbedBuilder extends ComponentBuilder {
       return '<div class="embed-error">StackBlitz: Missing project ID</div>';
     }
 
-    var embedUrl =
-        'https://stackblitz.com/edit/$id?embed=$embed&hideNavigation=$hideNavigation&hideDevtools=$hideDevTools&view=$view';
+    var embedUrl = 'https://stackblitz.com/edit/${Uri.encodeComponent(id)}'
+        '?embed=${Uri.encodeQueryComponent(embed)}&hideNavigation=$hideNavigation'
+        '&hideDevtools=$hideDevTools&view=${Uri.encodeQueryComponent(view)}';
     if (file case final file?) {
-      embedUrl += '&file=$file';
+      embedUrl += '&file=${Uri.encodeQueryComponent(file)}';
     }
 
     return '''
-<div class="embed embed-stackblitz" style="height: $height">
+<div class="embed embed-stackblitz" style="height: ${sanitizeCssValue(height, fallback: '500px')}">
   <iframe
-    src="$embedUrl"
-    title="$title"
+    src="${encodeHtmlAttribute(embedUrl)}"
+    title="${encodeHtmlAttribute(title)}"
     frameborder="0"
     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"

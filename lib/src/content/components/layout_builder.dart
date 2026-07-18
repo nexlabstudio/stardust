@@ -1,3 +1,4 @@
+import '../../utils/html_utils.dart';
 import '../utils/attribute_parser.dart';
 import '../utils/icon_utils.dart';
 import 'base_component.dart';
@@ -21,7 +22,7 @@ class LayoutBuilder extends ComponentBuilder {
 
     if (columns.isEmpty) {
       return '''
-<div class="columns" style="--columns-gap: $gap">
+<div class="columns" style="--columns-gap: ${sanitizeCssValue(gap, fallback: '1rem')}">
   <div class="column">
 
 $content
@@ -34,7 +35,10 @@ $content
     final columnsHtml = StringBuffer();
     for (final column in columns) {
       final width = column.attributes['width'];
-      final styleAttr = width != null ? ' style="flex: 0 0 $width; max-width: $width;"' : '';
+      final styleAttr = switch (width) {
+        final width? => ' style="flex: 0 0 ${sanitizeCssValue(width)}; max-width: ${sanitizeCssValue(width)};"',
+        null => '',
+      };
 
       columnsHtml.writeln('''
   <div class="column"$styleAttr>
@@ -45,7 +49,7 @@ ${column.content}
     }
 
     return '''
-<div class="columns" style="--columns-gap: $gap">
+<div class="columns" style="--columns-gap: ${sanitizeCssValue(gap, fallback: '1rem')}">
 $columnsHtml</div>
 ''';
   }
@@ -59,7 +63,7 @@ $columnsHtml</div>
     switch (icon) {
       case _?:
         iconHtml = isEmoji(icon)
-            ? '<span class="panel-icon">$icon</span>'
+            ? '<span class="panel-icon">${encodeHtml(icon)}</span>'
             : '<span class="panel-icon">${getLucideIcon(icon, '20')}</span>';
     }
 
@@ -67,13 +71,13 @@ $columnsHtml</div>
         ? '''
   <div class="panel-header">
     $iconHtml
-    <span class="panel-title">$title</span>
+    <span class="panel-title">${encodeHtml(title)}</span>
   </div>
 '''
         : '';
 
     return '''
-<div class="panel panel-$variant">
+<div class="panel panel-${encodeHtmlAttribute(variant)}">
 $headerHtml  <div class="panel-content">
 
 $content
@@ -92,7 +96,7 @@ $content
     }
 
     // Browser frame
-    final urlBar = url != null ? '<div class="frame-url">$url</div>' : '';
+    final urlBar = url != null ? '<div class="frame-url">${encodeHtml(url)}</div>' : '';
 
     return '''
 <div class="frame frame-browser">

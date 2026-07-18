@@ -55,3 +55,7 @@ RegExp childComponentPattern(String componentName) => RegExp(
       '<$componentName([^>]*)>([\\s\\S]*?)</$componentName>',
       dotAll: true,
     );
+
+final youtubeIdPattern = RegExp(r'^[A-Za-z0-9_-]{6,20}$');
+
+final vimeoIdPattern = RegExp(r'^\d+$');

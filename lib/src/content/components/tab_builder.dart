@@ -1,5 +1,6 @@
 import 'package:markdown/markdown.dart' as md;
 
+import '../../utils/html_utils.dart';
 import '../utils/attribute_parser.dart';
 import 'base_component.dart';
 
@@ -39,7 +40,7 @@ class TabBuilder extends ComponentBuilder {
             data-tab="$tabId"
             role="tab"
             aria-selected="${isActive ? 'true' : 'false'}">
-      $name
+      ${encodeHtml(name)}
     </button>''');
 
       final hiddenAttr = isActive ? '' : ' hidden';
@@ -83,7 +84,7 @@ $tabPanels  </div>
             data-tab="$tabId"
             role="tab"
             aria-selected="${isActive ? 'true' : 'false'}">
-      $title
+      ${encodeHtml(title)}
     </button>''');
 
       var codeContent = block.content.trim();

@@ -1,4 +1,5 @@
 import '../../config/config.dart';
+import '../../utils/html_utils.dart';
 
 /// Builds JavaScript and search functionality for pages
 class PageScriptsBuilder {
@@ -12,7 +13,7 @@ class PageScriptsBuilder {
     const html = document.documentElement;
 
     function getTheme() {
-      return localStorage.getItem('theme') || '${config.theme.darkMode.defaultMode}';
+      return localStorage.getItem('theme') || '${encodeJsString(config.theme.darkMode.defaultMode)}';
     }
 
     function setTheme(theme) {
@@ -222,7 +223,11 @@ class PageScriptsBuilder {
       zoomableImages.forEach(wrapper => {
         wrapper.addEventListener('click', () => {
           const src = wrapper.dataset.zoomSrc;
-          overlay.innerHTML = '<img src="' + src + '" alt="Zoomed image" />';
+          overlay.textContent = '';
+          const zoomed = document.createElement('img');
+          zoomed.src = src;
+          zoomed.alt = 'Zoomed image';
+          overlay.appendChild(zoomed);
           overlay.classList.add('active');
           document.body.style.overflow = 'hidden';
         });
@@ -277,7 +282,7 @@ class PageScriptsBuilder {
     }
 
     return '''
-  <link href="$basePath/_pagefind/pagefind-ui.css" rel="stylesheet">
+  <link href="${encodeHtmlAttribute(basePath)}/_pagefind/pagefind-ui.css" rel="stylesheet">
   <style>
     :root {
       --pagefind-ui-primary: var(--color-primary);
@@ -312,7 +317,7 @@ class PageScriptsBuilder {
     }
 
     return '''
-  <script src="$basePath/_pagefind/pagefind-ui.js"></script>
+  <script src="${encodeHtmlAttribute(basePath)}/_pagefind/pagefind-ui.js"></script>
   <div id="search-modal" class="search-modal">
     <div class="search-backdrop"></div>
     <div class="search-container">
@@ -333,17 +338,17 @@ class PageScriptsBuilder {
           ui = new PagefindUI({
             element: '#pagefind-search',
             showSubResults: true,
-            baseUrl: '${config.basePath}/',
+            baseUrl: '${encodeJsString(config.basePath)}/',
             showImages: false,
             excerptLength: 20,
             resetStyles: false,
             autofocus: true,
             translations: {
-              placeholder: '${config.search.placeholder}',
-              zero_results: '${config.i18nStrings.searchNoResults.replaceAll('%s', '[SEARCH_TERM]')}',
-              many_results: '${config.i18nStrings.searchManyResults.replaceAll('%s', '[COUNT]')}',
-              one_result: '${config.i18nStrings.searchOneResult}',
-              searching: '${config.i18nStrings.searchSearching}',
+              placeholder: '${encodeJsString(config.search.placeholder)}',
+              zero_results: '${encodeJsString(config.i18nStrings.searchNoResults.replaceAll('%s', '[SEARCH_TERM]'))}',
+              many_results: '${encodeJsString(config.i18nStrings.searchManyResults.replaceAll('%s', '[COUNT]'))}',
+              one_result: '${encodeJsString(config.i18nStrings.searchOneResult)}',
+              searching: '${encodeJsString(config.i18nStrings.searchSearching)}',
             },
           });
         }

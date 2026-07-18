@@ -464,4 +464,41 @@ void main() {
       });
     });
   });
+
+  group('escaping regressions', () {
+    test('JSON-LD cannot be terminated by </script> in the title', () {
+      const config = StardustConfig(
+        name: 'Test Site',
+        url: 'https://example.com',
+        seo: SeoConfig(structuredData: true),
+      );
+      const page = Page(
+        path: '/x',
+        sourcePath: '/content/x.md',
+        title: 'Bad</script><script>alert(1)</script>',
+        content: '',
+      );
+
+      final result = PageMetaBuilder(config: config).build(page);
+      final jsonLd = result.split('application/ld+json')[1];
+
+      expect(jsonLd, isNot(contains('</script><script>')));
+      expect(jsonLd, contains(r'\u003C/script'));
+    });
+
+    test('description with quotes cannot break out of meta content', () {
+      const config = StardustConfig(name: 'Test Site');
+      const page = Page(
+        path: '/x',
+        sourcePath: '/content/x.md',
+        title: 'T',
+        description: '"><script>alert(1)</script>',
+        content: '',
+      );
+
+      final result = PageMetaBuilder(config: config).build(page);
+
+      expect(result, isNot(contains('"><script>')));
+    });
+  });
 }

@@ -28,8 +28,8 @@ class MediaBuilder extends ComponentBuilder {
     final border = attributes['border'] == 'true' || attributes.containsKey('border');
 
     final styleList = <String>[];
-    if (width case final width?) styleList.add('width: $width');
-    if (height case final height?) styleList.add('height: $height');
+    if (width case final width?) styleList.add('width: ${sanitizeCssValue(width)}');
+    if (height case final height?) styleList.add('height: ${sanitizeCssValue(height)}');
     final styleAttr = styleList.isNotEmpty ? ' style="${styleList.join('; ')}"' : '';
 
     final classList = <String>['image-component'];
@@ -38,11 +38,12 @@ class MediaBuilder extends ComponentBuilder {
     if (border) classList.add('image-bordered');
     final classAttr = ' class="${classList.join(' ')}"';
 
-    final imgHtml = '<img src="$src" alt="$alt"$styleAttr loading="lazy" />';
+    final imgHtml =
+        '<img src="${encodeHtmlAttribute(sanitizeUrl(src))}" alt="${encodeHtmlAttribute(alt)}"$styleAttr loading="lazy" />';
 
     final zoomWrapper = zoom
         ? '''
-<div class="image-zoom-wrapper" data-zoom-src="$src">
+<div class="image-zoom-wrapper" data-zoom-src="${encodeHtmlAttribute(sanitizeUrl(src))}">
   $imgHtml
   <div class="image-zoom-hint">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -56,7 +57,7 @@ class MediaBuilder extends ComponentBuilder {
       return '''
 <figure$classAttr>
   $zoomWrapper
-  <figcaption class="image-caption">$caption</figcaption>
+  <figcaption class="image-caption">${encodeHtml(caption)}</figcaption>
 </figure>
 ''';
     }
@@ -82,12 +83,12 @@ class MediaBuilder extends ComponentBuilder {
     if (autoplay) attrs.add('autoplay');
     if (loop) attrs.add('loop');
     if (muted) attrs.add('muted');
-    if (poster case final poster?) attrs.add('poster="$poster"');
+    if (poster case final poster?) attrs.add('poster="${encodeHtmlAttribute(sanitizeUrl(poster))}"');
 
     return '''
 <div class="embed embed-video">
-  <video ${attrs.join(' ')} title="$title" preload="metadata">
-    <source src="$src" />
+  <video ${attrs.join(' ')} title="${encodeHtmlAttribute(title)}" preload="metadata">
+    <source src="${encodeHtmlAttribute(sanitizeUrl(src))}" />
     Your browser does not support the video tag.
   </video>
 </div>
@@ -101,7 +102,7 @@ class MediaBuilder extends ComponentBuilder {
     final escapedContent = encodeHtml(content.trim());
 
     final diagramHtml = '''
-<div class="mermaid-diagram" data-theme="$theme">
+<div class="mermaid-diagram" data-theme="${encodeHtmlAttribute(theme)}">
   <pre class="mermaid">$escapedContent</pre>
 </div>''';
 
@@ -109,7 +110,7 @@ class MediaBuilder extends ComponentBuilder {
       return '''
 <figure class="mermaid-figure">
   $diagramHtml
-  <figcaption class="mermaid-caption">$caption</figcaption>
+  <figcaption class="mermaid-caption">${encodeHtml(caption)}</figcaption>
 </figure>
 ''';
     }

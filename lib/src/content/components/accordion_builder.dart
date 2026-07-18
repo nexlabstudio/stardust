@@ -1,3 +1,4 @@
+import '../../utils/html_utils.dart';
 import '../utils/attribute_parser.dart';
 import '../utils/icon_utils.dart';
 import 'base_component.dart';
@@ -36,7 +37,7 @@ $accordionHtml</div>
     String iconHtml = '';
     if (icon.isNotEmpty) {
       if (isEmoji(icon)) {
-        iconHtml = '<span class="accordion-icon">$icon</span> ';
+        iconHtml = '<span class="accordion-icon">${encodeHtml(icon)}</span> ';
       } else {
         final svg = getLucideIcon(icon, '18');
         iconHtml = '<span class="accordion-icon">$svg</span> ';
@@ -45,7 +46,7 @@ $accordionHtml</div>
 
     return '''
 <details class="accordion"${defaultOpen ? ' open' : ''}>
-  <summary class="accordion-summary">$iconHtml$title</summary>
+  <summary class="accordion-summary">$iconHtml${encodeHtml(title)}</summary>
   <div class="accordion-content">
 
 $content
