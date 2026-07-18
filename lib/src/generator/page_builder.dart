@@ -38,11 +38,12 @@ class PageBuilder {
 
     return '''
 <!DOCTYPE html>
-<html lang="${config.lang}" dir="${config.dir}" class="dark-mode-${config.theme.darkMode.defaultMode}">
+<html lang="${config.lang}" dir="${config.dir}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${encodeHtml(seoTitle)}</title>
+  ${_scriptsBuilder.buildThemeInit()}
   ${_metaBuilder.buildFavicon()}
   ${_metaBuilder.build(page)}
   ${_analyticsBuilder.build()}

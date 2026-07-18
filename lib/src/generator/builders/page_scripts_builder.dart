@@ -7,6 +7,16 @@ class PageScriptsBuilder {
 
   PageScriptsBuilder({required this.config});
 
+  /// Blocking snippet for `<head>`: applies the theme class before first paint.
+  String buildThemeInit() => '''
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || '${encodeJsString(config.theme.darkMode.defaultMode)}';
+      const dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', dark);
+    })();
+  </script>''';
+
   String buildScripts() => '''
   <script>
     const themeToggle = document.getElementById('theme-toggle');
@@ -26,12 +36,12 @@ class PageScriptsBuilder {
       localStorage.setItem('theme', theme);
     }
 
-    setTheme(getTheme());
-
     themeToggle?.addEventListener('click', () => {
       const current = getTheme();
-      const next = current === 'dark' ? 'light' : 'dark';
-      setTheme(next);
+      const effective = current === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : current;
+      setTheme(effective === 'dark' ? 'light' : 'dark');
     });
 
     document.querySelectorAll('.copy-button').forEach(button => {

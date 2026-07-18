@@ -158,7 +158,7 @@ void main() {
         expect(html, contains('Setup'));
       });
 
-      test('includes dark mode class', () {
+      test('applies theme with a blocking script in head, before styles', () {
         const page = Page(
           path: '/test',
           sourcePath: 'content/test.md',
@@ -168,7 +168,10 @@ void main() {
 
         final html = builder.build(page, sidebar: []);
 
-        expect(html, contains('dark-mode-'));
+        expect(html, isNot(contains('dark-mode-')));
+        final head = html.substring(0, html.indexOf('</head>'));
+        expect(head, contains("classList.toggle('dark', dark)"));
+        expect(head.indexOf('classList.toggle'), lessThan(head.indexOf('<style')));
       });
     });
 
