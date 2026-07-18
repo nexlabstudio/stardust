@@ -58,6 +58,9 @@ class ComponentTransformer implements ContentTransformer {
   /// is already HTML-escaped (e.g., `<Info>` becomes &lt;Info&gt;) and won't match.
   @override
   String transform(String content) {
+    for (final builder in _builders.values.toSet()) {
+      builder.resetPageState();
+    }
     var result = content;
 
     for (final entry in _builders.entries) {

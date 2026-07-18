@@ -12,6 +12,9 @@ abstract class ComponentBuilder {
   /// Build the HTML output for a component
   String build(String tagName, Map<String, String> attributes, String content);
 
+  /// Reset any per-document state (e.g. ID counters) before a new page is transformed
+  void resetPageState() {}
+
   /// Transform all instances of this component's tags in content
   String transformAll(String content, String Function(String) parseAttributes) {
     var result = content;

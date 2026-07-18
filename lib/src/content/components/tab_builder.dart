@@ -9,6 +9,9 @@ class TabBuilder extends ComponentBuilder {
   int _idCounter = 0;
 
   @override
+  void resetPageState() => _idCounter = 0;
+
+  @override
   List<String> get tagNames => ['Tabs', 'CodeGroup'];
 
   @override
@@ -113,7 +116,7 @@ $tabPanels  </div>
 ''';
   }
 
-  String _generateId() => '${DateTime.now().millisecondsSinceEpoch}-${_idCounter++}';
+  String _generateId() => '${_idCounter++}';
 
   String _processMarkdown(String content) {
     final dedented = _dedent(content).trim();

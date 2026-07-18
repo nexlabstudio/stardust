@@ -304,6 +304,38 @@ More outer
       expect(output, contains('📘'));
     });
   });
+  group('deterministic ids', () {
+    const twoTabs = '''
+<Tabs>
+<Tab label="A">a</Tab>
+</Tabs>
+<Tabs>
+<Tab label="B">b</Tab>
+</Tabs>
+''';
+
+    test('same input produces identical output across transformer instances', () {
+      final first = ComponentTransformer().transform(twoTabs);
+      final second = ComponentTransformer().transform(twoTabs);
+
+      expect(first, equals(second));
+    });
+
+    test('repeated transforms on one instance reset the counter', () {
+      final transformer = ComponentTransformer();
+      final first = transformer.transform(twoTabs);
+      final second = transformer.transform(twoTabs);
+
+      expect(first, equals(second));
+    });
+
+    test('sibling tab groups get distinct ids', () {
+      final result = ComponentTransformer().transform(twoTabs);
+
+      expect(result, contains('data-tabs-id="tabs-0"'));
+      expect(result, contains('data-tabs-id="tabs-1"'));
+    });
+  });
 }
 
 class _TestComponentBuilder extends ComponentBuilder {
