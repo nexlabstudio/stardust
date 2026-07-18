@@ -85,7 +85,7 @@ void main() {
     test('deletes a directory carrying the build marker', () async {
       fileSystem.addDirectory('out');
       fileSystem.addFile('out/index.html', '<html></html>');
-      fileSystem.addFile('out/${BuildCommand.buildMarker}', 'marker');
+      fileSystem.addFile(p.join('out', BuildCommand.buildMarker), 'marker');
 
       final code = await runner.run(['build', '-c', configPath, '-o', 'out']);
 
@@ -106,7 +106,7 @@ void main() {
       final code = await runner.run(['build', '-c', configPath, '-o', 'out']);
 
       expect(code, 0);
-      expect(fileSystem.files.keys, contains('out/${BuildCommand.buildMarker}'));
+      expect(fileSystem.files.keys, contains(p.join('out', BuildCommand.buildMarker)));
     });
 
     test('--no-clean skips deletion entirely', () async {
