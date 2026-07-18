@@ -1,4 +1,6 @@
 import 'dart:io';
+
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
 import '../utils/logger.dart';
@@ -7,6 +9,15 @@ import '../utils/logger.dart';
 class PagefindRunner {
   static const _version = '1.4.0';
   static const _baseUrl = 'https://github.com/CloudCannon/pagefind/releases/download';
+
+  /// SHA-256 of each release asset, matching the publisher's .sha256 files.
+  static const _checksums = {
+    'aarch64-apple-darwin': '647fa1da25fefeb24348ed09cccfcbcdd1dcab75c83e146c9f50336a78efb290',
+    'x86_64-apple-darwin': '76aac3acd6f5c1e0d09c3943a4720ce74de7c2ffa17d6697f55ce218eea22402',
+    'aarch64-unknown-linux-musl': 'bff145bda01fbe079f67d68efaee602a44211b79ea45ed98c15d212f064de2ed',
+    'x86_64-unknown-linux-musl': '8737736d3450c3e0a497233324716e95e4d0119c4aacac9361f339968b24dc79',
+    'x86_64-pc-windows-msvc': '2cd20a6d2a9f69a9d340471b1cd4decdf2e8731e2c01d4a8b4d328e23ffd4dbb',
+  };
 
   /// Get the cache directory for Stardust binaries
   static String get _cacheDir {
@@ -41,20 +52,22 @@ class PagefindRunner {
   /// Check if Pagefind needs to be installed or updated
   static bool get needsInstall => !isInstalled || !_isCorrectVersion;
 
-  /// Get the download URL for the current platform
-  static String? get _downloadUrl {
+  /// Download URL and expected SHA-256 for the current platform
+  static (String url, String sha256)? get _download {
     final arch = _getArch();
     if (arch == null) return null;
 
-    final (platform, ext) = switch (Platform.operatingSystem) {
-      'macos' => ('$arch-apple-darwin', 'tar.gz'),
-      'linux' => ('$arch-unknown-linux-musl', 'tar.gz'),
-      'windows' => ('$arch-pc-windows-msvc', 'zip'),
-      _ => (null, null),
+    final target = switch (Platform.operatingSystem) {
+      'macos' => '$arch-apple-darwin',
+      'linux' => '$arch-unknown-linux-musl',
+      'windows' => '$arch-pc-windows-msvc',
+      _ => null,
     };
 
-    if (platform == null) return null;
-    return '$_baseUrl/v$_version/pagefind-v$_version-$platform.$ext';
+    if (_checksums[target] case final sha256?) {
+      return ('$_baseUrl/v$_version/pagefind-v$_version-$target.tar.gz', sha256);
+    }
+    return null;
   }
 
   /// Get the architecture string
@@ -81,11 +94,12 @@ class PagefindRunner {
     Logger logger = const Logger(),
     void Function(int received, int total)? onProgress,
   }) async {
-    final url = _downloadUrl;
-    if (url == null) {
+    final download = _download;
+    if (download == null) {
       logger.error('Unsupported platform for Pagefind');
       return false;
     }
+    final (url, expectedSha256) = download;
 
     final oldVersion = _installedVersion;
     if (oldVersion != null && oldVersion != _version) {
@@ -122,7 +136,7 @@ class PagefindRunner {
 
         return await _extractAndInstall(
           response,
-          url,
+          expectedSha256,
           logger: logger,
           onProgress: onProgress ?? defaultProgress,
         );
@@ -137,12 +151,11 @@ class PagefindRunner {
 
   static Future<bool> _extractAndInstall(
     HttpClientResponse response,
-    String url, {
+    String expectedSha256, {
     required Logger logger,
     void Function(int received, int total)? onProgress,
   }) async {
-    final isZip = url.endsWith('.zip');
-    final tempFile = File(p.join(_cacheDir, isZip ? 'pagefind.zip' : 'pagefind.tar.gz'));
+    final tempFile = File(p.join(_cacheDir, 'pagefind.tar.gz'));
 
     try {
       final total = response.contentLength;
@@ -158,24 +171,21 @@ class PagefindRunner {
       }
       await sink.close();
 
-      if (isZip) {
-        final result = await Process.run(
-          'powershell',
-          ['-Command', 'Expand-Archive', '-Path', tempFile.path, '-DestinationPath', _cacheDir, '-Force'],
-        );
-        if (result.exitCode != 0) {
-          logger.error('Failed to extract Pagefind: ${result.stderr}');
-          return false;
-        }
-      } else {
-        final result = await Process.run(
-          'tar',
-          ['-xzf', tempFile.path, '-C', _cacheDir],
-        );
-        if (result.exitCode != 0) {
-          logger.error('Failed to extract Pagefind: ${result.stderr}');
-          return false;
-        }
+      final actualSha256 = sha256.convert(await tempFile.readAsBytes()).toString();
+      if (actualSha256 != expectedSha256) {
+        logger.error('Pagefind download failed checksum verification');
+        logger.error('   expected: $expectedSha256');
+        logger.error('   actual:   $actualSha256');
+        return false;
+      }
+
+      final result = await Process.run(
+        'tar',
+        ['-xzf', tempFile.path, '-C', _cacheDir],
+      );
+      if (result.exitCode != 0) {
+        logger.error('Failed to extract Pagefind: ${result.stderr}');
+        return false;
       }
 
       if (!Platform.isWindows) {

@@ -21,6 +21,7 @@ dependencies:
   shelf_static: ^1.1.2
   highlight: ^0.7.0
   image: ^4.5.2
+  crypto: ^3.0.7
 
 dev_dependencies:
   coverage: ^1.15.0

@@ -261,7 +261,9 @@ class PageScriptsBuilder {
       if (mermaidDiagrams.length === 0) return;
 
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10.9.6/dist/mermaid.min.js';
+      script.integrity = 'sha384-qX9VvWkP79m/O121ZE6sOYp0nf/pldQgtvWDbkpzi+3mUo4Wn4Ix4cFzNPay3VaB';
+      script.crossOrigin = 'anonymous';
       script.onload = () => {
         mermaid.initialize({
           startOnLoad: true,
@@ -277,7 +279,9 @@ class PageScriptsBuilder {
       if (lucideIcons.length === 0) return;
 
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js';
+      script.src = 'https://cdn.jsdelivr.net/npm/lucide@1.25.0/dist/umd/lucide.min.js';
+      script.integrity = 'sha384-UoXAhqcCCjwD94x4CCSExEHvtO49AfNiY7g/IxDgrPtx4U6o6tvy1cScx9v/RrS9';
+      script.crossOrigin = 'anonymous';
       script.onload = () => {
         lucide.createIcons();
       };

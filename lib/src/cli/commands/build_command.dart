@@ -109,7 +109,10 @@ class BuildCommand extends Command<int> {
       if (!skipSearch && config.search.enabled && config.search.provider == 'pagefind') {
         logger.log('');
         logger.log('🔍 Building search index...');
-        await PagefindRunner.run(outputDir, verbose: verbose, logger: logger);
+        if (!await PagefindRunner.run(outputDir, verbose: verbose, logger: logger)) {
+          logger.error('❌ Search indexing failed. Use --skip-search to build without search.');
+          return 1;
+        }
       }
 
       stopwatch.stop();

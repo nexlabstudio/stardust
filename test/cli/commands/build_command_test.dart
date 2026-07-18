@@ -87,7 +87,7 @@ void main() {
       fileSystem.addFile('out/index.html', '<html></html>');
       fileSystem.addFile(p.join('out', BuildCommand.buildMarker), 'marker');
 
-      final code = await runner.run(['build', '-c', configPath, '-o', 'out']);
+      final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
 
       expect(code, 0);
       expect(fileSystem.operations, contains('deleteDirectory:out:recursive=true'));
@@ -96,14 +96,14 @@ void main() {
     test('deletes an existing empty directory', () async {
       fileSystem.addDirectory('out');
 
-      final code = await runner.run(['build', '-c', configPath, '-o', 'out']);
+      final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
 
       expect(code, 0);
       expect(fileSystem.operations, contains('deleteDirectory:out:recursive=true'));
     });
 
     test('writes the build marker into the fresh output', () async {
-      final code = await runner.run(['build', '-c', configPath, '-o', 'out']);
+      final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
 
       expect(code, 0);
       expect(fileSystem.files.keys, contains(p.join('out', BuildCommand.buildMarker)));
@@ -113,7 +113,7 @@ void main() {
       fileSystem.addDirectory('out');
       fileSystem.addFile('out/index.html', '<html></html>');
 
-      final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--no-clean']);
+      final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--no-clean', '--skip-search']);
 
       expect(code, 0);
       expect(deleted(), isFalse);

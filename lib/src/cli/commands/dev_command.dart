@@ -80,7 +80,9 @@ class DevCommand extends Command<int> {
     // Build search index if enabled
     if (config.search.enabled && config.search.provider == 'pagefind') {
       logger.log('🔍 Building search index...');
-      await PagefindRunner.run(outputDir, logger: logger);
+      if (!await PagefindRunner.run(outputDir, logger: logger)) {
+        logger.error('⚠️  Search indexing failed — continuing without search');
+      }
     }
 
     // Create static file handler with live reload injection
