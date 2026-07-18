@@ -1,0 +1,24 @@
+    [dir="rtl"] .main-container {
+      flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .sidebar {
+      border-right: none;
+      border-left: 1px solid var(--color-border);
+    }
+
+    [dir="rtl"] .toc {
+      order: -1;
+    }
+
+    [dir="rtl"] .page-nav {
+      direction: rtl;
+    }
+
+    [dir="rtl"] .sidebar-chevron {
+      transform: rotate(0deg);
+    }
+
+    [dir="rtl"] .sidebar-group.collapsed .sidebar-chevron {
+      transform: rotate(90deg);
+    }

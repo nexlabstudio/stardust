@@ -1,0 +1,126 @@
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 1.5rem;
+    }
+
+    .header-inner {
+      max-width: 90rem;
+      margin: 0 auto;
+      height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--color-primary) !important;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .logo:hover {
+      color: var(--color-primary) !important;
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .logo-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary);
+      filter: drop-shadow(0 2px 6px rgba(99, 102, 241, 0.3));
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo:hover .logo-icon {
+      transform: rotate(12deg) scale(1.1);
+      filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.5));
+    }
+
+    .dark .logo-icon {
+      filter: drop-shadow(0 2px 6px rgba(99, 102, 241, 0.4));
+    }
+
+    .dark .logo:hover .logo-icon {
+      filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.6));
+    }
+
+    .logo-image {
+      height: 24px;
+      width: auto;
+      flex-shrink: 0;
+    }
+
+    .logo-image.logo-light {
+      display: block;
+    }
+
+    .dark .logo-image.logo-light {
+      display: none;
+    }
+
+    .logo-image.logo-dark {
+      display: none;
+    }
+
+    .dark .logo-image.logo-dark {
+      display: block;
+    }
+
+    .logo-text {
+      line-height: 1;
+      color: var(--color-primary) !important;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo:hover .logo-text {
+      color: var(--color-primary) !important;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav a {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .nav a:hover {
+      color: var(--color-text);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .theme-toggle {
+      padding: 0.5rem;
+      background: transparent;
+      border: none;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius);
+    }
+
+    .theme-toggle:hover {
+      background: var(--color-bg-secondary);
+    }
