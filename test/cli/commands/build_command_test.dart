@@ -111,7 +111,7 @@ void main() {
 
     test('uses build.outDir when --output is not passed', () async {
       await File(configPath).writeAsString(
-          'name: Test\ncontent:\n  dir: ${p.dirname(configPath)}/content\nbuild:\n  outDir: from-config\n');
+          'name: Test\ncontent:\n  dir: ${p.join(p.dirname(configPath), 'content')}\nbuild:\n  outDir: from-config\n');
 
       final code = await runner.run(['build', '-c', configPath, '--skip-search']);
 
@@ -121,7 +121,7 @@ void main() {
 
     test('--output overrides build.outDir', () async {
       await File(configPath).writeAsString(
-          'name: Test\ncontent:\n  dir: ${p.dirname(configPath)}/content\nbuild:\n  outDir: from-config\n');
+          'name: Test\ncontent:\n  dir: ${p.join(p.dirname(configPath), 'content')}\nbuild:\n  outDir: from-config\n');
 
       final code = await runner.run(['build', '-c', configPath, '-o', 'from-flag', '--skip-search']);
 
