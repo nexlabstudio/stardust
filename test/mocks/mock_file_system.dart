@@ -13,15 +13,19 @@ class MockFileSystem implements FileSystem {
   void addFile(String path, String content, {DateTime? modified}) {
     files[path] = content;
     modifiedTimes[path] = modified ?? DateTime.now();
-    final dir = path.substring(0, path.lastIndexOf('/'));
-    if (dir.isNotEmpty) directories.add(dir);
+    _addParentDirectory(path);
   }
 
   void addBinaryFile(String path, Uint8List bytes, {DateTime? modified}) {
     binaryFiles[path] = bytes;
     modifiedTimes[path] = modified ?? DateTime.now();
-    final dir = path.substring(0, path.lastIndexOf('/'));
-    if (dir.isNotEmpty) directories.add(dir);
+    _addParentDirectory(path);
+  }
+
+  void _addParentDirectory(String path) {
+    if (path.lastIndexOf('/') case final slash when slash > 0) {
+      directories.add(path.substring(0, slash));
+    }
   }
 
   void addDirectory(String path) {
@@ -117,8 +121,7 @@ class MockFileSystem implements FileSystem {
           yield _MockFile(filePath);
         }
       } else {
-        final relativePath = filePath.substring(path.length + 1);
-        if (!relativePath.contains('/') && filePath.startsWith('$path/')) {
+        if (filePath.startsWith('$path/') && !filePath.substring(path.length + 1).contains('/')) {
           yield _MockFile(filePath);
         }
       }
