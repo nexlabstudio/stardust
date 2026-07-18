@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
@@ -59,7 +60,11 @@ class DevCommand extends Command<int> {
 
     final logger = loggerFactory();
     final configPath = args['config'] as String;
-    final port = int.parse(args['port'] as String);
+    final port = int.tryParse(args['port'] as String);
+    if (port == null || port < 0 || port > 65535) {
+      logger.error('❌ Invalid port: ${args['port']}');
+      return 1;
+    }
     final host = args['host'] as String;
     final openBrowser = args['open'] as bool;
 
@@ -85,65 +90,68 @@ class DevCommand extends Command<int> {
       }
     }
 
-    // Create static file handler with live reload injection
-    shelf.Handler createHandler() {
-      final staticHandler = createStaticHandler(
-        outputDir,
-        defaultDocument: 'index.html',
-      );
+    // Static file handler with live reload injection
+    final staticHandler = createStaticHandler(
+      outputDir,
+      defaultDocument: 'index.html',
+    );
 
-      return (shelf.Request request) async {
-        final response = await staticHandler(request);
+    Future<shelf.Response> serveWithReloadScript(shelf.Request request) async {
+      final response = await staticHandler(request);
 
-        // Inject live reload script into HTML responses
-        if (response.headers['content-type']?.contains('text/html') ?? false) {
-          var body = await response.readAsString();
-          body = body.replaceFirst(
-            '</body>',
-            '''
+      if (response.headers['content-type']?.contains('text/html') ?? false) {
+        final body = (await response.readAsString()).replaceFirst(
+          '</body>',
+          '''
 <script>
   const es = new EventSource('/__stardust_reload');
+  let lostConnection = false;
   es.onmessage = () => location.reload();
-  es.onerror = () => setTimeout(() => location.reload(), 1000);
+  es.onerror = () => { lostConnection = true; };
+  es.onopen = () => { if (lostConnection) location.reload(); };
 </script>
 </body>''',
-          );
-          return response.change(body: body);
-        }
+        );
+        // content-length must be dropped: the body just grew past the original header
+        return response.change(body: body, headers: {'content-length': null});
+      }
 
-        return response;
-      };
+      return response;
     }
 
-    // SSE endpoint for live reload
-    StreamController<void>? reloadController;
+    // SSE endpoint for live reload — one controller per connected client
+    final reloadClients = <StreamController<List<int>>>{};
 
-    shelf.Response handleReload(shelf.Request request) {
-      if (request.url.path == '__stardust_reload') {
-        reloadController?.close();
-        // ignore: close_sinks - closed on shutdown or next request
-        final controller = StreamController<void>.broadcast();
-        reloadController = controller;
-        final stream = controller.stream.map((_) => 'data: reload\n\n');
+    shelf.Response handleReload() {
+      final controller = StreamController<List<int>>();
+      reloadClients.add(controller);
+      controller.onCancel = () => reloadClients.remove(controller);
+      controller.add(utf8.encode(': connected\n\n'));
 
-        return shelf.Response.ok(
-          stream,
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
-        );
+      return shelf.Response.ok(
+        controller.stream,
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+        // shelf_io buffers streamed bodies by default; SSE needs every event flushed
+        context: {'shelf.io.buffer_output': false},
+      );
+    }
+
+    void notifyReload() {
+      for (final client in reloadClients.toList()) {
+        client.add(utf8.encode('data: reload\n\n'));
       }
-      return shelf.Response.notFound('Not found');
     }
 
     // Combined handler
     final handler = const shelf.Pipeline().addMiddleware(shelf.logRequests()).addHandler((request) {
       if (request.url.path == '__stardust_reload') {
-        return handleReload(request);
+        return handleReload();
       }
-      return createHandler()(request);
+      return serveWithReloadScript(request);
     });
 
     // Start server
@@ -168,27 +176,54 @@ class DevCommand extends Command<int> {
 
     final subscriptions = <StreamSubscription>[];
 
-    // Debounce rebuilds
+    // Debounced, non-overlapping rebuilds: events during a build queue exactly
+    // one trailing rebuild instead of running concurrently.
     Timer? debounceTimer;
+    var building = false;
+    var rebuildQueued = false;
+    var configDirty = false;
 
-    Future<void> rebuild({bool reloadConfig = false}) async {
-      debounceTimer?.cancel();
-      debounceTimer = Timer(const Duration(milliseconds: 100), () async {
-        logger.log('🔄 Rebuilding...');
+    Future<void> runRebuild() async {
+      if (building) {
+        rebuildQueued = true;
+        return;
+      }
+      building = true;
+      logger.log('🔄 Rebuilding...');
 
-        try {
-          if (reloadConfig) {
-            config = (await ConfigLoader.load(configPath, logger: logger)).withDevMode();
-            generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
-          }
-
-          await generator.generate();
-          reloadController?.add(null);
-          logger.log('✅ Done');
-        } catch (e) {
-          logger.error('❌ Build error: $e');
+      try {
+        if (configDirty) {
+          configDirty = false;
+          config = (await ConfigLoader.load(configPath, logger: logger)).withDevMode();
+          generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
         }
-      });
+
+        await generator.generate();
+
+        if (config.search.enabled && config.search.provider == 'pagefind') {
+          if (!await PagefindRunner.run(outputDir, logger: logger)) {
+            logger.error('⚠️  Search re-index failed — search results may be stale');
+          }
+        }
+
+        notifyReload();
+        logger.log('✅ Done');
+      } catch (e) {
+        logger.error('❌ Build error: $e');
+      } finally {
+        building = false;
+      }
+
+      if (rebuildQueued) {
+        rebuildQueued = false;
+        await runRebuild();
+      }
+    }
+
+    void rebuild({bool reloadConfig = false}) {
+      configDirty = configDirty || reloadConfig;
+      debounceTimer?.cancel();
+      debounceTimer = Timer(const Duration(milliseconds: 100), runRebuild);
     }
 
     subscriptions.add(contentWatcher.events.listen((event) {
@@ -217,7 +252,9 @@ class DevCommand extends Command<int> {
       for (final sub in subscriptions) {
         await sub.cancel();
       }
-      await reloadController?.close();
+      for (final client in reloadClients.toList()) {
+        await client.close();
+      }
       await server.close();
       exit(0);
     });
