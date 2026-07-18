@@ -62,6 +62,34 @@ class PageMetaBuilder {
       buffer.writeln(_buildStructuredData(page));
     }
 
+    buffer.write(_buildHreflangTags(page));
+
+    return buffer.toString();
+  }
+
+  String _buildHreflangTags(Page page) {
+    final i18n = config.i18n;
+    if (i18n == null || !i18n.enabled || i18n.locales.isEmpty) return '';
+    if (config.url == null) return '';
+
+    final baseUrl = _normalizeUrl(config.url!);
+    final pagePath = switch (page.path) { '/' => '/', final p => p };
+    final buffer = StringBuffer();
+
+    for (final locale in i18n.locales) {
+      final localePath = locale.path.endsWith('/') ? locale.path.substring(0, locale.path.length - 1) : locale.path;
+      buffer.writeln('  <link rel="alternate" hreflang="${locale.code}" href="$baseUrl$localePath$pagePath">');
+    }
+
+    // x-default points to the default locale
+    final defaultLocale = i18n.locales.where((l) => l.code == i18n.defaultLocale).firstOrNull;
+    if (defaultLocale != null) {
+      final defaultPath = defaultLocale.path.endsWith('/')
+          ? defaultLocale.path.substring(0, defaultLocale.path.length - 1)
+          : defaultLocale.path;
+      buffer.writeln('  <link rel="alternate" hreflang="x-default" href="$baseUrl$defaultPath$pagePath">');
+    }
+
     return buffer.toString();
   }
 

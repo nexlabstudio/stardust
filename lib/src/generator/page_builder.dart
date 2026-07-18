@@ -37,7 +37,7 @@ class PageBuilder {
 
     return '''
 <!DOCTYPE html>
-<html lang="en" class="dark-mode-${config.theme.darkMode.defaultMode}">
+<html lang="${config.lang}" dir="${config.dir}" class="dark-mode-${config.theme.darkMode.defaultMode}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

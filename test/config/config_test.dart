@@ -499,8 +499,8 @@ void main() {
       final config = I18nConfig.fromYaml({
         'defaultLocale': 'en',
         'locales': [
-          {'code': 'en', 'label': 'English'},
-          {'code': 'es', 'label': 'Spanish'},
+          {'code': 'en', 'label': 'English', 'path': '/en/'},
+          {'code': 'es', 'label': 'Spanish', 'path': '/es/'},
         ],
       });
 

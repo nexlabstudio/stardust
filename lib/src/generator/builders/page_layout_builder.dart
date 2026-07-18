@@ -24,13 +24,14 @@ class PageLayoutBuilder {
     final announcement = _buildAnnouncement();
     final versionBanner = _buildVersionBanner();
     final versionDropdown = _buildVersionDropdown();
+    final localeDropdown = _buildLocaleDropdown();
 
     return '''
     $versionBanner
     $announcement
     <header class="header">
       <div class="header-inner">
-        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="${config.i18nStrings.menuToggle}">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
             <line x1="3" y1="12" x2="21" y2="12"/>
@@ -45,6 +46,7 @@ class PageLayoutBuilder {
           $navLinks
         </nav>
         <div class="header-actions">
+          $localeDropdown
           $versionDropdown
           ${config.search.enabled ? '''
           <button class="search-button" id="search-trigger">
@@ -57,7 +59,7 @@ class PageLayoutBuilder {
           </button>
           ''' : ''}
           ${config.theme.darkMode.enabled ? '''
-          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+          <button class="theme-toggle" id="theme-toggle" aria-label="${config.i18nStrings.themeToggle}">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="5"/>
               <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
@@ -82,7 +84,7 @@ class PageLayoutBuilder {
     };
     final dismissBtn = announcement.dismissible
         ? '''
-      <button class="announcement-dismiss" aria-label="Dismiss announcement">
+      <button class="announcement-dismiss" aria-label="${config.i18nStrings.announcementDismiss}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -106,7 +108,7 @@ class PageLayoutBuilder {
     return '''
     <div class="version-banner" id="version-banner" data-version="${currentEntry.version}">
       <span class="version-banner-content">${currentEntry.banner}</span>
-      <button class="version-banner-dismiss" aria-label="Dismiss banner">
+      <button class="version-banner-dismiss" aria-label="${config.i18nStrings.versionDismiss}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -133,13 +135,40 @@ class PageLayoutBuilder {
 
     return '''
       <div class="version-dropdown" id="version-dropdown">
-        <button class="version-dropdown-trigger" aria-label="Select version">
+        <button class="version-dropdown-trigger" aria-label="${config.i18nStrings.versionSelect}">
           $currentLabel
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
         <div class="version-dropdown-menu">
+          $items
+        </div>
+      </div>''';
+  }
+
+  String _buildLocaleDropdown() {
+    final i18n = config.i18n;
+    if (i18n == null || !i18n.enabled) return '';
+    if (i18n.locales.length < 2) return '';
+
+    final currentLocale = i18n.locales.where((l) => l.code == i18n.defaultLocale).firstOrNull;
+    final currentLabel = currentLocale?.label ?? i18n.defaultLocale;
+
+    final items = i18n.locales.map((locale) {
+      final active = locale.code == i18n.defaultLocale ? ' active' : '';
+      return '<a href="${locale.path}" class="locale-dropdown-item$active">${locale.label}</a>';
+    }).join('\n        ');
+
+    return '''
+      <div class="locale-dropdown" id="locale-dropdown">
+        <button class="locale-dropdown-trigger" aria-label="${config.i18nStrings.localeSelect}">
+          $currentLabel
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="locale-dropdown-menu">
           $items
         </div>
       </div>''';
@@ -294,7 +323,7 @@ class PageLayoutBuilder {
 
     return '''
       <aside class="sidebar">
-        <button class="sidebar-close" id="sidebar-close" aria-label="Close menu">
+        <button class="sidebar-close" id="sidebar-close" aria-label="${config.i18nStrings.menuClose}">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -372,7 +401,7 @@ class PageLayoutBuilder {
     if (page.prev case final prev?) {
       buffer.writeln('''
         <a href="${_prefixPath(prev.path)}" class="page-nav-link prev">
-          <span class="page-nav-label">← Previous</span>
+          <span class="page-nav-label">${config.i18nStrings.navPrevious}</span>
           <span class="page-nav-title">${prev.title}</span>
         </a>
 ''');
@@ -383,7 +412,7 @@ class PageLayoutBuilder {
     if (page.next case final next?) {
       buffer.writeln('''
         <a href="${_prefixPath(next.path)}" class="page-nav-link next">
-          <span class="page-nav-label">Next →</span>
+          <span class="page-nav-label">${config.i18nStrings.navNext}</span>
           <span class="page-nav-title">${next.title}</span>
         </a>
 ''');
@@ -406,7 +435,7 @@ class PageLayoutBuilder {
       ${copyright != null ? '<div class="footer-copyright">$copyright</div>' : ''}
       $footerSocial
       <div class="footer-powered">
-        Powered by
+        ${config.i18nStrings.footerPoweredBy}
         <svg class="footer-hex" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/>
         </svg>

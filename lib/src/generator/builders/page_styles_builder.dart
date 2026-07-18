@@ -55,6 +55,7 @@ class PageStylesBuilder {
 ${_buildBaseStyles()}
 ${_buildAnnouncementStyles()}
 ${_buildVersionStyles()}
+${_buildI18nStyles()}
 ${_buildHeaderStyles()}
 ${_buildSearchStyles()}
 ${_buildLayoutStyles()}
@@ -250,6 +251,93 @@ ${_buildCustomStyles()}
     .version-dropdown-item.active {
       color: var(--color-primary);
       font-weight: 600;
+    }''';
+
+  String _buildI18nStyles() => '''
+    .locale-dropdown {
+      position: relative;
+    }
+
+    .locale-dropdown-trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.625rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .locale-dropdown-trigger:hover {
+      color: var(--color-text);
+      border-color: var(--color-text-secondary);
+    }
+
+    .locale-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 0.25rem);
+      right: 0;
+      min-width: 10rem;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 200;
+      padding: 0.25rem;
+    }
+
+    .locale-dropdown.open .locale-dropdown-menu {
+      display: block;
+    }
+
+    .locale-dropdown-item {
+      display: block;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: calc(var(--radius) - 2px);
+    }
+
+    .locale-dropdown-item:hover {
+      background: var(--color-bg-secondary);
+      color: var(--color-text);
+    }
+
+    .locale-dropdown-item.active {
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    [dir="rtl"] .main-container {
+      flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .sidebar {
+      border-right: none;
+      border-left: 1px solid var(--color-border);
+    }
+
+    [dir="rtl"] .toc {
+      order: -1;
+    }
+
+    [dir="rtl"] .page-nav {
+      direction: rtl;
+    }
+
+    [dir="rtl"] .sidebar-chevron {
+      transform: rotate(0deg);
+    }
+
+    [dir="rtl"] .sidebar-group.collapsed .sidebar-chevron {
+      transform: rotate(90deg);
     }''';
 
   String _buildBaseStyles() => '''

@@ -312,6 +312,17 @@ Use your browser's DevTools to inspect elements and discover classes. Here are t
 | `.version-banner-dismiss` | Banner dismiss button |
 | `.version-banner.dismissed` | Hidden state after dismiss |
 
+**Internationalization**
+
+| Class | Element |
+|-------|---------|
+| `.locale-dropdown` | Locale switcher container |
+| `.locale-dropdown-trigger` | Dropdown button showing current locale |
+| `.locale-dropdown-menu` | Dropdown menu (hidden until `.open`) |
+| `.locale-dropdown-item` | Individual locale link |
+| `.locale-dropdown-item.active` | Currently active locale |
+| `[dir="rtl"]` | RTL layout overrides (applied to html element) |
+
 **Navigation**
 
 | Class | Element |

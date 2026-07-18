@@ -90,6 +90,8 @@ sidebar:
         label: Redirects
       - slug: features/versioning
         label: Versioning
+      - slug: features/i18n
+        label: Internationalization
 
   - group: CLI Reference
     icon: terminal

@@ -390,5 +390,78 @@ void main() {
         expect(result, isNot(contains('application/ld+json')));
       });
     });
+
+    group('hreflang tags', () {
+      test('emits hreflang links for each locale', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.com',
+          i18n: I18nConfig(
+            enabled: true,
+            defaultLocale: 'en',
+            locales: [
+              LocaleConfig(code: 'en', label: 'English', path: '/en/'),
+              LocaleConfig(code: 'fr', label: 'Français', path: '/fr/'),
+            ],
+          ),
+        );
+        final b = PageMetaBuilder(config: config);
+
+        final result = b.build(const Page(
+          path: '/getting-started',
+          sourcePath: '/docs/getting-started.md',
+          title: 'Getting Started',
+          content: '',
+        ));
+
+        expect(result, contains('hreflang="en"'));
+        expect(result, contains('href="https://example.com/en/getting-started"'));
+        expect(result, contains('hreflang="fr"'));
+        expect(result, contains('href="https://example.com/fr/getting-started"'));
+      });
+
+      test('includes x-default pointing to default locale', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.com',
+          i18n: I18nConfig(
+            enabled: true,
+            defaultLocale: 'en',
+            locales: [
+              LocaleConfig(code: 'en', label: 'English', path: '/en/'),
+              LocaleConfig(code: 'fr', label: 'Français', path: '/fr/'),
+            ],
+          ),
+        );
+        final b = PageMetaBuilder(config: config);
+
+        final result = b.build(const Page(
+          path: '/test',
+          sourcePath: '/docs/test.md',
+          title: 'Test',
+          content: '',
+        ));
+
+        expect(result, contains('hreflang="x-default"'));
+        expect(result, contains('href="https://example.com/en/test"'));
+      });
+
+      test('does not emit when i18n disabled', () {
+        const config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.com',
+        );
+        final b = PageMetaBuilder(config: config);
+
+        final result = b.build(const Page(
+          path: '/test',
+          sourcePath: '/docs/test.md',
+          title: 'Test',
+          content: '',
+        ));
+
+        expect(result, isNot(contains('hreflang')));
+      });
+    });
   });
 }

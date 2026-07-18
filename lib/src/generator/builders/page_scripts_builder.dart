@@ -176,6 +176,19 @@ class PageScriptsBuilder {
       });
     })();
 
+    (function() {
+      const dropdown = document.getElementById('locale-dropdown');
+      if (!dropdown) return;
+      const trigger = dropdown.querySelector('.locale-dropdown-trigger');
+      trigger.addEventListener('click', () => dropdown.classList.toggle('open'));
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') dropdown.classList.remove('open');
+      });
+    })();
+
     document.querySelectorAll('.code-group').forEach(group => {
       const buttons = group.querySelectorAll('.tab-button');
       const panels = group.querySelectorAll('.tab-panel');
@@ -327,10 +340,10 @@ class PageScriptsBuilder {
             autofocus: true,
             translations: {
               placeholder: '${config.search.placeholder}',
-              zero_results: 'No results found for [SEARCH_TERM]',
-              many_results: '[COUNT] results',
-              one_result: '1 result',
-              searching: 'Searching...',
+              zero_results: '${config.i18nStrings.searchNoResults.replaceAll('%s', '[SEARCH_TERM]')}',
+              many_results: '${config.i18nStrings.searchManyResults.replaceAll('%s', '[COUNT]')}',
+              one_result: '${config.i18nStrings.searchOneResult}',
+              searching: '${config.i18nStrings.searchSearching}',
             },
           });
         }

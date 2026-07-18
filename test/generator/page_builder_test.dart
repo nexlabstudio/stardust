@@ -308,6 +308,57 @@ void main() {
     });
   });
 
+  group('html lang and dir', () {
+    test('defaults to lang="en" and dir="ltr"', () {
+      const config = StardustConfig(name: 'Test');
+      final builder = PageBuilder(config: config);
+
+      final result = builder.build(
+        const Page(path: '/', sourcePath: '/docs/index.md', title: 'Home', content: ''),
+        sidebar: const [],
+      );
+
+      expect(result, contains('lang="en"'));
+      expect(result, contains('dir="ltr"'));
+    });
+
+    test('sets lang from i18n defaultLocale', () {
+      const config = StardustConfig(
+        name: 'Test',
+        i18n: I18nConfig(defaultLocale: 'fr'),
+      );
+      final builder = PageBuilder(config: config);
+
+      final result = builder.build(
+        const Page(path: '/', sourcePath: '/docs/index.md', title: 'Home', content: ''),
+        sidebar: const [],
+      );
+
+      expect(result, contains('lang="fr"'));
+    });
+
+    test('sets dir="rtl" when current locale is RTL', () {
+      const config = StardustConfig(
+        name: 'Test',
+        i18n: I18nConfig(
+          enabled: true,
+          defaultLocale: 'ar',
+          locales: [
+            LocaleConfig(code: 'ar', label: 'العربية', dir: 'rtl', path: '/ar/'),
+          ],
+        ),
+      );
+      final builder = PageBuilder(config: config);
+
+      final result = builder.build(
+        const Page(path: '/', sourcePath: '/docs/index.md', title: 'Home', content: ''),
+        sidebar: const [],
+      );
+
+      expect(result, contains('dir="rtl"'));
+    });
+  });
+
   group('PageLink', () {
     test('stores path and title', () {
       const link = PageLink(path: '/next-page', title: 'Next Page');

@@ -45,14 +45,21 @@ class I18nConfig {
   final bool enabled;
   final String defaultLocale;
   final List<LocaleConfig> locales;
+  final I18nStrings strings;
 
-  const I18nConfig({this.enabled = false, this.defaultLocale = 'en', this.locales = const []});
+  const I18nConfig({
+    this.enabled = false,
+    this.defaultLocale = 'en',
+    this.locales = const [],
+    this.strings = const I18nStrings(),
+  });
 
   factory I18nConfig.fromYaml(Map? yaml) => switch (yaml) {
         final Map yaml => I18nConfig(
             enabled: yaml['enabled'] as bool? ?? false,
             defaultLocale: yaml['defaultLocale'] as String? ?? 'en',
             locales: (yaml['locales'] as List?)?.map((e) => LocaleConfig.fromYaml(e as Map)).toList() ?? [],
+            strings: I18nStrings.fromYaml(yaml['strings'] as Map?),
           ),
         _ => const I18nConfig(),
       };
@@ -62,12 +69,102 @@ class LocaleConfig {
   final String code;
   final String label;
   final String dir;
+  final String path;
 
-  const LocaleConfig({required this.code, required this.label, this.dir = 'ltr'});
+  const LocaleConfig({required this.code, required this.label, this.dir = 'ltr', required this.path});
 
   factory LocaleConfig.fromYaml(Map yaml) => LocaleConfig(
         code: yaml['code'] as String,
         label: yaml['label'] as String,
         dir: yaml['dir'] as String? ?? 'ltr',
+        path: yaml['path'] as String,
       );
+}
+
+class I18nStrings {
+  final String searchPlaceholder;
+  final String navPrevious;
+  final String navNext;
+  final String tocTitle;
+  final String footerPoweredBy;
+  final String themeToggle;
+  final String menuToggle;
+  final String menuClose;
+  final String announcementDismiss;
+  final String versionSelect;
+  final String versionDismiss;
+  final String searchNoResults;
+  final String searchOneResult;
+  final String searchManyResults;
+  final String searchSearching;
+  final String localeSelect;
+
+  const I18nStrings({
+    this.searchPlaceholder = 'Search documentation...',
+    this.navPrevious = '← Previous',
+    this.navNext = 'Next →',
+    this.tocTitle = 'On this page',
+    this.footerPoweredBy = 'Powered by',
+    this.themeToggle = 'Toggle dark mode',
+    this.menuToggle = 'Toggle menu',
+    this.menuClose = 'Close menu',
+    this.announcementDismiss = 'Dismiss announcement',
+    this.versionSelect = 'Select version',
+    this.versionDismiss = 'Dismiss banner',
+    this.searchNoResults = 'No results found for "%s"',
+    this.searchOneResult = '1 result',
+    this.searchManyResults = '%s results',
+    this.searchSearching = 'Searching...',
+    this.localeSelect = 'Select language',
+  });
+
+  static const _keyMap = {
+    'search.placeholder': 'searchPlaceholder',
+    'nav.previous': 'navPrevious',
+    'nav.next': 'navNext',
+    'toc.title': 'tocTitle',
+    'footer.poweredBy': 'footerPoweredBy',
+    'theme.toggle': 'themeToggle',
+    'menu.toggle': 'menuToggle',
+    'menu.close': 'menuClose',
+    'announcement.dismiss': 'announcementDismiss',
+    'version.select': 'versionSelect',
+    'version.dismiss': 'versionDismiss',
+    'search.noResults': 'searchNoResults',
+    'search.oneResult': 'searchOneResult',
+    'search.manyResults': 'searchManyResults',
+    'search.searching': 'searchSearching',
+    'locale.select': 'localeSelect',
+  };
+
+  factory I18nStrings.fromYaml(Map? yaml) {
+    if (yaml == null || yaml.isEmpty) return const I18nStrings();
+
+    final overrides = <String, String>{};
+    for (final entry in yaml.entries) {
+      final field = _keyMap[entry.key as String];
+      if (field != null) {
+        overrides[field] = entry.value as String;
+      }
+    }
+
+    return I18nStrings(
+      searchPlaceholder: overrides['searchPlaceholder'] ?? 'Search documentation...',
+      navPrevious: overrides['navPrevious'] ?? '← Previous',
+      navNext: overrides['navNext'] ?? 'Next →',
+      tocTitle: overrides['tocTitle'] ?? 'On this page',
+      footerPoweredBy: overrides['footerPoweredBy'] ?? 'Powered by',
+      themeToggle: overrides['themeToggle'] ?? 'Toggle dark mode',
+      menuToggle: overrides['menuToggle'] ?? 'Toggle menu',
+      menuClose: overrides['menuClose'] ?? 'Close menu',
+      announcementDismiss: overrides['announcementDismiss'] ?? 'Dismiss announcement',
+      versionSelect: overrides['versionSelect'] ?? 'Select version',
+      versionDismiss: overrides['versionDismiss'] ?? 'Dismiss banner',
+      searchNoResults: overrides['searchNoResults'] ?? 'No results found for "%s"',
+      searchOneResult: overrides['searchOneResult'] ?? '1 result',
+      searchManyResults: overrides['searchManyResults'] ?? '%s results',
+      searchSearching: overrides['searchSearching'] ?? 'Searching...',
+      localeSelect: overrides['localeSelect'] ?? 'Select language',
+    );
+  }
 }

@@ -1132,5 +1132,176 @@ void main() {
         expect(result, isNot(contains('theme-toggle')));
       });
     });
+
+    group('locale dropdown', () {
+      test('renders when i18n enabled with 2+ locales', () {
+        const config = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            enabled: true,
+            defaultLocale: 'en',
+            locales: [
+              LocaleConfig(code: 'en', label: 'English', path: '/en/'),
+              LocaleConfig(code: 'ar', label: 'العربية', dir: 'rtl', path: '/ar/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('locale-dropdown'));
+        expect(result, contains('locale-dropdown-trigger'));
+        expect(result, contains('locale-dropdown-menu'));
+      });
+
+      test('does not render when i18n disabled', () {
+        final result = builder.buildHeader();
+
+        expect(result, isNot(contains('locale-dropdown')));
+      });
+
+      test('does not render when only one locale', () {
+        const config = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            enabled: true,
+            defaultLocale: 'en',
+            locales: [
+              LocaleConfig(code: 'en', label: 'English', path: '/en/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, isNot(contains('locale-dropdown')));
+      });
+
+      test('shows current locale label', () {
+        const config = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            enabled: true,
+            defaultLocale: 'en',
+            locales: [
+              LocaleConfig(code: 'en', label: 'English', path: '/en/'),
+              LocaleConfig(code: 'fr', label: 'Français', path: '/fr/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('English'));
+      });
+
+      test('lists all locales with correct paths', () {
+        const config = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            enabled: true,
+            defaultLocale: 'en',
+            locales: [
+              LocaleConfig(code: 'en', label: 'English', path: '/en/'),
+              LocaleConfig(code: 'fr', label: 'Français', path: '/fr/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('href="/en/"'));
+        expect(result, contains('href="/fr/"'));
+      });
+
+      test('marks current locale as active', () {
+        const config = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            enabled: true,
+            defaultLocale: 'en',
+            locales: [
+              LocaleConfig(code: 'en', label: 'English', path: '/en/'),
+              LocaleConfig(code: 'fr', label: 'Français', path: '/fr/'),
+            ],
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('locale-dropdown-item active'));
+      });
+    });
+
+    group('i18n strings', () {
+      test('uses default English strings when no overrides', () {
+        final result = builder.buildHeader();
+
+        expect(result, contains('aria-label="Toggle menu"'));
+        expect(result, contains('aria-label="Toggle dark mode"'));
+      });
+
+      test('overrides strings from i18n config', () {
+        const config = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            strings: I18nStrings(
+              menuToggle: 'Menü umschalten',
+              themeToggle: 'Dunkelmodus umschalten',
+            ),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('aria-label="Menü umschalten"'));
+        expect(result, contains('aria-label="Dunkelmodus umschalten"'));
+      });
+
+      test('uses i18n strings for previous/next navigation', () {
+        const config = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            strings: I18nStrings(
+              navPrevious: '← Zurück',
+              navNext: 'Weiter →',
+            ),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildPageNav(const Page(
+          path: '/test',
+          sourcePath: '/docs/test.md',
+          title: 'Test',
+          content: '',
+          prev: PageLink(path: '/prev', title: 'Prev'),
+          next: PageLink(path: '/next', title: 'Next'),
+        ));
+
+        expect(result, contains('← Zurück'));
+        expect(result, contains('Weiter →'));
+      });
+
+      test('uses i18n strings for footer powered by', () {
+        const config = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            strings: I18nStrings(footerPoweredBy: 'Unterstützt von'),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildFooter();
+
+        expect(result, contains('Unterstützt von'));
+      });
+    });
   });
 }

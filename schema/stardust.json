@@ -581,12 +581,24 @@
                   "rtl"
                 ],
                 "default": "ltr"
+              },
+              "path": {
+                "type": "string",
+                "description": "URL path where this locale is deployed (e.g. /en/)"
               }
             },
             "required": [
               "code",
-              "label"
+              "label",
+              "path"
             ]
+          }
+        },
+        "strings": {
+          "type": "object",
+          "description": "Override UI strings for localization",
+          "additionalProperties": {
+            "type": "string"
           }
         }
       }

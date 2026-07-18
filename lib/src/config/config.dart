@@ -72,6 +72,17 @@ class StardustConfig {
     this.devMode = false,
   });
 
+  I18nStrings get i18nStrings => i18n?.strings ?? const I18nStrings();
+
+  String get lang => i18n?.defaultLocale ?? 'en';
+
+  String get dir {
+    final i18nConfig = i18n;
+    if (i18nConfig == null || !i18nConfig.enabled) return 'ltr';
+    final current = i18nConfig.locales.where((l) => l.code == i18nConfig.defaultLocale).firstOrNull;
+    return current?.dir ?? 'ltr';
+  }
+
   /// Returns the base path for URL generation.
   /// Returns empty string in dev mode.
   /// Uses explicit build.basePath if set, otherwise extracts from url.
