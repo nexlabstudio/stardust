@@ -1,0 +1,16 @@
+# Normalize all text files to LF in the repository and on checkout,
+# so tests and tooling see identical bytes on every platform.
+* text=auto eol=lf
+
+# PowerShell scripts check out with CRLF (Windows convention)
+*.ps1 text eol=crlf
+
+# Binary files — never touch line endings
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.woff binary
+*.woff2 binary
