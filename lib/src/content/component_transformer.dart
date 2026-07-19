@@ -15,18 +15,7 @@ import 'utils/attribute_parser.dart';
 import 'utils/code_masker.dart';
 import 'utils/component_scanner.dart';
 
-/// Transforms JSX-style components into HTML
-///
-/// Supports components like:
-/// - `<Info>`, `<Warning>`, `<Danger>`, `<Tip>`, `<Note>`, `<Success>`
-/// - `<Tabs>`, `<Tab>`
-/// - `<CodeGroup>`, `<Code>`
-/// - `<Accordion>`, `<AccordionGroup>`
-/// - `<Steps>`, `<Step>`
-/// - `<Cards>`, `<Card>`
-/// - And many more...
-///
-/// Custom components can be registered via [register].
+/// Transforms JSX-style components into HTML; custom builders register via [register].
 class ComponentTransformer implements ContentTransformer {
   final Map<String, ComponentBuilder> _builders = {};
 
@@ -43,10 +32,7 @@ class ComponentTransformer implements ContentTransformer {
     register(UtilityBuilder());
   }
 
-  /// Register a component builder
-  ///
-  /// This allows custom components to be added. The builder will handle
-  /// all tag names returned by [ComponentBuilder.tagNames].
+  /// Register a builder for every tag name it declares
   void register(ComponentBuilder builder) {
     for (final tagName in builder.tagNames) {
       _builders[tagName] = builder;

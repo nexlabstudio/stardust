@@ -95,7 +95,6 @@ $content
       return _buildPhoneFrame(attributes, content);
     }
 
-    // Browser frame
     final urlBar = url != null ? '<div class="frame-url">${encodeHtml(url)}</div>' : '';
 
     return '''

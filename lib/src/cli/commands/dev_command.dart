@@ -81,7 +81,6 @@ class DevCommand extends Command<int> {
     var generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
     await generator.generate();
 
-    // Build search index if enabled
     if (config.search.enabled && config.search.provider == 'pagefind') {
       logger.log('🔍 Building search index...');
       if (!await PagefindRunner.run(outputDir, logger: logger)) {
@@ -89,7 +88,6 @@ class DevCommand extends Command<int> {
       }
     }
 
-    // Static file handler with live reload injection
     final staticHandler = createStaticHandler(
       outputDir,
       defaultDocument: 'index.html',
@@ -118,7 +116,6 @@ class DevCommand extends Command<int> {
       return response;
     }
 
-    // SSE endpoint for live reload — one controller per connected client
     final reloadClients = <StreamController<List<int>>>{};
 
     shelf.Response handleReload() {
@@ -145,7 +142,6 @@ class DevCommand extends Command<int> {
       }
     }
 
-    // Combined handler
     final handler = const shelf.Pipeline().addMiddleware(shelf.logRequests()).addHandler((request) {
       if (request.url.path == '__stardust_reload') {
         return handleReload();
@@ -153,7 +149,6 @@ class DevCommand extends Command<int> {
       return serveWithReloadScript(request);
     });
 
-    // Start server
     final server = await shelf_io.serve(handler, host, port);
     logger.log('');
     logger.log('  ✨ Stardust dev server running');
@@ -167,7 +162,6 @@ class DevCommand extends Command<int> {
       await _openBrowser('http://$host:$port/');
     }
 
-    // Watch for changes
     final contentDir = config.content.dir;
     final assetsDir = config.build.assets.dir;
     final contentWatcher = DirectoryWatcher(contentDir);
@@ -245,7 +239,6 @@ class DevCommand extends Command<int> {
       rebuild(reloadConfig: true);
     }));
 
-    // Handle shutdown
     ProcessSignal.sigint.watch().listen((_) async {
       logger.log('\n👋 Shutting down...');
       for (final sub in subscriptions) {
@@ -258,7 +251,6 @@ class DevCommand extends Command<int> {
       exit(0);
     });
 
-    // Keep running
     await Completer<void>().future;
 
     return 0;

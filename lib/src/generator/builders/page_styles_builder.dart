@@ -95,12 +95,10 @@ ${_buildCustomStyles()}
 
     final buffer = StringBuffer();
 
-    // Include pre-resolved CSS file content
     if (resolvedCssFileContent case final String content when content.isNotEmpty) {
       buffer.write(content);
     }
 
-    // Append inline CSS
     if (custom.css case final String css when css.isNotEmpty) {
       if (buffer.isNotEmpty) buffer.writeln();
       buffer.write(css);

@@ -57,7 +57,6 @@ class InitCommand extends Command<int> {
       await dir.create(recursive: true);
     }
 
-    // Create stardust.yaml
     await _createFile(
       p.join(targetDir, 'stardust.yaml'),
       _docsYamlTemplate(projectName),
@@ -65,13 +64,11 @@ class InitCommand extends Command<int> {
       'stardust.yaml',
     );
 
-    // Create docs directory
     final docsDir = Directory(p.join(targetDir, 'docs'));
     if (!docsDir.existsSync()) {
       await docsDir.create(recursive: true);
     }
 
-    // Create index.md
     await _createFile(
       p.join(targetDir, 'docs', 'index.md'),
       _indexMdTemplate(projectName),
@@ -79,7 +76,6 @@ class InitCommand extends Command<int> {
       'docs/index.md',
     );
 
-    // Create getting-started.md
     await _createFile(
       p.join(targetDir, 'docs', 'getting-started.md'),
       _gettingStartedTemplate(),
@@ -87,13 +83,11 @@ class InitCommand extends Command<int> {
       'docs/getting-started.md',
     );
 
-    // Create public directory
     final publicDir = Directory(p.join(targetDir, 'public'));
     if (!publicDir.existsSync()) {
       await publicDir.create(recursive: true);
     }
 
-    // Create .gitignore
     await _createFile(
       p.join(targetDir, '.gitignore'),
       _gitignoreTemplate(),
