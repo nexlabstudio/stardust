@@ -35,8 +35,8 @@ void main() {
 
       expect(code, 0);
       final path = p.join('docs', 'getting-started.md');
-      expect(fileSystem.files[path], contains('title: Getting Started'));
-      expect(fileSystem.files[path], contains('# Getting Started'));
+      expect(fileSystem.fileAt(path), contains('title: Getting Started'));
+      expect(fileSystem.fileAt(path), contains('# Getting Started'));
       expect(logs.join('\n'), contains('- slug: getting-started'));
     });
 
@@ -44,7 +44,7 @@ void main() {
       final code = await runner.run(['new', 'guides/install', '--title', 'Install Guide']);
 
       expect(code, 0);
-      expect(fileSystem.files[p.join('docs', 'guides/install.md')], contains('title: Install Guide'));
+      expect(fileSystem.fileAt(p.join('docs', 'guides', 'install.md')), contains('title: Install Guide'));
     });
 
     test('refuses to overwrite an existing page', () async {
@@ -54,7 +54,7 @@ void main() {
 
       expect(code, 1);
       expect(errors.join('\n'), contains('already exists'));
-      expect(fileSystem.files[p.join('docs', 'existing.md')], equals('original'));
+      expect(fileSystem.fileAt(p.join('docs', 'existing.md')), equals('original'));
     });
 
     test('requires a slug argument', () async {
@@ -68,16 +68,17 @@ void main() {
   group('clean', () {
     test('removes marked output, dev output, and caches', () async {
       fileSystem.addFile(p.join('dist', outputGuardMarker), 'marker');
-      fileSystem.addFile(p.join('dist', 'index.html'), 'x');
+      fileSystem.addFile('dist/index.html', 'x');
       fileSystem.addDirectory('.stardust');
       fileSystem.addDirectory(p.join('.dart_tool', 'stardust'));
 
       final code = await runner.run(['clean']);
 
       expect(code, 0);
-      expect(fileSystem.operations, contains('deleteDirectory:dist:recursive=true'));
-      expect(fileSystem.operations, contains('deleteDirectory:.stardust:recursive=true'));
-      expect(fileSystem.operations, contains('deleteDirectory:${p.join('.dart_tool', 'stardust')}:recursive=true'));
+      expect(fileSystem.operations, contains(MockFileSystem.op('deleteDirectory', 'dist', recursive: true)));
+      expect(fileSystem.operations, contains(MockFileSystem.op('deleteDirectory', '.stardust', recursive: true)));
+      expect(fileSystem.operations,
+          contains(MockFileSystem.op('deleteDirectory', p.join('.dart_tool', 'stardust'), recursive: true)));
     });
 
     test('skips an unmarked non-empty output directory', () async {

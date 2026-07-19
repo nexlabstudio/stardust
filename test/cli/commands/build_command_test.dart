@@ -90,7 +90,7 @@ void main() {
       final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
 
       expect(code, 0);
-      expect(fileSystem.operations, contains('deleteDirectory:out:recursive=true'));
+      expect(fileSystem.operations, contains(MockFileSystem.op('deleteDirectory', 'out', recursive: true)));
     });
 
     test('deletes an existing empty directory', () async {
@@ -99,14 +99,14 @@ void main() {
       final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
 
       expect(code, 0);
-      expect(fileSystem.operations, contains('deleteDirectory:out:recursive=true'));
+      expect(fileSystem.operations, contains(MockFileSystem.op('deleteDirectory', 'out', recursive: true)));
     });
 
     test('writes the build marker into the fresh output', () async {
       final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
 
       expect(code, 0);
-      expect(fileSystem.files.keys, contains(p.join('out', BuildCommand.buildMarker)));
+      expect(fileSystem.hasFile(p.join('out', BuildCommand.buildMarker)), isTrue);
     });
 
     test('uses build.outDir when --output is not passed', () async {
@@ -116,7 +116,7 @@ void main() {
       final code = await runner.run(['build', '-c', configPath, '--skip-search']);
 
       expect(code, 0);
-      expect(fileSystem.files.keys, contains(p.join('from-config', BuildCommand.buildMarker)));
+      expect(fileSystem.hasFile(p.join('from-config', BuildCommand.buildMarker)), isTrue);
     });
 
     test('--output overrides build.outDir', () async {
@@ -126,8 +126,8 @@ void main() {
       final code = await runner.run(['build', '-c', configPath, '-o', 'from-flag', '--skip-search']);
 
       expect(code, 0);
-      expect(fileSystem.files.keys, contains(p.join('from-flag', BuildCommand.buildMarker)));
-      expect(fileSystem.files.keys, isNot(contains(p.join('from-config', BuildCommand.buildMarker))));
+      expect(fileSystem.hasFile(p.join('from-flag', BuildCommand.buildMarker)), isTrue);
+      expect(fileSystem.hasFile(p.join('from-config', BuildCommand.buildMarker)), isFalse);
     });
 
     test('--no-clean skips deletion entirely', () async {
