@@ -29,6 +29,7 @@ Search is powered by [Pagefind](https://pagefind.app/), which creates a compact 
 | Key | Action |
 |-----|--------|
 | `↑` / `↓` | Navigate through results |
+| `Home` / `End` | Jump to first / last result |
 | `Enter` | Go to selected result |
 | `Escape` | Close search dialog |
 

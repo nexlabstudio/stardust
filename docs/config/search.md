@@ -70,6 +70,7 @@ Users can open search by:
 | Key | Action |
 |-----|--------|
 | `↑` / `↓` | Navigate results |
+| `Home` / `End` | Jump to first / last result |
 | `Enter` | Go to selected result |
 | `Escape` | Close search |
 
@@ -145,10 +146,5 @@ search:
   provider: pagefind
   placeholder: "Search docs..."
   hotkey: "/"
-
-  # Only needed for Algolia
-  algolia:
-    appId: YOUR_APP_ID
-    apiKey: YOUR_SEARCH_API_KEY
-    indexName: YOUR_INDEX_NAME
+  pageSize: 8  # results shown per page, with a Load more button
 ```
