@@ -72,5 +72,10 @@ void main() {
       expect(modal, contains('loadError'));
       expect(modal, contains('UNAVAILABLE'));
     });
+
+    test('sanitizes result excerpts to only allow <mark> highlights', () {
+      expect(modal, contains('markOnly(s.excerpt)'));
+      expect(modal, isNot(contains('+ (s.excerpt || \'\') +')));
+    });
   });
 }

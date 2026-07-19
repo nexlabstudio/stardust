@@ -360,6 +360,10 @@ ${buildAppJs()}
           .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       }
 
+      function markOnly(html) {
+        return String(html == null ? '' : html).replace(/<(?!\\/?mark>)/gi, '&lt;');
+      }
+
       function countLabel(n) {
         return n === 1 ? ONE_RESULT : MANY_RESULTS.replace('%s', n);
       }
@@ -413,7 +417,7 @@ ${buildAppJs()}
             const sid = 'sd-r-' + (uid++);
             html += '<li><a class="sd-search__sub" role="option" id="' + sid + '" href="' + esc(s.url) + '" tabindex="-1">'
               + SUB_ICON + '<span class="sd-search__sub-title">' + esc(s.title) + '</span>'
-              + '<span class="sd-search__excerpt">' + (s.excerpt || '') + '</span></a></li>';
+              + '<span class="sd-search__excerpt">' + markOnly(s.excerpt) + '</span></a></li>';
           }
           html += '</ul>';
         }
