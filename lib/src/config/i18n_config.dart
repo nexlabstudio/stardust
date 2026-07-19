@@ -95,6 +95,9 @@ class I18nStrings {
   final String searchOneResult;
   final String searchManyResults;
   final String searchSearching;
+  final String searchClear;
+  final String searchMore;
+  final String searchUnavailable;
   final String localeSelect;
 
   const I18nStrings({
@@ -111,6 +114,9 @@ class I18nStrings {
     this.searchOneResult = '1 result',
     this.searchManyResults = '%s results',
     this.searchSearching = 'Searching...',
+    this.searchClear = 'Clear search',
+    this.searchMore = 'Load more results',
+    this.searchUnavailable = 'Search is unavailable',
     this.localeSelect = 'Select language',
   });
 
@@ -128,6 +134,9 @@ class I18nStrings {
     'search.oneResult': 'searchOneResult',
     'search.manyResults': 'searchManyResults',
     'search.searching': 'searchSearching',
+    'search.clear': 'searchClear',
+    'search.more': 'searchMore',
+    'search.unavailable': 'searchUnavailable',
     'locale.select': 'localeSelect',
   };
 
@@ -156,6 +165,9 @@ class I18nStrings {
       searchOneResult: overrides['searchOneResult'] ?? '1 result',
       searchManyResults: overrides['searchManyResults'] ?? '%s results',
       searchSearching: overrides['searchSearching'] ?? 'Searching...',
+      searchClear: overrides['searchClear'] ?? 'Clear search',
+      searchMore: overrides['searchMore'] ?? 'Load more results',
+      searchUnavailable: overrides['searchUnavailable'] ?? 'Search is unavailable',
       localeSelect: overrides['localeSelect'] ?? 'Select language',
     );
   }

@@ -30,39 +30,52 @@ void main() {
     });
   });
 
-  group('search modal', () {
+  group('search modal (raw pagefind api)', () {
     const searchOn = SearchConfig(enabled: true, hotkey: 's');
     const config = StardustConfig(name: 'T', url: 'https://example.com/docs', search: searchOn);
+    final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
 
-    test('prefixes result urls with the base path via processResult', () {
-      final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
-
-      expect(modal, contains("const base = '/docs'"));
-      expect(modal, contains('processResult'));
-      expect(modal, contains('sub_results'));
-      expect(modal, isNot(contains('baseUrl:')));
+    test('drives the raw search API, not the PagefindUI widget', () {
+      expect(modal, contains("import(BASE + '/_pagefind/pagefind.js')"));
+      expect(modal, contains('debouncedSearch'));
+      expect(modal, isNot(contains('PagefindUI')));
+      expect(modal, isNot(contains('pagefind-ui')));
+      expect(modal, isNot(contains('processResult')));
     });
 
-    test('uses a native dialog with default excerpt length', () {
-      final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
+    test('prefixes result urls via the baseUrl option on a subpath', () {
+      expect(modal, contains("const BASE = '/docs'"));
+      expect(modal, contains("baseUrl: BASE || '/'"));
+    });
 
+    test('renders our own DOM with build-time inline icons', () {
       expect(modal, contains('<dialog id="search-modal"'));
+      expect(modal, contains('class="sd-search__results"'));
+      expect(modal, contains('<svg class="lucide"'));
+      expect(modal, isNot(contains('data-lucide')));
+    });
+
+    test('implements the keyboard combobox pattern', () {
+      expect(modal, contains("e.key === 'ArrowDown'"));
+      expect(modal, contains("e.key === 'ArrowUp'"));
+      expect(modal, contains('aria-activedescendant'));
+      expect(modal, contains('role="listbox"'));
+    });
+
+    test('honors the configured hotkey and native dialog controls', () {
+      expect(modal, contains("e.key === 's'"));
       expect(modal, contains('modal.showModal()'));
       expect(modal, contains('modal.close()'));
-      expect(modal, isNot(contains('excerptLength')));
-      expect(modal, isNot(contains('search-backdrop')));
     });
 
-    test('honors the configured hotkey', () {
-      final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
-
-      expect(modal, contains("e.key === 's'"));
+    test('shows a message when the index cannot load', () {
+      expect(modal, contains('loadError'));
+      expect(modal, contains('UNAVAILABLE'));
     });
 
-    test('falls back with a message when the index is missing', () {
-      final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
-
-      expect(modal, contains('Search index not found'));
+    test('sanitizes result excerpts to only allow <mark> highlights', () {
+      expect(modal, contains('markOnly(s.excerpt)'));
+      expect(modal, isNot(contains('+ (s.excerpt || \'\') +')));
     });
   });
 }

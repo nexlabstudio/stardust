@@ -3,12 +3,14 @@ class SearchConfig {
   final String provider;
   final String placeholder;
   final String hotkey;
+  final int pageSize;
 
   const SearchConfig({
     this.enabled = true,
     this.provider = 'pagefind',
     this.placeholder = 'Search docs...',
     this.hotkey = '/',
+    this.pageSize = 8,
   });
 
   factory SearchConfig.fromYaml(Map? yaml) => switch (yaml) {
@@ -17,6 +19,7 @@ class SearchConfig {
             provider: yaml['provider'] as String? ?? 'pagefind',
             placeholder: yaml['placeholder'] as String? ?? 'Search docs...',
             hotkey: yaml['hotkey'] as String? ?? '/',
+            pageSize: (yaml['pageSize'] as num?)?.toInt() ?? 8,
           ),
         _ => const SearchConfig(),
       };

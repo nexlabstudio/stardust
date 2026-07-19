@@ -76,18 +76,11 @@ ${_section('footer')}
 ${_section('social')}
 ${_section('syntax-highlighting')}
 ${_section('responsive')}
-${_buildPagefindOverrides()}
 ${_buildCustomStyles()}
 ''';
   }
 
   String _section(String key) => stardustCssSections[key] ?? '';
-
-  String _buildPagefindOverrides() {
-    if (!config.search.enabled || config.search.provider != 'pagefind') return '';
-
-    return _section('pagefind');
-  }
 
   String _buildCustomStyles() {
     final custom = config.theme.custom;

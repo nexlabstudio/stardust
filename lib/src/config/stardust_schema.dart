@@ -344,6 +344,12 @@ const stardustSchemaJson = r'''
         "hotkey": {
           "type": "string",
           "default": "/"
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 8,
+          "description": "Number of search results rendered per page (with a Load more button)."
         }
       }
     },
