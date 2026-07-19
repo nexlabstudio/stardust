@@ -60,12 +60,12 @@ void main() {
 
         expect(count, 2);
 
-        final html1 = fileSystem.files[p.join('dist', 'old-page', 'index.html')];
+        final html1 = fileSystem.fileAt(p.join('dist', 'old-page', 'index.html'));
         expect(html1, isNotNull);
         expect(html1, contains('url=/new-page'));
         expect(html1, contains('href="/new-page"'));
 
-        final html2 = fileSystem.files[p.join('dist', 'docs', 'old', 'index.html')];
+        final html2 = fileSystem.fileAt(p.join('dist', 'docs', 'old', 'index.html'));
         expect(html2, isNotNull);
         expect(html2, contains('url=/docs/new'));
       });
@@ -85,7 +85,7 @@ void main() {
           pages: [],
         );
 
-        final html = fileSystem.files[p.join('dist', 'old', 'index.html')];
+        final html = fileSystem.fileAt(p.join('dist', 'old', 'index.html'));
         expect(html, contains('url=/mysite/new'));
         expect(html, contains('href="/mysite/new"'));
       });
@@ -105,7 +105,7 @@ void main() {
         );
 
         expect(errors, contains(contains('Cannot redirect from "/"')));
-        expect(fileSystem.files.containsKey(p.join('dist', 'index.html')), isFalse);
+        expect(fileSystem.hasFile(p.join('dist', 'index.html')), isFalse);
       });
 
       test('generates _redirects file for Netlify/Cloudflare', () async {
@@ -123,7 +123,7 @@ void main() {
           pages: [],
         );
 
-        final redirects = fileSystem.files[p.join('dist', '_redirects')];
+        final redirects = fileSystem.fileAt(p.join('dist', '_redirects'));
         expect(redirects, isNotNull);
         expect(redirects, contains('/old    /new    301'));
         expect(redirects, contains('/temp    /other    302'));
@@ -143,7 +143,7 @@ void main() {
           pages: [],
         );
 
-        final redirects = fileSystem.files[p.join('dist', '_redirects')];
+        final redirects = fileSystem.fileAt(p.join('dist', '_redirects'));
         expect(redirects, contains('/docs/:splat    /documentation/:splat    301'));
       });
 
@@ -162,10 +162,10 @@ void main() {
           pages: [],
         );
 
-        final vercelJson = fileSystem.files[p.join('dist', 'vercel.json')];
+        final vercelJson = fileSystem.fileAt(p.join('dist', 'vercel.json'));
         expect(vercelJson, isNotNull);
 
-        final config = jsonDecode(vercelJson!) as Map<String, dynamic>;
+        final config = jsonDecode(vercelJson ?? '{}') as Map<String, dynamic>;
         final redirects = config['redirects'] as List;
 
         expect(redirects.length, 2);
@@ -190,8 +190,9 @@ void main() {
           pages: [],
         );
 
-        final vercelJson = fileSystem.files[p.join('dist', 'vercel.json')];
-        final config = jsonDecode(vercelJson!) as Map<String, dynamic>;
+        final vercelJson = fileSystem.fileAt(p.join('dist', 'vercel.json'));
+        expect(vercelJson, isNotNull);
+        final config = jsonDecode(vercelJson ?? '{}') as Map<String, dynamic>;
         final redirects = config['redirects'] as List;
 
         expect(redirects[0]['source'], '/docs/:path*');
@@ -221,10 +222,10 @@ void main() {
 
         expect(count, 2);
 
-        final html1 = fileSystem.files[p.join('dist', 'old-guide', 'index.html')];
+        final html1 = fileSystem.fileAt(p.join('dist', 'old-guide', 'index.html'));
         expect(html1, contains('url=/new-guide'));
 
-        final html2 = fileSystem.files[p.join('dist', 'legacy', 'guide', 'index.html')];
+        final html2 = fileSystem.fileAt(p.join('dist', 'legacy', 'guide', 'index.html'));
         expect(html2, contains('url=/new-guide'));
       });
 
@@ -254,7 +255,7 @@ void main() {
 
         expect(count, 2);
 
-        final redirects = fileSystem.files[p.join('dist', '_redirects')];
+        final redirects = fileSystem.fileAt(p.join('dist', '_redirects'));
         expect(redirects, contains('/old    /new    301'));
         expect(redirects, contains('/documentation    /docs    301'));
       });
@@ -273,9 +274,9 @@ void main() {
           pages: [],
         );
 
-        expect(fileSystem.files.keys.where((k) => k.endsWith('.html')), isEmpty);
+        expect(fileSystem.filePaths.where((path) => path.endsWith('.html')), isEmpty);
 
-        final redirects = fileSystem.files[p.join('dist', '_redirects')];
+        final redirects = fileSystem.fileAt(p.join('dist', '_redirects'));
         expect(redirects, isNotNull);
       });
 
@@ -293,7 +294,7 @@ void main() {
           pages: [],
         );
 
-        expect(fileSystem.files.keys.where((k) => k.endsWith('.html')), isEmpty);
+        expect(fileSystem.filePaths.where((path) => path.endsWith('.html')), isEmpty);
       });
 
       test('logs correct count for mixed redirects', () async {
@@ -329,7 +330,7 @@ void main() {
           pages: [],
         );
 
-        final html = fileSystem.files[p.join('dist', 'old', 'index.html')];
+        final html = fileSystem.fileAt(p.join('dist', 'old', 'index.html'));
         expect(html, isNotNull);
         expect(html, contains('url=/new'));
       });
@@ -348,7 +349,7 @@ void main() {
           pages: [],
         );
 
-        final html = fileSystem.files[p.join('dist', 'old', 'index.html')];
+        final html = fileSystem.fileAt(p.join('dist', 'old', 'index.html'));
         expect(html, contains('<link rel="canonical" href="/new">'));
       });
 
@@ -366,7 +367,7 @@ void main() {
           pages: [],
         );
 
-        final html = fileSystem.files[p.join('dist', 'old', 'index.html')];
+        final html = fileSystem.fileAt(p.join('dist', 'old', 'index.html'));
         expect(html, contains('window.location.href = "/new"'));
       });
     });

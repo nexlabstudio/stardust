@@ -70,9 +70,9 @@ void main() {
         expect(results.length, 2);
         expect(results['/'], '/images/og/index.png');
         expect(results['/getting-started'], '/images/og/getting-started.png');
-        expect(fileSystem.directories.contains(p.join('dist', 'images', 'og')), isTrue);
-        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'index.png')), isTrue);
-        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'getting-started.png')), isTrue);
+        expect(fileSystem.hasDirectory(p.join('dist', 'images', 'og')), isTrue);
+        expect(fileSystem.hasFile(p.join('dist', 'images', 'og', 'index.png')), isTrue);
+        expect(fileSystem.hasFile(p.join('dist', 'images', 'og', 'getting-started.png')), isTrue);
       });
 
       test('handles nested paths correctly', () async {
@@ -114,7 +114,8 @@ void main() {
 
         expect(result, '/images/og/index.png');
 
-        final bytes = fileSystem.binaryFiles[p.join('dist', 'images', 'og', 'index.png')]!;
+        final bytes = fileSystem.binaryFileAt(p.join('dist', 'images', 'og', 'index.png')) ?? Uint8List(0);
+        expect(bytes, isNotEmpty);
         final image = img.decodePng(bytes);
         expect(image, isNotNull);
         expect(image!.width, 1200);
@@ -355,7 +356,7 @@ void main() {
 
         expect(result, isNotNull);
         // Verify image was generated (colors are applied internally)
-        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'index.png')), isTrue);
+        expect(fileSystem.hasFile(p.join('dist', 'images', 'og', 'index.png')), isTrue);
       });
 
       test('uses default colors when theme colors not specified', () async {
@@ -494,7 +495,7 @@ void main() {
           p.join('dist', 'images', 'og'),
         );
 
-        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'index.png')), isTrue);
+        expect(fileSystem.hasFile(p.join('dist', 'images', 'og', 'index.png')), isTrue);
       });
 
       test('converts nested path with slashes to dashes', () async {
@@ -512,7 +513,7 @@ void main() {
           p.join('dist', 'images', 'og'),
         );
 
-        expect(fileSystem.binaryFiles.containsKey(p.join('dist', 'images', 'og', 'docs-api-v2.png')), isTrue);
+        expect(fileSystem.hasFile(p.join('dist', 'images', 'og', 'docs-api-v2.png')), isTrue);
       });
     });
 
