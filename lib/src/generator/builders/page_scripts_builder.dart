@@ -1,4 +1,5 @@
 import '../../config/config.dart';
+import '../../content/utils/icon_utils.dart';
 import '../../utils/html_utils.dart';
 
 /// Builds JavaScript and search functionality for pages
@@ -302,24 +303,27 @@ ${buildAppJs()}
       script.crossOrigin = 'anonymous';''';
   }
 
-  String buildPagefindStyles(String basePath) {
-    if (!config.search.enabled || config.search.provider != 'pagefind') {
-      return '';
-    }
-
-    return '  <link href="${encodeHtmlAttribute(basePath)}/_pagefind/pagefind-ui.css" rel="stylesheet">';
-  }
-
   String buildSearchModal(String basePath) {
     if (!config.search.enabled || config.search.provider != 'pagefind') {
       return '';
     }
 
+    final i18n = config.i18nStrings;
     return '''
-  <script src="${encodeHtmlAttribute(basePath)}/_pagefind/pagefind-ui.js"></script>
   <dialog id="search-modal" class="search-modal" aria-label="${encodeHtmlAttribute(config.search.placeholder)}">
     <div class="search-container">
-      <div id="pagefind-search"></div>
+      <div class="sd-search">
+        <div class="sd-search__box">
+          <span class="sd-search__icon">${getLucideIcon('search', '18')}</span>
+          <input class="sd-search__input" type="text" autocomplete="off" spellcheck="false"
+                 role="searchbox" aria-controls="sd-search__results" aria-activedescendant=""
+                 placeholder="${encodeHtmlAttribute(config.search.placeholder)}">
+          <button class="sd-search__clear" type="button" aria-label="${encodeHtmlAttribute(i18n.searchClear)}" hidden>${getLucideIcon('x', '18')}</button>
+        </div>
+        <div class="sd-search__status" role="status" aria-live="polite"></div>
+        <ul id="sd-search__results" class="sd-search__results" role="listbox" aria-label="${encodeHtmlAttribute(config.search.placeholder)}"></ul>
+        <button class="sd-search__more" type="button" hidden>${encodeHtmlAttribute(i18n.searchMore)}</button>
+      </div>
     </div>
   </dialog>
   <script>
@@ -327,51 +331,179 @@ ${buildAppJs()}
       const modal = document.getElementById('search-modal');
       const trigger = document.getElementById('search-trigger');
       const frame = modal.querySelector('.search-container');
-      let ui = null;
+      const input = modal.querySelector('.sd-search__input');
+      const clearBtn = modal.querySelector('.sd-search__clear');
+      const statusEl = modal.querySelector('.sd-search__status');
+      const resultsEl = modal.querySelector('#sd-search__results');
+      const moreBtn = modal.querySelector('.sd-search__more');
+
+      const BASE = '${encodeJsString(config.basePath)}';
+      const PAGE_SIZE = ${config.search.pageSize};
+      const PAGE_ICON = '${getLucideIcon('file-text', '16')}';
+      const SUB_ICON = '${getLucideIcon('corner-down-right', '14')}';
+      const NO_RESULTS = '${encodeJsString(i18n.searchNoResults)}';
+      const ONE_RESULT = '${encodeJsString(i18n.searchOneResult)}';
+      const MANY_RESULTS = '${encodeJsString(i18n.searchManyResults)}';
+      const UNAVAILABLE = '${encodeJsString(i18n.searchUnavailable)}';
+
+      let pagefind = null;
+      let loadError = false;
+      let results = [];
+      let shown = 0;
+      let token = 0;
+      let uid = 0;
+      let options = [];
+      let activeIndex = -1;
+
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function countLabel(n) {
+        return n === 1 ? ONE_RESULT : MANY_RESULTS.replace('%s', n);
+      }
+
+      async function ensurePagefind() {
+        if (pagefind || loadError) return;
+        try {
+          pagefind = await import(BASE + '/_pagefind/pagefind.js');
+          await pagefind.options({ baseUrl: BASE || '/', excerptLength: 30 });
+          await pagefind.init();
+        } catch (e) {
+          loadError = true;
+        }
+      }
+
+      function setActive(i) {
+        if (options[activeIndex]) options[activeIndex].classList.remove('is-active');
+        activeIndex = i;
+        const el = options[activeIndex];
+        if (el) {
+          el.classList.add('is-active');
+          input.setAttribute('aria-activedescendant', el.id);
+          el.scrollIntoView({ block: 'nearest' });
+        } else {
+          input.setAttribute('aria-activedescendant', '');
+        }
+      }
+
+      function move(dir) {
+        if (!options.length) return;
+        let i = activeIndex + dir;
+        if (i < 0) i = options.length - 1;
+        if (i >= options.length) i = 0;
+        setActive(i);
+      }
+
+      function groupHtml(d) {
+        const id = 'sd-r-' + (uid++);
+        let html = '<li class="sd-search__group">'
+          + '<a class="sd-search__page" role="option" id="' + id + '" href="' + esc(d.url) + '" tabindex="-1">'
+          + PAGE_ICON + '<span class="sd-search__page-title">' + esc(d.meta && d.meta.title) + '</span></a>';
+        const subs = d.sub_results || [];
+        if (subs.length) {
+          html += '<ul class="sd-search__subs">';
+          for (const s of subs) {
+            const sid = 'sd-r-' + (uid++);
+            html += '<li><a class="sd-search__sub" role="option" id="' + sid + '" href="' + esc(s.url) + '" tabindex="-1">'
+              + SUB_ICON + '<span class="sd-search__sub-title">' + esc(s.title) + '</span>'
+              + '<span class="sd-search__excerpt">' + (s.excerpt || '') + '</span></a></li>';
+          }
+          html += '</ul>';
+        }
+        return html + '</li>';
+      }
+
+      function collectOptions() {
+        options = Array.prototype.slice.call(resultsEl.querySelectorAll('[role="option"]'));
+      }
+
+      async function renderMore() {
+        const slice = results.slice(shown, shown + PAGE_SIZE);
+        const myToken = token;
+        const data = await Promise.all(slice.map((r) => r.data()));
+        if (myToken !== token) return;
+        for (const d of data) resultsEl.insertAdjacentHTML('beforeend', groupHtml(d));
+        shown += slice.length;
+        moreBtn.hidden = shown >= results.length;
+        collectOptions();
+      }
+
+      function clearResults() {
+        results = [];
+        shown = 0;
+        setActive(-1);
+        options = [];
+        resultsEl.innerHTML = '';
+        statusEl.textContent = '';
+        moreBtn.hidden = true;
+      }
+
+      async function runSearch(term) {
+        const myToken = ++token;
+        if (!term) { clearResults(); return; }
+        await ensurePagefind();
+        if (myToken !== token) return;
+        if (loadError) { statusEl.textContent = UNAVAILABLE; return; }
+        pagefind.preload(term);
+        const res = await pagefind.debouncedSearch(term, {}, 250);
+        if (res === null || myToken !== token) return;
+        results = res.results;
+        resultsEl.innerHTML = '';
+        shown = 0;
+        setActive(-1);
+        if (!results.length) {
+          statusEl.textContent = NO_RESULTS.replace('%s', term);
+          moreBtn.hidden = true;
+          return;
+        }
+        statusEl.textContent = countLabel(results.length);
+        await renderMore();
+      }
 
       function open() {
         if (modal.open) return;
-        if (!ui && typeof PagefindUI === 'undefined') {
-          document.getElementById('pagefind-search').textContent =
-            'Search index not found — build without --skip-search.';
-        }
-        if (!ui && typeof PagefindUI !== 'undefined') {
-          const base = '${encodeJsString(config.basePath)}';
-          ui = new PagefindUI({
-            element: '#pagefind-search',
-            showSubResults: true,
-            showImages: false,
-            autofocus: true,
-            processResult: (result) => {
-              if (base && result) {
-                if (result.url) result.url = base + result.url;
-                (result.sub_results || []).forEach((sub) => {
-                  if (sub.url) sub.url = base + sub.url;
-                });
-              }
-              return result;
-            },
-            translations: {
-              placeholder: '${encodeJsString(config.search.placeholder)}',
-              zero_results: '${encodeJsString(config.i18nStrings.searchNoResults.replaceAll('%s', '[SEARCH_TERM]'))}',
-              many_results: '${encodeJsString(config.i18nStrings.searchManyResults.replaceAll('%s', '[COUNT]'))}',
-              one_result: '${encodeJsString(config.i18nStrings.searchOneResult)}',
-              searching: '${encodeJsString(config.i18nStrings.searchSearching)}',
-            },
-          });
-        }
         modal.showModal();
         document.body.style.overflow = 'hidden';
-        modal.querySelector('input')?.focus();
+        ensurePagefind();
+        input.focus();
       }
+
+      input.addEventListener('input', () => {
+        clearBtn.hidden = !input.value;
+        runSearch(input.value.trim());
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+        else if (e.key === 'Home' && options.length) { e.preventDefault(); setActive(0); }
+        else if (e.key === 'End' && options.length) { e.preventDefault(); setActive(options.length - 1); }
+        else if (e.key === 'Enter' && options[activeIndex]) { e.preventDefault(); options[activeIndex].click(); }
+      });
+
+      resultsEl.addEventListener('mouseover', (e) => {
+        const opt = e.target.closest && e.target.closest('[role="option"]');
+        if (opt) setActive(options.indexOf(opt));
+      });
+
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.hidden = true;
+        clearResults();
+        input.focus();
+      });
+
+      moreBtn.addEventListener('click', () => renderMore());
 
       modal.addEventListener('close', () => { document.body.style.overflow = ''; });
       trigger?.addEventListener('click', open);
 
       modal.addEventListener('click', (e) => {
-        if ('href' in (e.target || {}) || (document.body.contains(e.target) && !frame.contains(e.target))) {
-          modal.close();
-        }
+        const link = e.target.closest && e.target.closest('a[role="option"]');
+        if (link) { modal.close(); return; }
+        if (document.body.contains(e.target) && !frame.contains(e.target)) modal.close();
       });
 
       document.addEventListener('keydown', (e) => {
