@@ -1,6 +1,6 @@
 name: Stardust
 description: A Dart-native documentation generator. Beautiful docs, zero config.
-url: https://stardust.nexlab.studio/
+url: https://nexlabstudio.github.io/stardust
 logo: /images/stardust-logo.svg
 favicon: /images/favicon.svg
 
