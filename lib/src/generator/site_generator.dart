@@ -418,6 +418,7 @@ class SiteGenerator {
   }
 
   Future<void> _generateLlms(List<Page> pages) async {
+    final urls = UrlResolver(config);
     final buffer = StringBuffer();
     final visiblePages = pages.where((page) => page.frontmatter['llm'] != false).toList();
     final pagesByPath = {for (final page in visiblePages) page.path: page};
@@ -444,7 +445,7 @@ class SiteGenerator {
           final path = sidebarPage.slug == 'index' ? '/' : '/${sidebarPage.slug}';
           if (pagesByPath[path] case final page?) {
             final title = sidebarPage.label ?? page.title;
-            buffer.write('- [$title]($path)');
+            buffer.write('- [$title](${urls.absolute(path) ?? path})');
             if (page.description case final desc?) {
               buffer.write(': $desc');
             }
@@ -459,7 +460,7 @@ class SiteGenerator {
       buffer.writeln('');
 
       for (final page in visiblePages) {
-        buffer.write('- [${page.title}](${page.path})');
+        buffer.write('- [${page.title}](${urls.absolute(page.path) ?? page.path})');
         if (page.description case final desc?) {
           buffer.write(': $desc');
         }

@@ -30,3 +30,6 @@ final nonAlphanumericPattern = RegExp(r'[^a-z0-9]+');
 final youtubeIdPattern = RegExp(r'^[A-Za-z0-9_-]{6,20}$');
 
 final vimeoIdPattern = RegExp(r'^\d+$');
+
+/// Root-absolute href/src attributes in rendered content (not protocol-relative)
+final rootRelativeAttrPattern = RegExp(r'(href|src)="/(?!/)');

@@ -449,13 +449,16 @@ class PageLayoutBuilder {
 ''';
   }
 
+  String _footerHref(String href) => href.startsWith('http') ? href : _prefixPath(href);
+
   String _buildFooterLinks() {
     final links = config.footer.links;
     if (links.isEmpty) return '';
 
     final groups = links.map((group) {
       final items = group.items
-          .map((item) => '<li><a href="${encodeHtmlAttribute(item.href)}">${encodeHtml(item.label)}</a></li>')
+          .map((item) =>
+              '<li><a href="${encodeHtmlAttribute(_footerHref(item.href))}">${encodeHtml(item.label)}</a></li>')
           .join('\n            ');
 
       return '''

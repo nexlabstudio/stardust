@@ -1,6 +1,7 @@
 import '../config/config.dart';
 import '../models/page.dart';
 import '../utils/html_utils.dart';
+import '../utils/patterns.dart';
 import 'builders/page_analytics_builder.dart';
 import 'builders/page_layout_builder.dart';
 import 'builders/page_meta_builder.dart';
@@ -29,6 +30,17 @@ class PageBuilder {
     scriptsBuilder = PageScriptsBuilder(config: config);
     _analyticsBuilder = PageAnalyticsBuilder(analytics: config.integrations.analytics);
   }
+
+  /// Site-absolute links and images written in markdown get the base path
+  /// applied, so content works on subpath deploys. Code samples are immune:
+  /// their attributes are already HTML-escaped.
+  String _prefixContentPaths(String content) => switch (config.basePath) {
+        '' => content,
+        final basePath => content.replaceAllMapped(
+            rootRelativeAttrPattern,
+            (match) => '${match.group(1)}="$basePath/',
+          ),
+      };
 
   /// Build a complete HTML page
   String build(Page page, {required List<SidebarGroup> sidebar}) {
@@ -71,7 +83,7 @@ class PageBuilder {
       <main class="content">
 $copyPageButton
         <article class="prose"$pagefindAttr>
-          ${page.content}
+          ${_prefixContentPaths(page.content)}
         </article>
         ${_layoutBuilder.buildEditLink(page)}
         ${_layoutBuilder.buildPageNav(page)}

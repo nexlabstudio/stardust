@@ -1,6 +1,7 @@
 import 'package:stardust/src/config/config.dart';
 import 'package:stardust/src/generator/builders/page_layout_builder.dart';
 import 'package:stardust/src/generator/builders/page_meta_builder.dart';
+import 'package:stardust/src/generator/page_builder.dart';
 import 'package:stardust/src/generator/url_resolver.dart';
 import 'package:stardust/src/models/page.dart';
 import 'package:test/test.dart';
@@ -66,6 +67,40 @@ void main() {
       final header = PageLayoutBuilder(config: versioned).buildHeader();
 
       expect(header, contains('href="/docs/v1/"'));
+    });
+
+    test('footer links carry the base path; external ones do not', () {
+      const footered = StardustConfig(
+        name: 'T',
+        url: 'https://example.com/docs',
+        footer: FooterConfig(links: [
+          FooterLinkGroup(group: 'Resources', items: [
+            FooterLink(label: 'Quick Start', href: '/quickstart'),
+            FooterLink(label: 'GitHub', href: 'https://github.com/x/y'),
+          ]),
+        ]),
+      );
+
+      final footer = PageLayoutBuilder(config: footered).buildFooter();
+
+      expect(footer, contains('href="/docs/quickstart"'));
+      expect(footer, contains('href="https://github.com/x/y"'));
+    });
+
+    test('content links and images get the base path applied', () {
+      const page = Page(
+        path: '/guide',
+        sourcePath: 'c/guide.md',
+        title: 'G',
+        content: '<p><a href="/installation">install</a> <img src="/images/x.png"> '
+            '<code>href=&quot;/not-touched&quot;</code></p>',
+      );
+
+      final html = PageBuilder(config: config).build(page, sidebar: []);
+
+      expect(html, contains('href="/docs/installation"'));
+      expect(html, contains('src="/docs/images/x.png"'));
+      expect(html, contains('href=&quot;/not-touched&quot;'));
     });
 
     test('locale dropdown links carry the base path', () {

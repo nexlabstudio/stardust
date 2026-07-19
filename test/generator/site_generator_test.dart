@@ -499,7 +499,7 @@ description: Guide description
 
         final llmsContent = await File(p.join(outputDir, 'llms.txt')).readAsString();
         expect(llmsContent, contains('## Getting Started'));
-        expect(llmsContent, contains('[User Guide](/')); // Uses sidebar label
+        expect(llmsContent, contains('[User Guide](https://example.com/')); // Uses sidebar label
       });
 
       test('lists all pages when no sidebar', () async {
