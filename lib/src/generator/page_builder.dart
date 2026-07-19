@@ -72,7 +72,6 @@ class PageBuilder {
   ${_analyticsBuilder.build()}
   ${stylesBuilder.buildFonts()}
   <link rel="stylesheet" href="$basePath/assets/styles.css$cssQuery">
-  ${scriptsBuilder.buildPagefindStyles(basePath)}
 </head>
 <body>
   <div class="layout">
