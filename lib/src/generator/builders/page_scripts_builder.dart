@@ -388,11 +388,16 @@ ${buildAppJs()}
         }
       }
 
-      function move(dir) {
+      async function move(dir) {
         if (!options.length) return;
         let i = activeIndex + dir;
-        if (i < 0) i = options.length - 1;
-        if (i >= options.length) i = 0;
+        if (i >= options.length) {
+          if (!moreBtn.hidden) await renderMore();
+          i = activeIndex + dir;
+          if (i >= options.length) i = 0;
+        } else if (i < 0) {
+          i = options.length - 1;
+        }
         setActive(i);
       }
 
