@@ -1,14 +1,20 @@
 import '../../utils/html_utils.dart';
 import '../../utils/patterns.dart';
+import 'lucide_icons.dart';
 
 /// Check if a string is an emoji
 bool isEmoji(String text) => emojiPattern.hasMatch(text);
 
-/// Get a Lucide icon element for the given icon name
+/// Get a Lucide icon as build-time inline SVG
 String getLucideIcon(String name, String size) {
-  final iconName = encodeHtmlAttribute(name.toLowerCase().replaceAll('_', '-'));
+  final iconName = name.toLowerCase().replaceAll('_', '-');
   final px = int.tryParse(size) ?? 20;
-  return '<i data-lucide="$iconName" style="width: ${px}px; height: ${px}px;"></i>';
+  return switch (lucideIcons[iconName]) {
+    final inner? => '<svg class="lucide" width="$px" height="$px" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '
+        'aria-hidden="true">$inner</svg>',
+    null => '<span class="icon-missing" data-icon="${encodeHtmlAttribute(iconName)}"></span>',
+  };
 }
 
 /// Resolve an icon - returns emoji as-is or converts to Lucide icon

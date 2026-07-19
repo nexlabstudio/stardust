@@ -45,7 +45,13 @@ class CodeThemeConfig {
 }
 
 class ComponentsConfig {
+  static const defaultMermaidScriptUrl = 'https://cdn.jsdelivr.net/npm/mermaid@10.9.6/dist/mermaid.min.js';
+
   final Map<String, CalloutConfig> callouts;
+
+  /// Where the Mermaid renderer is loaded from; point at a self-hosted copy
+  /// (e.g. /vendor/mermaid.min.js in public/) for air-gapped sites.
+  final String mermaidScriptUrl;
 
   const ComponentsConfig({
     this.callouts = const {
@@ -55,17 +61,25 @@ class ComponentsConfig {
       'tip': CalloutConfig(icon: '💡', color: '#22c55e'),
       'note': CalloutConfig(icon: '📝', color: '#8b5cf6'),
     },
+    this.mermaidScriptUrl = defaultMermaidScriptUrl,
   });
 
-  factory ComponentsConfig.fromYaml(Map? yaml) => switch (yaml?['callouts']) {
-        null => const ComponentsConfig(),
-        final Map calloutsYaml => ComponentsConfig(
-            callouts: calloutsYaml.map(
-              (key, value) => MapEntry(key as String, CalloutConfig.fromYaml(value as Map)),
-            ),
+  factory ComponentsConfig.fromYaml(Map? yaml) {
+    final mermaidScriptUrl = switch (yaml?['mermaid']) {
+      {'scriptUrl': final String url} => url,
+      _ => defaultMermaidScriptUrl,
+    };
+    return switch (yaml?['callouts']) {
+      null => ComponentsConfig(mermaidScriptUrl: mermaidScriptUrl),
+      final Map calloutsYaml => ComponentsConfig(
+          mermaidScriptUrl: mermaidScriptUrl,
+          callouts: calloutsYaml.map(
+            (key, value) => MapEntry(key as String, CalloutConfig.fromYaml(value as Map)),
           ),
-        _ => const ComponentsConfig(),
-      };
+        ),
+      _ => ComponentsConfig(mermaidScriptUrl: mermaidScriptUrl),
+    };
+  }
 }
 
 class CalloutConfig {

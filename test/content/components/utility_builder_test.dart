@@ -88,8 +88,8 @@ void main() {
       test('uses custom size for lucide icon', () {
         final result = builder.build('Icon', {'name': 'star', 'size': '32'}, '');
 
-        expect(result, contains('width: 32px'));
-        expect(result, contains('height: 32px'));
+        expect(result, contains('width="32"'));
+        expect(result, contains('height="32"'));
       });
 
       test('uses default size for lucide icons', () {

@@ -40,5 +40,6 @@ const stardustCssSections = <String, String>{
 
   buffer.writeln('};');
   File('lib/src/generator/builders/stardust_css.dart').writeAsStringSync(buffer.toString());
+  Process.runSync('dart', ['format', '-l', '120', 'lib/src/generator/builders/stardust_css.dart']);
   stdout.writeln('lib/src/generator/builders/stardust_css.dart regenerated (${files.length} sections)');
 }

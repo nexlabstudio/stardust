@@ -208,6 +208,15 @@
             "mono": {
               "type": "string",
               "default": "JetBrains Mono"
+            },
+            "source": {
+              "type": "string",
+              "enum": [
+                "google",
+                "local"
+              ],
+              "default": "google",
+              "description": "Where fonts load from. \"local\" emits no font links (air-gapped); supply @font-face via theme.custom."
             }
           }
         },
@@ -292,6 +301,16 @@
           "type": "object",
           "additionalProperties": {
             "$ref": "#/$defs/calloutConfig"
+          }
+        },
+        "mermaid": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "scriptUrl": {
+              "type": "string",
+              "description": "Mermaid renderer script URL. Point at a self-hosted copy for air-gapped sites."
+            }
           }
         }
       }

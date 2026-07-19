@@ -11,6 +11,7 @@ class PageStylesBuilder {
   PageStylesBuilder({required this.config});
 
   String buildFonts() {
+    if (config.theme.fonts.source == 'local') return '';
     final sans = config.theme.fonts.sans;
     final mono = config.theme.fonts.mono;
 

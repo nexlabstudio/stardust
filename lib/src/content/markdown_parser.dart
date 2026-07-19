@@ -187,7 +187,7 @@ class MarkdownParser implements ContentParser {
     final protectedBlocks = <String, String>{};
     var result = content.replaceAllMapped(codeBlockPattern, (match) {
       final placeholder = '___BLOCK_${protectedBlocks.length}___';
-      protectedBlocks[placeholder] = match.group(0)!;
+      protectedBlocks[placeholder] = match.group(0) ?? '';
       return placeholder;
     });
 

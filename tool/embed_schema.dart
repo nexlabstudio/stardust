@@ -20,5 +20,6 @@ void main() {
 const stardustSchemaJson = r\'\'\'
 $json\'\'\';
 ''');
+  Process.runSync('dart', ['format', '-l', '120', 'lib/src/config/stardust_schema.dart']);
   stdout.writeln('lib/src/config/stardust_schema.dart regenerated');
 }

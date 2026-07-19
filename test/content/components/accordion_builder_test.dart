@@ -82,7 +82,7 @@ void main() {
         final result = builder.build('Accordion', {'title': 'Help', 'icon': 'help-circle'}, 'Content');
 
         expect(result, contains('accordion-icon'));
-        expect(result, contains('data-lucide'));
+        expect(result, contains('<svg class="lucide"'));
       });
 
       test('no icon when icon attribute is empty', () {

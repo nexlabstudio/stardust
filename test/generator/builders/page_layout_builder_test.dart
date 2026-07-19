@@ -259,7 +259,7 @@ void main() {
         final result = builder.buildSidebar(sidebar, '/other');
 
         expect(result, contains('sidebar-group-icon'));
-        expect(result, contains('data-lucide="rocket"'));
+        expect(result, contains('<svg class="lucide"'));
       });
 
       test('does not render icon when null', () {

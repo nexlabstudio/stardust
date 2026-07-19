@@ -123,6 +123,22 @@ theme:
     mono: "ui-monospace, monospace"
 ```
 
+### Self-Hosted Fonts
+
+Set `source: local` to emit no font links at all — your site then works fully
+offline. Provide the fonts yourself with `@font-face` rules in a custom CSS
+file and font files in `public/fonts/`:
+
+```yaml
+theme:
+  fonts:
+    sans: "Inter"
+    mono: "JetBrains Mono"
+    source: local
+  custom:
+    cssFile: theme/fonts.css
+```
+
 ## Border Radius
 
 Control the roundness of UI elements:

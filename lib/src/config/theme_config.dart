@@ -104,12 +104,17 @@ class FontsConfig {
   final String sans;
   final String mono;
 
-  const FontsConfig({this.sans = 'Inter', this.mono = 'JetBrains Mono'});
+  /// 'google' loads from Google Fonts; 'local' emits no font links so the
+  /// site works air-gapped (supply @font-face via theme.custom).
+  final String source;
+
+  const FontsConfig({this.sans = 'Inter', this.mono = 'JetBrains Mono', this.source = 'google'});
 
   factory FontsConfig.fromYaml(Map? yaml) => switch (yaml) {
         final Map yaml => FontsConfig(
             sans: yaml['sans'] as String? ?? 'Inter',
             mono: yaml['mono'] as String? ?? 'JetBrains Mono',
+            source: yaml['source'] as String? ?? 'google',
           ),
         _ => const FontsConfig(),
       };

@@ -129,4 +129,18 @@ void main() {
       });
     });
   });
+
+  group('vendored assets', () {
+    test('local font source emits no font links', () {
+      const config = StardustConfig(name: 'T', theme: ThemeConfig(fonts: FontsConfig(source: 'local')));
+
+      expect(PageStylesBuilder(config: config).buildFonts(), isEmpty);
+    });
+
+    test('google font source keeps the font links', () {
+      const config = StardustConfig(name: 'T');
+
+      expect(PageStylesBuilder(config: config).buildFonts(), contains('fonts.googleapis.com'));
+    });
+  });
 }

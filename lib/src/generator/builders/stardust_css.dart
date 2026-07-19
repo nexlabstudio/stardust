@@ -1512,7 +1512,7 @@ const stardustCssSections = <String, String>{
       font-size: 0.875em;
     }
 
-    [data-lucide] {
+    svg.lucide {
       display: inline-flex;
       align-items: center;
       justify-content: center;

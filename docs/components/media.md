@@ -165,6 +165,17 @@ classDiagram
     Document <|-- Page
 </Mermaid>
 
+### Self-Hosting Mermaid
+
+Mermaid loads from a CDN by default. For air-gapped or offline sites, place a
+copy of `mermaid.min.js` in `public/vendor/` and point Stardust at it:
+
+```yaml
+components:
+  mermaid:
+    scriptUrl: /vendor/mermaid.min.js
+```
+
 ## Tree
 
 Display file and folder structures:
