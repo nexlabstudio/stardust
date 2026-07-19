@@ -121,9 +121,175 @@
       border-radius: 4px;
     }
 
-    .pagefind-ui {
+    .sd-search {
+      display: flex;
+      flex-direction: column;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+    }
+
+    .sd-search__box {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0 1rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .sd-search__icon {
+      display: flex;
+      color: var(--color-text-secondary);
+    }
+
+    .sd-search__input {
+      flex: 1;
+      padding: 1rem 0;
+      font-size: 1rem;
+      font-family: var(--font-sans);
+      color: var(--color-text);
+      background: transparent;
+      border: none;
+      outline: none;
+    }
+
+    .sd-search__input::placeholder {
+      color: var(--color-text-secondary);
+      opacity: 0.7;
+    }
+
+    .sd-search__clear {
+      display: flex;
+      padding: 0.25rem;
+      color: var(--color-text-secondary);
+      background: transparent;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .sd-search__clear:hover {
+      color: var(--color-text);
+      background: var(--color-bg-secondary);
+    }
+
+    .sd-search__status {
+      padding: 0.75rem 1rem 0.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .sd-search__status:empty {
+      display: none;
+    }
+
+    .sd-search__results {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0.5rem 1rem 1rem;
+      list-style: none;
+    }
+
+    .sd-search__group {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .sd-search__page,
+    .sd-search__sub {
+      display: block;
+      text-decoration: none;
+      color: var(--color-text);
+      background: var(--color-bg-secondary);
+      transition: background 0.12s;
+    }
+
+    .sd-search__page {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+    }
+
+    .sd-search__page .lucide {
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+    }
+
+    .sd-search__subs {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .sd-search__sub {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.25rem 0.625rem;
+      padding: 0.625rem 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .sd-search__subs > li:first-child .sd-search__sub {
+      border-top: none;
+    }
+
+    .sd-search__sub .lucide {
+      grid-row: 1;
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+    }
+
+    .sd-search__sub-title {
+      grid-column: 2;
+      font-weight: 600;
+      font-size: 0.9375rem;
+    }
+
+    .sd-search__excerpt {
+      grid-column: 2;
+      font-size: 0.875rem;
+      line-height: 1.55;
+      color: var(--color-text-secondary);
+      overflow-wrap: anywhere;
+    }
+
+    .sd-search__excerpt mark {
+      color: var(--color-text);
+      background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+      border-radius: 3px;
+      padding: 0 0.15em;
+    }
+
+    .sd-search__page.is-active,
+    .sd-search__sub.is-active {
+      background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-secondary));
+      outline: 1px solid var(--color-primary);
+      outline-offset: -1px;
+    }
+
+    .sd-search__more {
+      margin: 0 1rem 1rem;
+      padding: 0.5rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .sd-search__more:hover {
+      color: var(--color-text);
+      border-color: var(--color-text-secondary);
     }
 
     @media (max-width: 640px) {
