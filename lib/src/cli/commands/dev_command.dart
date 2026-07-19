@@ -47,7 +47,6 @@ class DevCommand extends Command<int> {
     );
     argParser.addFlag(
       'open',
-      abbr: 'o',
       help: 'Open browser automatically',
       defaultsTo: false,
     );

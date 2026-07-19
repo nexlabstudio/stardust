@@ -273,6 +273,11 @@ jobs:
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
+          if [ -z "${HOMEBREW_TAP_TOKEN}" ]; then
+            echo "::error::HOMEBREW_TAP_TOKEN secret is not set. Create a fine-grained PAT with Contents:write on nexlabstudio/homebrew-tap and add it to this repo's Actions secrets."
+            exit 1
+          fi
+
           VERSION=${{ steps.extract.outputs.version }}
 
           # Clone the homebrew-tap repo
@@ -290,7 +295,7 @@ jobs:
           git commit -m "stardust ${VERSION}" || echo "No changes to commit"
 
           # Pull with rebase to handle any new commits, then push
-          git pull --rebase origin dev || true
+          git pull --rebase origin dev
           git push
 
           # Create a release in homebrew-tap repo

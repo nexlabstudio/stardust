@@ -44,8 +44,7 @@ stardust dev --no-open
 |--------|---------|-------------|
 | `--port, -p` | `4000` | Port to run the server on |
 | `--host` | `localhost` | Host to bind to |
-| `--open` | `true` | Open browser automatically |
-| `--no-open` | - | Don't open browser |
+| `--open` | `false` | Open browser automatically |
 
 ## Features
 
