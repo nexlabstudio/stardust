@@ -18,6 +18,7 @@ import '../utils/logger.dart';
 import 'og_image_generator.dart';
 import 'page_builder.dart';
 import 'redirect_generator.dart';
+import 'url_resolver.dart';
 
 class SiteGenerator {
   final StardustConfig config;
@@ -318,8 +319,9 @@ class SiteGenerator {
     buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
     buffer.writeln('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
 
+    final urls = UrlResolver(config);
     for (final page in pages) {
-      final url = '${config.url}${page.path}';
+      final url = urls.absolute(page.path) ?? page.path;
       buffer.writeln('  <url>');
       buffer.writeln('    <loc>${encodeXml(url)}</loc>');
 

@@ -3,15 +3,16 @@ import '../../content/markdown_parser.dart';
 import '../../content/utils/icon_utils.dart';
 import '../../models/page.dart';
 import '../../utils/html_utils.dart';
+import '../url_resolver.dart';
 
 /// Builds layout components: header, sidebar, footer, navigation
 class PageLayoutBuilder {
   final StardustConfig config;
-  late final String _basePath;
+  final UrlResolver urls;
 
-  PageLayoutBuilder({required this.config}) : _basePath = config.basePath;
+  PageLayoutBuilder({required this.config}) : urls = UrlResolver(config);
 
-  String _prefixPath(String path) => '$_basePath$path';
+  String _prefixPath(String path) => urls.href(path);
 
   String buildHeader() {
     final navLinks = config.nav.map((item) {
@@ -133,7 +134,7 @@ class PageLayoutBuilder {
     final items = versions.list.map((entry) {
       final label = entry.label ?? 'v${entry.version}';
       final active = entry.version == versions.current ? ' active' : '';
-      return '<a href="${encodeHtmlAttribute(entry.path)}" class="version-dropdown-item$active">${encodeHtml(label)}</a>';
+      return '<a href="${encodeHtmlAttribute(_prefixPath(entry.path))}" class="version-dropdown-item$active">${encodeHtml(label)}</a>';
     }).join('\n        ');
 
     return '''
@@ -160,7 +161,7 @@ class PageLayoutBuilder {
 
     final items = i18n.locales.map((locale) {
       final active = locale.code == i18n.defaultLocale ? ' active' : '';
-      return '<a href="${encodeHtmlAttribute(locale.path)}" class="locale-dropdown-item$active">${encodeHtml(locale.label)}</a>';
+      return '<a href="${encodeHtmlAttribute(_prefixPath(locale.path))}" class="locale-dropdown-item$active">${encodeHtml(locale.label)}</a>';
     }).join('\n        ');
 
     return '''

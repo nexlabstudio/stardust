@@ -6,6 +6,7 @@ import 'builders/page_layout_builder.dart';
 import 'builders/page_meta_builder.dart';
 import 'builders/page_scripts_builder.dart';
 import 'builders/page_styles_builder.dart';
+import 'url_resolver.dart';
 
 /// Builds HTML pages from parsed content
 class PageBuilder {
@@ -29,16 +30,10 @@ class PageBuilder {
     _analyticsBuilder = PageAnalyticsBuilder(analytics: config.integrations.analytics);
   }
 
-  String _getBasePath(String pagePath) {
-    final segments = pagePath.split('/').where((s) => s.isNotEmpty).toList();
-    if (segments.isEmpty) return '.';
-    return List.filled(segments.length, '..').join('/');
-  }
-
   /// Build a complete HTML page
   String build(Page page, {required List<SidebarGroup> sidebar}) {
     final seoTitle = config.seo.titleTemplate.replaceAll('%s', page.title);
-    final basePath = _getBasePath(page.path);
+    final basePath = UrlResolver(config).relativeRoot(page.path);
     final pagefindAttr = page.frontmatter['search'] == false ? '' : ' data-pagefind-body';
     final (cssQuery, jsQuery) = switch (assetVersions) {
       (:final css, :final js)? => ('?v=$css', '?v=$js'),

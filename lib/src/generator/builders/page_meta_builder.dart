@@ -1,18 +1,20 @@
 import '../../config/config.dart';
 import '../../models/page.dart';
 import '../../utils/html_utils.dart';
+import '../url_resolver.dart';
 
 /// Builds meta tags, Open Graph, Twitter Cards, and JSON-LD structured data
 class PageMetaBuilder {
   final StardustConfig config;
+  final UrlResolver urls;
 
-  PageMetaBuilder({required this.config});
+  PageMetaBuilder({required this.config}) : urls = UrlResolver(config);
 
   String buildFavicon() {
     final favicon = config.favicon;
     if (favicon == null) return '';
 
-    final href = '${config.basePath}$favicon';
+    final href = urls.href(favicon);
     final ext = favicon.split('.').last.toLowerCase();
 
     final type = switch (ext) {
@@ -28,10 +30,8 @@ class PageMetaBuilder {
   String build(Page page) {
     final buffer = StringBuffer();
 
-    if (config.url case final url?) {
-      final baseUrl = _normalizeUrl(url);
-      final pagePath = switch (page.path) { '/' => '', final p => p };
-      buffer.writeln('  <link rel="canonical" href="${encodeHtmlAttribute('$baseUrl$pagePath')}">');
+    if (urls.absolute(switch (page.path) { '/' => '', final p => p }) case final canonical?) {
+      buffer.writeln('  <link rel="canonical" href="${encodeHtmlAttribute(canonical)}">');
     }
 
     if (page.description case final description?) {
@@ -43,10 +43,8 @@ class PageMetaBuilder {
       buffer.writeln('  <meta property="og:description" content="${encodeHtml(description)}">');
     }
     buffer.writeln('  <meta property="og:type" content="article">');
-    if (config.url case final url?) {
-      final baseUrl = _normalizeUrl(url);
-      final pagePath = switch (page.path) { '/' => '', final p => p };
-      buffer.writeln('  <meta property="og:url" content="${encodeHtmlAttribute('$baseUrl$pagePath')}">');
+    if (urls.absolute(switch (page.path) { '/' => '', final p => p }) case final ogUrl?) {
+      buffer.writeln('  <meta property="og:url" content="${encodeHtmlAttribute(ogUrl)}">');
     }
     final ogImage = _getOgImage(page);
     if (ogImage != null) {
@@ -72,14 +70,13 @@ class PageMetaBuilder {
     if (i18n == null || !i18n.enabled || i18n.locales.isEmpty) return '';
     if (config.url == null) return '';
 
-    final baseUrl = _normalizeUrl(config.url!);
     final pagePath = switch (page.path) { '/' => '/', final p => p };
     final buffer = StringBuffer();
 
     for (final locale in i18n.locales) {
       final localePath = locale.path.endsWith('/') ? locale.path.substring(0, locale.path.length - 1) : locale.path;
       buffer.writeln(
-          '  <link rel="alternate" hreflang="${encodeHtmlAttribute(locale.code)}" href="${encodeHtmlAttribute('$baseUrl$localePath$pagePath')}">');
+          '  <link rel="alternate" hreflang="${encodeHtmlAttribute(locale.code)}" href="${encodeHtmlAttribute(urls.absolute('$localePath$pagePath') ?? '')}">');
     }
 
     // x-default points to the default locale
@@ -89,7 +86,7 @@ class PageMetaBuilder {
           ? defaultLocale.path.substring(0, defaultLocale.path.length - 1)
           : defaultLocale.path;
       buffer.writeln(
-          '  <link rel="alternate" hreflang="x-default" href="${encodeHtmlAttribute('$baseUrl$defaultPath$pagePath')}">');
+          '  <link rel="alternate" hreflang="x-default" href="${encodeHtmlAttribute(urls.absolute('$defaultPath$pagePath') ?? '')}">');
     }
 
     return buffer.toString();
@@ -98,19 +95,15 @@ class PageMetaBuilder {
   String _buildStructuredData(Page page) {
     final buffer = StringBuffer();
 
-    if (config.url case final url?) {
-      final baseUrl = _normalizeUrl(url);
-      final pagePath = switch (page.path) { '/' => '', final p => p };
-      final pageUrl = '$baseUrl$pagePath';
-
+    if (urls.absolute(switch (page.path) { '/' => '', final p => p }) case final pageUrl?) {
       buffer.writeln(_buildArticleSchema(page, pageUrl));
 
       if (page.breadcrumbs.isNotEmpty) {
-        buffer.writeln(_buildBreadcrumbSchema(page, baseUrl, pageUrl));
+        buffer.writeln(_buildBreadcrumbSchema(page, pageUrl));
       }
 
       if (page.path == '/') {
-        buffer.writeln(_buildWebsiteSchema(baseUrl));
+        buffer.writeln(_buildWebsiteSchema(urls.absolute('') ?? pageUrl));
       }
     }
 
@@ -140,7 +133,7 @@ class PageMetaBuilder {
     return '  <script type="application/ld+json">${json.toString()}</script>';
   }
 
-  String _buildBreadcrumbSchema(Page page, String baseUrl, String pageUrl) {
+  String _buildBreadcrumbSchema(Page page, String pageUrl) {
     final json = StringBuffer()
       ..write('{"@context":"https://schema.org"')
       ..write(',"@type":"BreadcrumbList"')
@@ -148,7 +141,7 @@ class PageMetaBuilder {
 
     final items = <String>[];
     for (final (index, crumb) in page.breadcrumbs.indexed) {
-      final crumbUrl = '$baseUrl${crumb.path}';
+      final crumbUrl = urls.absolute(crumb.path) ?? crumb.path;
       items.add(
           '{"@type":"ListItem","position":${index + 1},"name":"${_escapeJson(crumb.title)}","item":"${_escapeJson(crumbUrl)}"}');
     }
@@ -187,13 +180,7 @@ class PageMetaBuilder {
       return ogImage;
     }
 
-    if (config.url case final url?) {
-      final baseUrl = _normalizeUrl(url);
-      final fileName = _pagePathToOgFileName(page.path);
-      return '$baseUrl${config.basePath}/images/og/$fileName';
-    }
-
-    return null;
+    return urls.absolute('/images/og/${_pagePathToOgFileName(page.path)}');
   }
 
   String _pagePathToOgFileName(String path) {
@@ -201,11 +188,6 @@ class PageMetaBuilder {
     final slug = path.substring(1).replaceAll('/', '-');
     return '$slug.png';
   }
-
-  String _normalizeUrl(String url) => switch (url) {
-        final u when u.endsWith('/') => u.substring(0, u.length - 1),
-        _ => url,
-      };
 
   String _escapeJson(String text) => text
       .replaceAll('\\', '\\\\')
