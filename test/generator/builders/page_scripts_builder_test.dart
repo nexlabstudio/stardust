@@ -29,4 +29,40 @@ void main() {
       expect(js, isNot(contains('lucide')));
     });
   });
+
+  group('search modal', () {
+    const searchOn = SearchConfig(enabled: true, hotkey: 's');
+    const config = StardustConfig(name: 'T', url: 'https://example.com/docs', search: searchOn);
+
+    test('prefixes result urls with the base path via processResult', () {
+      final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
+
+      expect(modal, contains("const base = '/docs'"));
+      expect(modal, contains('processResult'));
+      expect(modal, contains('sub_results'));
+      expect(modal, isNot(contains('baseUrl:')));
+    });
+
+    test('uses a native dialog with default excerpt length', () {
+      final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
+
+      expect(modal, contains('<dialog id="search-modal"'));
+      expect(modal, contains('modal.showModal()'));
+      expect(modal, contains('modal.close()'));
+      expect(modal, isNot(contains('excerptLength')));
+      expect(modal, isNot(contains('search-backdrop')));
+    });
+
+    test('honors the configured hotkey', () {
+      final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
+
+      expect(modal, contains("e.key === 's'"));
+    });
+
+    test('falls back with a message when the index is missing', () {
+      final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
+
+      expect(modal, contains('Search index not found'));
+    });
+  });
 }
