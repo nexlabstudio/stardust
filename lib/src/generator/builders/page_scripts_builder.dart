@@ -317,31 +317,40 @@ ${buildAppJs()}
 
     return '''
   <script src="${encodeHtmlAttribute(basePath)}/_pagefind/pagefind-ui.js"></script>
-  <div id="search-modal" class="search-modal">
-    <div class="search-backdrop"></div>
+  <dialog id="search-modal" class="search-modal" aria-label="${encodeHtmlAttribute(config.search.placeholder)}">
     <div class="search-container">
       <div id="pagefind-search"></div>
     </div>
-  </div>
+  </dialog>
   <script>
     (function() {
       const modal = document.getElementById('search-modal');
       const trigger = document.getElementById('search-trigger');
-      const backdrop = modal.querySelector('.search-backdrop');
+      const frame = modal.querySelector('.search-container');
       let ui = null;
 
       function open() {
-        modal.classList.add('open');
-        document.body.style.overflow = 'hidden';
+        if (modal.open) return;
+        if (!ui && typeof PagefindUI === 'undefined') {
+          document.getElementById('pagefind-search').textContent =
+            'Search index not found — build without --skip-search.';
+        }
         if (!ui && typeof PagefindUI !== 'undefined') {
+          const base = '${encodeJsString(config.basePath)}';
           ui = new PagefindUI({
             element: '#pagefind-search',
             showSubResults: true,
-            baseUrl: '${encodeJsString(config.basePath)}/',
             showImages: false,
-            excerptLength: 20,
-            resetStyles: false,
             autofocus: true,
+            processResult: (result) => {
+              if (base && result) {
+                if (result.url) result.url = base + result.url;
+                (result.sub_results || []).forEach((sub) => {
+                  if (sub.url) sub.url = base + sub.url;
+                });
+              }
+              return result;
+            },
             translations: {
               placeholder: '${encodeJsString(config.search.placeholder)}',
               zero_results: '${encodeJsString(config.i18nStrings.searchNoResults.replaceAll('%s', '[SEARCH_TERM]'))}',
@@ -351,26 +360,26 @@ ${buildAppJs()}
             },
           });
         }
-        setTimeout(() => modal.querySelector('input')?.focus(), 100);
+        modal.showModal();
+        document.body.style.overflow = 'hidden';
+        modal.querySelector('input')?.focus();
       }
 
-      function close() {
-        modal.classList.remove('open');
-        document.body.style.overflow = '';
-      }
-
+      modal.addEventListener('close', () => { document.body.style.overflow = ''; });
       trigger?.addEventListener('click', open);
-      backdrop?.addEventListener('click', close);
+
+      modal.addEventListener('click', (e) => {
+        if ('href' in (e.target || {}) || (document.body.contains(e.target) && !frame.contains(e.target))) {
+          modal.close();
+        }
+      });
 
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('open')) {
-          close();
-        }
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
           e.preventDefault();
-          modal.classList.contains('open') ? close() : open();
+          modal.open ? modal.close() : open();
         }
-        if (e.key === '/' && !modal.classList.contains('open')) {
+        if (e.key === '${encodeJsString(config.search.hotkey)}' && !modal.open) {
           const t = document.activeElement?.tagName;
           if (t !== 'INPUT' && t !== 'TEXTAREA') {
             e.preventDefault();
