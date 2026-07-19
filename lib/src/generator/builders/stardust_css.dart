@@ -440,7 +440,6 @@ const stardustCssSections = <String, String>{
       position: relative;
       width: 100%;
       max-height: 80vh;
-      padding: 1rem;
       overflow-y: auto;
       overscroll-behavior: none;
       background: var(--color-bg);
@@ -480,8 +479,16 @@ const stardustCssSections = <String, String>{
       display: flex;
       align-items: center;
       gap: 0.625rem;
-      padding: 0 1rem;
-      border-bottom: 1px solid var(--color-border);
+      margin: 1rem;
+      padding: 0 0.875rem;
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      transition: border-color 0.15s;
+    }
+
+    .sd-search__box:focus-within {
+      border-color: var(--color-primary);
     }
 
     .sd-search__icon {
@@ -491,8 +498,8 @@ const stardustCssSections = <String, String>{
 
     .sd-search__input {
       flex: 1;
-      padding: 1rem 0;
-      font-size: 1rem;
+      padding: 0.7rem 0;
+      font-size: 0.95rem;
       font-family: var(--font-sans);
       color: var(--color-text);
       background: transparent;
@@ -517,11 +524,15 @@ const stardustCssSections = <String, String>{
 
     .sd-search__clear:hover {
       color: var(--color-text);
-      background: var(--color-bg-secondary);
+      background: var(--color-bg);
+    }
+
+    .sd-search__clear[hidden] {
+      display: none;
     }
 
     .sd-search__status {
-      padding: 0.75rem 1rem 0.25rem;
+      padding: 0 1rem 0.5rem;
       font-size: 0.8125rem;
       font-weight: 500;
       color: var(--color-text-secondary);
