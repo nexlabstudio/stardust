@@ -510,4 +510,45 @@ void main() {
       expect(config.locales[1].label, equals('Spanish'));
     });
   });
+
+  group('I18nStrings.fromYaml', () {
+    test('empty yaml uses all defaults', () {
+      const strings = I18nStrings();
+      final parsed = I18nStrings.fromYaml(null);
+
+      expect(parsed.searchOneResult, equals(strings.searchOneResult));
+      expect(parsed.searchClear, equals(strings.searchClear));
+    });
+
+    test('applies search string overrides', () {
+      final strings = I18nStrings.fromYaml({
+        'search.noResults': 'Rien pour "%s"',
+        'search.oneResult': '1 résultat',
+        'search.manyResults': '%s résultats',
+        'search.searching': 'Recherche...',
+        'search.clear': 'Effacer',
+        'search.more': 'Charger plus',
+        'search.unavailable': 'Indisponible',
+      });
+
+      expect(strings.searchNoResults, equals('Rien pour "%s"'));
+      expect(strings.searchOneResult, equals('1 résultat'));
+      expect(strings.searchManyResults, equals('%s résultats'));
+      expect(strings.searchSearching, equals('Recherche...'));
+      expect(strings.searchClear, equals('Effacer'));
+      expect(strings.searchMore, equals('Charger plus'));
+      expect(strings.searchUnavailable, equals('Indisponible'));
+    });
+
+    test('falls back to search defaults when a non-empty map omits them', () {
+      final strings = I18nStrings.fromYaml({'nav.next': 'Suivant'});
+
+      expect(strings.navNext, equals('Suivant'));
+      expect(strings.searchOneResult, equals('1 result'));
+      expect(strings.searchManyResults, equals('%s results'));
+      expect(strings.searchClear, equals('Clear search'));
+      expect(strings.searchMore, equals('Load more results'));
+      expect(strings.searchUnavailable, equals('Search is unavailable'));
+    });
+  });
 }
