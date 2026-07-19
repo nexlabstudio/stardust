@@ -7,6 +7,8 @@ import '../utils/html_utils.dart';
 import '../utils/patterns.dart';
 import 'component_transformer.dart';
 import 'frontmatter_parser.dart';
+import 'utils/code_masker.dart';
+import 'utils/component_scanner.dart';
 
 /// Parsed page result
 class ParsedPage {
@@ -52,29 +54,27 @@ class MarkdownParser implements ContentParser {
   ParsedPage parse(String content, {String? defaultTitle}) {
     final doc = FrontmatterParser.parse(content);
 
-    final codeBlocks = <String, String>{};
-    var withProtectedCode = doc.content.replaceAllMapped(fencedCodeBlockPattern, (match) {
-      final placeholder = '___CODE_${codeBlocks.length}___';
-      codeBlocks[placeholder] = match.group(0)!;
-      return placeholder;
-    });
+    // Only block components are lifted over markdown; inline ones (Badge,
+    // Icon, ...) must stay in the text so they keep their <p> wrapping.
+    final masked = maskCodeSpans(doc.content);
+    const tags = _blockComponents;
 
     final components = <String, String>{};
-    for (final name in _componentNames) {
-      withProtectedCode = _protectComponents(withProtectedCode, name, components);
+    final protectedDoc = StringBuffer();
+    var pos = 0;
+    for (var match = findFirstComponent(masked.text, tags, pos);
+        match != null;
+        match = findFirstComponent(masked.text, tags, pos)) {
+      protectedDoc.write(masked.restore(masked.text.substring(pos, match.start)));
+      final placeholder = '<!--STARDUSTCOMPONENT${components.length}-->';
+      components[placeholder] = masked.restore(masked.text.substring(match.start, match.end));
+      protectedDoc.write(placeholder);
+      pos = match.end;
     }
-
-    for (final MapEntry(:key, :value) in codeBlocks.entries) {
-      withProtectedCode = withProtectedCode.replaceAll(key, value);
-      for (final compKey in components.keys) {
-        if (components[compKey] case final compValue?) {
-          components[compKey] = compValue.replaceAll(key, value);
-        }
-      }
-    }
+    protectedDoc.write(masked.restore(masked.text.substring(pos)));
 
     final markdownHtml = md.markdownToHtml(
-      withProtectedCode,
+      protectedDoc.toString(),
       blockSyntaxes: [
         const md.FencedCodeBlockSyntax(),
         const md.HeaderWithIdSyntax(),
@@ -111,7 +111,7 @@ class MarkdownParser implements ContentParser {
     );
   }
 
-  static const _componentNames = [
+  static const _blockComponents = {
     'Tabs',
     'Accordion',
     'AccordionGroup',
@@ -126,16 +126,7 @@ class MarkdownParser implements ContentParser {
     'Tip',
     'Note',
     'Success',
-  ];
-
-  String _protectComponents(String content, String name, Map<String, String> store) {
-    final pattern = RegExp('<$name[^>]*>[\\s\\S]*?</$name>', caseSensitive: false);
-    return content.replaceAllMapped(pattern, (match) {
-      final placeholder = '<!--COMPONENT_${store.length}-->';
-      store[placeholder] = match.group(0)!;
-      return placeholder;
-    });
-  }
+  };
 
   String _processMarkdownInComponentOutput(String html) {
     var result = html;
@@ -154,23 +145,23 @@ class MarkdownParser implements ContentParser {
 
   String _processContainersOfType(String html, String className) {
     final openPattern = RegExp('<div class="$className[^"]*"[^>]*>');
-    var result = html;
+    final out = StringBuffer();
     var searchStart = 0;
 
     while (true) {
-      final openMatch = openPattern.firstMatch(result.substring(searchStart));
+      final openMatch = openPattern.allMatches(html, searchStart).firstOrNull;
       if (openMatch == null) break;
 
-      final contentStart = searchStart + openMatch.end;
+      final contentStart = openMatch.end;
 
       var depth = 1;
       var pos = contentStart;
-      while (pos < result.length && depth > 0) {
-        if (result.substring(pos).startsWith('</div>')) {
+      while (pos < html.length && depth > 0) {
+        if (html.startsWith('</div>', pos)) {
           depth--;
           if (depth == 0) break;
           pos += 6;
-        } else if (result.substring(pos).startsWith('<div')) {
+        } else if (html.startsWith('<div', pos)) {
           depth++;
           pos++;
         } else {
@@ -179,18 +170,17 @@ class MarkdownParser implements ContentParser {
       }
 
       if (depth == 0) {
-        final content = result.substring(contentStart, pos);
-        final processed = _processContainerContent(content);
-        final before = result.substring(0, contentStart);
-        final after = result.substring(pos);
-        result = '$before$processed$after';
-        searchStart = contentStart + processed.length + 6;
+        out.write(html.substring(searchStart, contentStart));
+        out.write(_processContainerContent(html.substring(contentStart, pos)));
+        searchStart = pos;
       } else {
+        out.write(html.substring(searchStart, contentStart));
         searchStart = contentStart;
       }
     }
 
-    return result;
+    out.write(html.substring(searchStart));
+    return out.toString();
   }
 
   String _processContainerContent(String content) {

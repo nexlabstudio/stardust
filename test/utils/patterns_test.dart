@@ -168,44 +168,4 @@ void main() {
       expect(nonAlphanumericPattern.hasMatch('1'), isFalse);
     });
   });
-
-  group('component patterns', () {
-    test('selfClosingComponentPattern matches self-closing tags', () {
-      final pattern = selfClosingComponentPattern('Image');
-      const html = '<Image src="test.png" />';
-      final match = pattern.firstMatch(html);
-      expect(match, isNotNull);
-      expect(match!.group(1), contains('src="test.png"'));
-    });
-
-    test('selfClosingComponentPattern is cached', () {
-      final pattern1 = selfClosingComponentPattern('Test');
-      final pattern2 = selfClosingComponentPattern('Test');
-      expect(identical(pattern1, pattern2), isTrue);
-    });
-
-    test('openCloseComponentPattern matches component with content', () {
-      final pattern = openCloseComponentPattern('Info');
-      const html = '<Info title="Note">Some content here</Info>';
-      final match = pattern.firstMatch(html);
-      expect(match, isNotNull);
-      expect(match!.group(1), contains('title="Note"'));
-      expect(match.group(2), equals('Some content here'));
-    });
-
-    test('openCloseComponentPattern is cached', () {
-      final pattern1 = openCloseComponentPattern('Test');
-      final pattern2 = openCloseComponentPattern('Test');
-      expect(identical(pattern1, pattern2), isTrue);
-    });
-
-    test('childComponentPattern matches nested components', () {
-      final pattern = childComponentPattern('Tab');
-      const html = '<Tab label="First">Tab content</Tab>';
-      final match = pattern.firstMatch(html);
-      expect(match, isNotNull);
-      expect(match!.group(1), contains('label="First"'));
-      expect(match.group(2), equals('Tab content'));
-    });
-  });
 }

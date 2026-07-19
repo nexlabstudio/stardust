@@ -58,26 +58,26 @@ class BalancedTagMatch {
 /// Returns only top-level matches; nested same-type tags are included in content.
 List<BalancedTagMatch> findBalancedTags(String content, String tagName) {
   final results = <BalancedTagMatch>[];
+  final lower = content.toLowerCase();
   final openTagPattern = RegExp('<$tagName([^>]*)>', caseSensitive: false);
   final closeTagLower = '</${tagName.toLowerCase()}>';
 
   var searchStart = 0;
   while (searchStart < content.length) {
-    final openMatch = openTagPattern.firstMatch(content.substring(searchStart));
+    final openMatch = openTagPattern.matchAsPrefix(content, searchStart) ??
+        RegExp('<$tagName([^>]*)>', caseSensitive: false).allMatches(content, searchStart).firstOrNull;
     if (openMatch == null) break;
 
-    final absoluteStart = searchStart + openMatch.start;
+    final absoluteStart = openMatch.start;
     final attributes = openMatch.group(1) ?? '';
-    final contentStart = searchStart + openMatch.end;
+    final contentStart = openMatch.end;
 
     var nestLevel = 1;
     var pos = contentStart;
     var matchEnd = -1;
 
     while (pos < content.length && nestLevel > 0) {
-      final remaining = content.substring(pos);
-
-      if (remaining.toLowerCase().startsWith(closeTagLower)) {
+      if (lower.startsWith(closeTagLower, pos)) {
         nestLevel--;
         if (nestLevel == 0) {
           final innerContent = content.substring(contentStart, pos);
@@ -93,10 +93,9 @@ List<BalancedTagMatch> findBalancedTags(String content, String tagName) {
         continue;
       }
 
-      final nestedOpen = openTagPattern.firstMatch(remaining);
-      if (nestedOpen != null && nestedOpen.start == 0) {
+      if (openTagPattern.matchAsPrefix(content, pos) case final nested?) {
         nestLevel++;
-        pos += nestedOpen.end;
+        pos = nested.end;
         continue;
       }
 

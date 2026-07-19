@@ -1,6 +1,5 @@
 import '../config/config.dart';
 import '../core/interfaces.dart';
-import '../utils/patterns.dart';
 import 'components/accordion_builder.dart';
 import 'components/api_builder.dart';
 import 'components/base_component.dart';
@@ -13,6 +12,8 @@ import 'components/step_builder.dart';
 import 'components/tab_builder.dart';
 import 'components/utility_builder.dart';
 import 'utils/attribute_parser.dart';
+import 'utils/code_masker.dart';
+import 'utils/component_scanner.dart';
 
 /// Transforms JSX-style components into HTML
 ///
@@ -52,47 +53,49 @@ class ComponentTransformer implements ContentTransformer {
     }
   }
 
-  /// Transform JSX-style components in HTML content
-  ///
-  /// Note: This runs AFTER markdown parsing, so content inside code blocks
-  /// is already HTML-escaped (e.g., `<Info>` becomes &lt;Info&gt;) and won't match.
+  /// Tag names with a registered builder.
+  Set<String> get registeredTags => _builders.keys.toSet();
+
+  /// Builders receive raw inner source; their output is transformed
+  /// recursively, and code spans are re-masked at every level.
   @override
   String transform(String content) {
     for (final builder in _builders.values.toSet()) {
       builder.resetPageState();
     }
-    var result = content;
-
-    for (final entry in _builders.entries) {
-      final tagName = entry.key;
-      final builder = entry.value;
-      result = _transformTag(result, tagName, builder);
-    }
-
-    return result;
+    return _transformLevel(content, 0);
   }
 
-  String _transformTag(String content, String tagName, ComponentBuilder builder) {
-    var result = content;
+  String _transformLevel(String content, int depth) {
+    if (depth > 16) return content;
 
-    if (builder.allowSelfClosing) {
-      result = result.replaceAllMapped(selfClosingComponentPattern(tagName), (match) {
-        final attrs = parseAttributes(match.group(1) ?? '');
-        return builder.build(tagName, attrs, '');
-      });
+    final masked = maskCodeSpans(content);
+    final out = StringBuffer();
+    var pos = 0;
+
+    for (var match = findFirstComponent(masked.text, registeredTags, pos);
+        match != null;
+        match = findFirstComponent(masked.text, registeredTags, pos)) {
+      out.write(masked.restore(masked.text.substring(pos, match.start)));
+      pos = match.end;
+
+      final builder = _builders[match.name];
+      if (builder == null) continue;
+
+      if (match.selfClosing && !builder.allowSelfClosing) {
+        out.write(masked.restore(masked.text.substring(match.start, match.end)));
+        continue;
+      }
+
+      final attrs = parseAttributes(masked.restore(match.attributes));
+      final inner = switch (match.inner) {
+        final inner? => masked.restore(inner).trim(),
+        null => '',
+      };
+      out.write(_transformLevel(builder.build(match.name, attrs, inner), depth + 1));
     }
 
-    final pattern = openCloseComponentPattern(tagName);
-    var previousResult = '';
-    while (previousResult != result) {
-      previousResult = result;
-      result = result.replaceAllMapped(pattern, (match) {
-        final attrs = parseAttributes(match.group(1) ?? '');
-        final innerContent = match.group(2) ?? '';
-        return builder.build(tagName, attrs, innerContent.trim());
-      });
-    }
-
-    return result;
+    out.write(masked.restore(masked.text.substring(pos)));
+    return out.toString();
   }
 }

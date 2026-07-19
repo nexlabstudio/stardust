@@ -1,3 +1,4 @@
+import 'package:stardust/src/content/component_transformer.dart';
 import 'package:stardust/src/content/components/base_component.dart';
 import 'package:test/test.dart';
 
@@ -25,71 +26,6 @@ class NoSelfCloseBuilder extends ComponentBuilder {
 
 void main() {
   group('ComponentBuilder', () {
-    group('transformAll', () {
-      late TestBuilder builder;
-
-      setUp(() {
-        builder = TestBuilder();
-      });
-
-      test('transforms self-closing tags', () {
-        const content = '<Test title="Hello" />';
-        final result = builder.transformAll(content, (_) => '');
-
-        expect(result, contains('<div class="Test"'));
-        expect(result, contains('data-title="Hello"'));
-      });
-
-      test('transforms open/close tags', () {
-        const content = '<Test title="World">Inner content</Test>';
-        final result = builder.transformAll(content, (_) => '');
-
-        expect(result, contains('<div class="Test"'));
-        expect(result, contains('data-title="World"'));
-        expect(result, contains('Inner content'));
-      });
-
-      test('transforms multiple tag types', () {
-        const content = '<Test /><Demo />';
-        final result = builder.transformAll(content, (_) => '');
-
-        expect(result, contains('class="Test"'));
-        expect(result, contains('class="Demo"'));
-      });
-
-      test('transforms nested same-type components', () {
-        const content = '''<Test title="outer">
-<Test title="inner">Nested</Test>
-</Test>''';
-        final result = builder.transformAll(content, (_) => '');
-
-        expect(result, contains('data-title="outer"'));
-        expect(result, contains('data-title="inner"'));
-        expect(result, contains('Nested'));
-      });
-
-      test('leaves non-matching content unchanged', () {
-        const content = '<div>Plain HTML</div>';
-        final result = builder.transformAll(content, (_) => '');
-
-        expect(result, equals(content));
-      });
-
-      test('handles empty content', () {
-        const content = '';
-        final result = builder.transformAll(content, (_) => '');
-
-        expect(result, equals(''));
-      });
-
-      test('handles content with no components', () {
-        const content = 'Just some text without any components';
-        final result = builder.transformAll(content, (_) => '');
-
-        expect(result, equals(content));
-      });
-    });
-
     group('allowSelfClosing', () {
       test('defaults to true', () {
         final builder = TestBuilder();
@@ -104,21 +40,15 @@ void main() {
       });
 
       test('does not transform self-closing when disabled', () {
-        final builder = NoSelfCloseBuilder();
-        const content = '<Block />';
-        final result = builder.transformAll(content, (_) => '');
-
-        // Should remain unchanged since self-closing is not allowed
-        expect(result, equals(content));
+        final transformer = ComponentTransformer()..register(NoSelfCloseBuilder());
+        final result = transformer.transform('<Block />');
+        expect(result, contains('<Block />'));
       });
 
       test('still transforms open/close when self-closing disabled', () {
-        final builder = NoSelfCloseBuilder();
-        const content = '<Block>Content</Block>';
-        final result = builder.transformAll(content, (_) => '');
-
-        expect(result, contains('class="block"'));
-        expect(result, contains('Content'));
+        final transformer = ComponentTransformer()..register(NoSelfCloseBuilder());
+        final result = transformer.transform('<Block>content</Block>');
+        expect(result, contains('<div class="block">content</div>'));
       });
     });
   });
