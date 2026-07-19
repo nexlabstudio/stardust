@@ -50,6 +50,7 @@ class SiteGenerator {
     }
 
     await _writeSharedAssets();
+    await fileSystem.writeFile(p.join(outputDir, '.nojekyll'), '');
 
     final contentDir = p.join(Directory.current.path, config.content.dir);
     final files = await _findMarkdownFiles(contentDir);
