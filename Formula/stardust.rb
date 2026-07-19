@@ -1,28 +1,28 @@
 class Stardust < Formula
   desc "Dart-native documentation generator. Beautiful docs, zero config."
   homepage "https://github.com/nexlabstudio/stardust"
-  version "0.6.0"
+  version "0.6.1"
   license "Apache-2.0"
 
   on_macos do
     on_arm do
-      url "https://github.com/nexlabstudio/stardust/releases/download/v0.6.0/stardust-darwin-arm64.tar.gz"
-      sha256 "e6c753831bb8509d4675febc15666cafe8808302700ee1ceca892b75db421911"
+      url "https://github.com/nexlabstudio/stardust/releases/download/v0.6.1/stardust-darwin-arm64.tar.gz"
+      sha256 "f90e44c7ff0efb31fd14ce810aacf35d392d999bd95ddf384403757a68c8ccaa"
     end
     on_intel do
-      url "https://github.com/nexlabstudio/stardust/releases/download/v0.6.0/stardust-darwin-x64.tar.gz"
-      sha256 "2e078692916d64124006eabfb570444f7c73804d4aa8df6389e11dc3fef475cd"
+      url "https://github.com/nexlabstudio/stardust/releases/download/v0.6.1/stardust-darwin-x64.tar.gz"
+      sha256 "e31e9c80d60b669c12c4c1dea89258dd6806c7f190c9d037df9a3578f336ab70"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/nexlabstudio/stardust/releases/download/v0.6.0/stardust-linux-arm64.tar.gz"
-      sha256 "b1b0bc362d01b15b0cdaf3b8748f1551ad4f9ea19734ae4c55b2c04bfef166b9"
+      url "https://github.com/nexlabstudio/stardust/releases/download/v0.6.1/stardust-linux-arm64.tar.gz"
+      sha256 "befca0139980435452811004813cec50e535ec645d4a383a9f0dbd18894a5f23"
     end
     on_intel do
-      url "https://github.com/nexlabstudio/stardust/releases/download/v0.6.0/stardust-linux-x64.tar.gz"
-      sha256 "eab5975e7b2ca258e2f40ad2fcd3e1fb881c88ea9b62d998c24d89a18bc7bc22"
+      url "https://github.com/nexlabstudio/stardust/releases/download/v0.6.1/stardust-linux-x64.tar.gz"
+      sha256 "962f3b8c774210dd56c4684e62765d60561ca691a3ac27b5745dfe3d8a2cf904"
     end
   end
 
@@ -31,6 +31,6 @@ class Stardust < Formula
   end
 
   test do
-    assert_match "Stardust v0.6.0", shell_output("#{bin}/stardust --version")
+    assert_match "Stardust v0.6.1", shell_output("#{bin}/stardust --version")
   end
 end
