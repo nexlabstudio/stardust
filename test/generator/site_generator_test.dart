@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:stardust/src/config/config.dart';
+import 'package:stardust/src/core/file_system.dart';
 import 'package:stardust/src/generator/site_generator.dart';
 import 'package:stardust/src/utils/exceptions.dart';
 import 'package:stardust/src/utils/logger.dart';
@@ -735,4 +736,49 @@ title: Home
       });
     });
   });
+
+  group('incremental dev rebuilds', () {
+    test('unchanged files are not re-read or re-parsed on rebuild', () async {
+      final tempDir = await Directory.systemTemp.createTemp('stardust_incremental');
+      try {
+        final contentDir = p.join(tempDir.path, 'content');
+        await Directory(contentDir).create();
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+        final other = File(p.join(contentDir, 'other.md'));
+        await other.writeAsString('# Other');
+
+        final fileSystem = CountingFileSystem();
+        final config = StardustConfig(name: 'T', content: ContentConfig(dir: contentDir)).withDevMode();
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: p.join(tempDir.path, 'out'),
+          fileSystem: fileSystem,
+          logger: const Logger(),
+        );
+
+        await generator.generate();
+        expect(fileSystem.contentReads, equals(2));
+
+        await generator.generate();
+        expect(fileSystem.contentReads, equals(2));
+
+        await other.writeAsString('# Other changed');
+        await other.setLastModified(DateTime.now().add(const Duration(seconds: 2)));
+        await generator.generate();
+        expect(fileSystem.contentReads, equals(3));
+      } finally {
+        await tempDir.delete(recursive: true);
+      }
+    });
+  });
+}
+
+class CountingFileSystem extends LocalFileSystem {
+  int contentReads = 0;
+
+  @override
+  Future<String> readFile(String path) {
+    if (path.endsWith('.md')) contentReads++;
+    return super.readFile(path);
+  }
 }

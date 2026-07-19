@@ -601,6 +601,50 @@ void main() {
       });
     });
   });
+
+  group('render cache', () {
+    test('second run reuses cached renders instead of re-rendering', () async {
+      final fileSystem = MockFileSystem();
+      const config = StardustConfig(name: 'Cache Site');
+      final generator = OgImageGenerator(
+        config: config,
+        outputDir: 'dist',
+        fileSystem: fileSystem,
+        cacheDir: 'cache/og',
+      );
+      const pages = [
+        Page(path: '/', sourcePath: 'index.md', title: 'Home', content: ''),
+        Page(path: '/guide', sourcePath: 'guide.md', title: 'Guide', content: ''),
+      ];
+
+      await generator.generateAll(pages);
+      final cacheWrites = fileSystem.operations.where((op) => op.startsWith('writeFileBytes:cache/og')).length;
+      expect(cacheWrites, equals(2));
+
+      fileSystem.operations.clear();
+      await generator.generateAll(pages);
+
+      expect(fileSystem.operations.where((op) => op.startsWith('writeFileBytes:cache/og')), isEmpty);
+      expect(fileSystem.operations.where((op) => op.startsWith('readFileBytes:cache/og')).length, equals(2));
+    });
+
+    test('title change re-renders only under a new cache key', () async {
+      final fileSystem = MockFileSystem();
+      const config = StardustConfig(name: 'Cache Site');
+      final generator = OgImageGenerator(
+        config: config,
+        outputDir: 'dist',
+        fileSystem: fileSystem,
+        cacheDir: 'cache/og',
+      );
+
+      await generator.generateAll(const [Page(path: '/', sourcePath: 'index.md', title: 'One', content: '')]);
+      await generator.generateAll(const [Page(path: '/', sourcePath: 'index.md', title: 'Two', content: '')]);
+
+      final cacheWrites = fileSystem.operations.where((op) => op.startsWith('writeFileBytes:cache/og')).length;
+      expect(cacheWrites, equals(2));
+    });
+  });
 }
 
 class _FailingFileSystem extends MockFileSystem {

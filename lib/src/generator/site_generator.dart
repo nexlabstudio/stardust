@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 
@@ -12,6 +13,7 @@ import '../content/markdown_parser.dart';
 import '../core/file_system.dart';
 import '../core/interfaces.dart';
 import '../models/page.dart';
+import '../utils/concurrency.dart';
 import '../utils/exceptions.dart';
 import '../utils/html_utils.dart';
 import '../utils/logger.dart';
@@ -54,26 +56,16 @@ class SiteGenerator {
 
     logger.log('📄 Found ${files.length} markdown files');
 
-    final pages = <Page>[];
-    final pagesBySlug = <String, Page>{};
-
-    for (final file in files) {
-      final page = await _parsePage(file, contentDir);
-      if (page != null) {
-        pages.add(page);
-        final slug = _pathToSlug(file.path, contentDir);
-        pagesBySlug[slug] = page;
-      }
-    }
-
+    final pages = await _parsePages(files, contentDir);
     final pagesWithNav = _addNavigation(pages);
 
-    var count = 0;
-    for (final page in pagesWithNav) {
-      await _generatePage(page);
-      count++;
-      logger.log('  ✅ ${page.path}');
+    for (final chunk in chunked(pagesWithNav, Platform.numberOfProcessors)) {
+      await Future.wait(chunk.map(_generatePage));
+      for (final page in chunk) {
+        logger.log('  ✅ ${page.path}');
+      }
     }
+    final count = pagesWithNav.length;
 
     await _copyPublicAssets();
 
@@ -156,20 +148,76 @@ class SiteGenerator {
     return (paths.toList()..sort()).map(File.new).toList();
   }
 
-  Future<Page?> _parsePage(File file, String contentDir) async {
-    try {
-      final content = await file.readAsString();
-      final slug = _pathToSlug(file.path, contentDir);
-      final defaultTitle = _slugToTitle(slug);
+  /// Parsed pages cached across dev rebuilds, keyed by source path.
+  final _parseCache = <String, ({DateTime modified, Page page})>{};
 
-      final parsed = contentParser.parse(content, defaultTitle: defaultTitle);
+  Future<List<Page>> _parsePages(List<File> files, String contentDir) async {
+    if (config.devMode) return _parsePagesIncremental(files, contentDir);
+    if (files.isEmpty) return [];
 
-      if (parsed.frontmatter['draft'] == true) {
-        logger.log('⏭️  Skipping draft: $slug');
-        return null;
+    final sources = <(String, String)>[];
+    for (final file in files) {
+      sources.add((file.path, await file.readAsString()));
+    }
+
+    final chunkSize = (sources.length / Platform.numberOfProcessors).ceil();
+    // captured locally so the isolate closure does not capture `this`
+    final parseConfig = config;
+    final outcomes = await Future.wait([
+      for (final chunk in chunked(sources, chunkSize)) Isolate.run(() => _parseChunk(parseConfig, contentDir, chunk)),
+    ]);
+
+    final pages = <Page>[];
+    for (final (page, draftSlug, error) in outcomes.expand((chunk) => chunk)) {
+      if (draftSlug case final slug?) logger.log('⏭️  Skipping draft: $slug');
+      if (error case final message?) logger.error(message);
+      if (page case final page?) pages.add(page);
+    }
+    return pages;
+  }
+
+  /// Dev rebuilds re-parse only files whose mtime changed.
+  Future<List<Page>> _parsePagesIncremental(List<File> files, String contentDir) async {
+    final pages = <Page>[];
+    final seen = <String>{};
+
+    for (final file in files) {
+      seen.add(file.path);
+      final modified = await fileSystem.lastModified(file.path);
+      if (_parseCache[file.path] case final cached? when cached.modified == modified) {
+        pages.add(cached.page);
+        continue;
       }
 
-      final pagePath = slug == 'index' ? '/' : '/$slug';
+      final content = await fileSystem.readFile(file.path);
+      final (page, draftSlug, error) = _parseSource(contentParser, contentDir, file.path, content);
+      if (draftSlug case final slug?) logger.log('⏭️  Skipping draft: $slug');
+      if (error case final message?) logger.error(message);
+      if (page case final page?) {
+        _parseCache[file.path] = (modified: modified, page: page);
+        pages.add(page);
+      } else {
+        _parseCache.remove(file.path);
+      }
+    }
+
+    _parseCache.removeWhere((path, _) => !seen.contains(path));
+    return pages;
+  }
+
+  static List<(Page?, String?, String?)> _parseChunk(
+      StardustConfig config, String contentDir, List<(String, String)> sources) {
+    final parser = MarkdownParser(config: config);
+    return [for (final (path, content) in sources) _parseSource(parser, contentDir, path, content)];
+  }
+
+  static (Page? page, String? draftSlug, String? error) _parseSource(
+      ContentParser parser, String contentDir, String path, String content) {
+    try {
+      final slug = _pathToSlug(path, contentDir);
+      final parsed = parser.parse(content, defaultTitle: _slugToTitle(slug));
+
+      if (parsed.frontmatter['draft'] == true) return (null, slug, null);
 
       final redirectFrom = switch (parsed.frontmatter['redirect_from']) {
         final List list => list.whereType<String>().toList(),
@@ -177,9 +225,9 @@ class SiteGenerator {
         _ => <String>[],
       };
 
-      return Page(
-        path: pagePath,
-        sourcePath: file.path,
+      final page = Page(
+        path: slug == 'index' ? '/' : '/$slug',
+        sourcePath: path,
         title: parsed.title,
         description: parsed.description,
         content: parsed.html,
@@ -187,20 +235,20 @@ class SiteGenerator {
         frontmatter: parsed.frontmatter,
         redirectFrom: redirectFrom,
       );
+      return (page, null, null);
     } catch (e) {
-      logger.error('  ❌ Error parsing ${file.path}: $e');
-      return null;
+      return (null, null, '  ❌ Error parsing $path: $e');
     }
   }
 
-  String _pathToSlug(String filePath, String contentDir) {
+  static String _pathToSlug(String filePath, String contentDir) {
     var relative = p.relative(filePath, from: contentDir);
     relative = p.withoutExtension(relative);
     relative = relative.replaceAll('\\', '/');
     return relative;
   }
 
-  String _slugToTitle(String slug) {
+  static String _slugToTitle(String slug) {
     if (slug == 'index') return 'Home';
     final name = p.basename(slug);
     return name
