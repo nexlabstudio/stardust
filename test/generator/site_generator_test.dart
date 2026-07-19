@@ -737,6 +737,36 @@ title: Home
     });
   });
 
+  group('ai-ready output', () {
+    test('writes per-page markdown, llms-full.txt, and respects llm: false', () async {
+      final tempDir = await Directory.systemTemp.createTemp('stardust_ai_output');
+      try {
+        final contentDir = p.join(tempDir.path, 'content');
+        await Directory(contentDir).create();
+        await File(p.join(contentDir, 'index.md')).writeAsString('---\ntitle: Home\n---\n\nWelcome text.');
+        await File(p.join(contentDir, 'secret.md')).writeAsString('---\ntitle: Secret\nllm: false\n---\n\nHidden.');
+
+        final outputDir = p.join(tempDir.path, 'out');
+        final config = StardustConfig(name: 'T', content: ContentConfig(dir: contentDir));
+        await SiteGenerator(config: config, outputDir: outputDir, logger: const Logger()).generate();
+
+        expect(File(p.join(outputDir, 'index.md')).existsSync(), isTrue);
+        expect(File(p.join(outputDir, 'secret.md')).existsSync(), isFalse);
+
+        final full = File(p.join(outputDir, 'llms-full.txt')).readAsStringSync();
+        expect(full, contains('Welcome text.'));
+        expect(full, isNot(contains('Hidden.')));
+
+        final html = File(p.join(outputDir, 'index.html')).readAsStringSync();
+        expect(html, contains('data-md-path="./index.md"'));
+        final secretHtml = File(p.join(outputDir, 'secret', 'index.html')).readAsStringSync();
+        expect(secretHtml, isNot(contains('copy-page-button')));
+      } finally {
+        await tempDir.delete(recursive: true);
+      }
+    });
+  });
+
   group('incremental dev rebuilds', () {
     test('unchanged files are not re-read or re-parsed on rebuild', () async {
       final tempDir = await Directory.systemTemp.createTemp('stardust_incremental');
@@ -748,7 +778,11 @@ title: Home
         await other.writeAsString('# Other');
 
         final fileSystem = CountingFileSystem();
-        final config = StardustConfig(name: 'T', content: ContentConfig(dir: contentDir)).withDevMode();
+        final config = StardustConfig(
+          name: 'T',
+          content: ContentConfig(dir: contentDir),
+          build: const BuildConfig(llms: LlmsConfig(enabled: false)),
+        ).withDevMode();
         final generator = SiteGenerator(
           config: config,
           outputDir: p.join(tempDir.path, 'out'),

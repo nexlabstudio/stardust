@@ -9,6 +9,7 @@ import 'package:glob/list_local_fs.dart';
 import 'package:path/path.dart' as p;
 
 import '../config/config.dart';
+import '../content/frontmatter_parser.dart';
 import '../content/markdown_parser.dart';
 import '../core/file_system.dart';
 import '../core/interfaces.dart';
@@ -60,7 +61,10 @@ class SiteGenerator {
     final pagesWithNav = _addNavigation(pages);
 
     for (final chunk in chunked(pagesWithNav, Platform.numberOfProcessors)) {
-      await Future.wait(chunk.map(_generatePage));
+      await Future.wait(chunk.map((page) async {
+        await _generatePage(page);
+        if (config.build.llms.enabled) await _writePageMarkdown(page);
+      }));
       for (final page in chunk) {
         logger.log('  ✅ ${page.path}');
       }
@@ -79,6 +83,7 @@ class SiteGenerator {
 
     if (config.build.llms.enabled) {
       await _generateLlms(pagesWithNav);
+      await _generateLlmsFull(pagesWithNav);
     }
 
     if (config.seo.ogImage == null && !config.devMode) {
@@ -464,6 +469,36 @@ class SiteGenerator {
 
     await fileSystem.writeFile(p.join(outputDir, 'llms.txt'), buffer.toString());
     logger.log('🤖 Generated llms.txt');
+  }
+
+  /// The raw page source served at `<path>.md`, so agents and the copy
+  /// button can fetch clean markdown for any page.
+  Future<void> _writePageMarkdown(Page page) async {
+    if (page.frontmatter['llm'] == false) return;
+    final source = await fileSystem.readFile(page.sourcePath);
+    final target = page.path == '/' ? 'index.md' : '${page.path.substring(1)}.md';
+    await fileSystem.writeFile(p.join(outputDir, target), source);
+  }
+
+  Future<void> _generateLlmsFull(List<Page> pages) async {
+    final urls = UrlResolver(config);
+    final buffer = StringBuffer();
+
+    buffer.writeln('# ${config.name} — full documentation');
+    if (config.description case final desc?) {
+      buffer.writeln('\n> $desc');
+    }
+
+    for (final page in pages.where((page) => page.frontmatter['llm'] != false)) {
+      final source = await fileSystem.readFile(page.sourcePath);
+      buffer.writeln('\n---\n');
+      buffer.writeln('## ${page.title}');
+      buffer.writeln('\nURL: ${urls.absolute(page.path) ?? page.path}\n');
+      buffer.writeln(FrontmatterParser.parse(source).content.trim());
+    }
+
+    await fileSystem.writeFile(p.join(outputDir, 'llms-full.txt'), buffer.toString());
+    logger.log('🤖 Generated llms-full.txt');
   }
 
   Future<void> _generateRedirects(List<Page> pages) async {

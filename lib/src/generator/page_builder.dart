@@ -39,6 +39,13 @@ class PageBuilder {
       (:final css, :final js)? => ('?v=$css', '?v=$js'),
       null => ('', ''),
     };
+    final markdownTwin = page.path == '/' ? 'index.md' : '${page.path.substring(1)}.md';
+    final copyPageButton = config.build.llms.enabled && page.frontmatter['llm'] != false
+        ? '''
+        <div class="page-actions">
+          <button class="copy-page-button" data-md-path="$basePath/$markdownTwin">Copy page as Markdown</button>
+        </div>'''
+        : '';
 
     return '''
 <!DOCTYPE html>
@@ -62,6 +69,7 @@ class PageBuilder {
     <div class="main-container">
       ${_layoutBuilder.buildSidebar(sidebar, page.path)}
       <main class="content">
+$copyPageButton
         <article class="prose"$pagefindAttr>
           ${page.content}
         </article>

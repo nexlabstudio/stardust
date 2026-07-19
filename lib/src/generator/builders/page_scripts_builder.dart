@@ -50,6 +50,20 @@ ${buildAppJs()}
       setTheme(effective === 'dark' ? 'light' : 'dark');
     });
 
+    document.querySelectorAll('.copy-page-button').forEach(button => {
+      button.addEventListener('click', async () => {
+        const label = button.textContent;
+        try {
+          const response = await fetch(button.dataset.mdPath);
+          await navigator.clipboard.writeText(await response.text());
+          button.textContent = 'Copied!';
+        } catch (e) {
+          button.textContent = 'Copy failed';
+        }
+        setTimeout(() => button.textContent = label, 2000);
+      });
+    });
+
     document.querySelectorAll('.copy-button').forEach(button => {
       button.addEventListener('click', async () => {
         const code = button.closest('.code-block').querySelector('code').textContent;

@@ -49,7 +49,26 @@ Website: https://example.com
 ...
 ```
 
-Each entry links to the page and carries its frontmatter description, so an AI tool can discover and fetch exactly the pages it needs. A single-file `llms-full.txt` variant with complete page content is planned.
+Each entry links to the page and carries its frontmatter description, so an AI tool can discover and fetch exactly the pages it needs.
+
+## llms-full.txt
+
+Alongside the index, Stardust writes `llms-full.txt`: every page's full markdown
+content in one file, each section prefixed with the page title and URL. Point
+an AI assistant at this single file to give it your entire documentation.
+
+## Per-Page Markdown
+
+Every page is also published as raw markdown next to its HTML — append `.md`
+to any page URL:
+
+```
+https://example.com/guide      → the rendered page
+https://example.com/guide.md   → its markdown source
+```
+
+Readers get the same thing through the **Copy page as Markdown** button at the
+top of each page — one click to paste a page into an AI chat.
 
 ## Use Cases
 
@@ -127,7 +146,7 @@ llm: false
 
 ## File Size Considerations
 
-llms.txt is an index — one line per page — so it stays small (a few KB) even for large sites.
+llms.txt is an index — one line per page — so it stays small (a few KB) even for large sites. `llms-full.txt` grows with your content; agents that need everything fetch it once.
 
 ## Why This Matters
 
