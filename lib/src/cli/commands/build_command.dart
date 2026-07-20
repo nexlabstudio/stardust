@@ -145,11 +145,18 @@ class BuildCommand extends Command<int> {
       return null;
     }
 
+    final tasks = planVersionBuilds(config, outputDir);
+    final versionPages = <String, Set<String>>{};
+    for (final task in tasks) {
+      versionPages[task.entry.version] = await discoverPagePaths(fileSystem, task.source, config.content);
+    }
+
     var total = 0;
-    for (final task in planVersionBuilds(config, outputDir)) {
+    for (final task in tasks) {
       final label = task.entry.label ?? 'v${task.entry.version}';
       logger.log('📦 $label → ${p.relative(task.outputDir)}${task.noindex ? '  (noindex)' : ''}');
-      final versioned = config.withVersion(task.entry, source: task.source, versionBasePath: task.versionBasePath);
+      final versioned = config.withVersion(task.entry,
+          source: task.source, versionBasePath: task.versionBasePath, versionPages: versionPages);
       final count =
           await _buildOne(factory, versioned, task.outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger);
       if (count == null) return null;

@@ -27,7 +27,18 @@ class PageLayoutBuilder {
     return _prefixPath(path);
   }
 
-  String buildHeader() {
+  /// Cross-version link that preserves [currentPath] when [entry]'s version has
+  /// that page, else falls back to the version root.
+  String _versionPageHref(VersionEntry entry, String currentPath) {
+    final root = _versionRootHref(entry.path);
+    if (currentPath == '/' || !(config.versionPages?[entry.version]?.contains(currentPath) ?? false)) {
+      return root;
+    }
+    final trimmed = root.endsWith('/') ? root.substring(0, root.length - 1) : root;
+    return '$trimmed$currentPath';
+  }
+
+  String buildHeader([String currentPath = '/']) {
     final navLinks = config.nav.map((item) {
       final external = item.external ? ' target="_blank" rel="noopener"' : '';
       final href = item.external ? item.href : _prefixPath(item.href);
@@ -38,7 +49,7 @@ class PageLayoutBuilder {
     final logoHtml = _buildLogo();
     final announcement = _buildAnnouncement();
     final versionBanner = _buildVersionBanner();
-    final versionDropdown = _buildVersionDropdown();
+    final versionDropdown = _buildVersionDropdown(currentPath);
     final localeDropdown = _buildLocaleDropdown();
 
     return '''
@@ -135,7 +146,7 @@ class PageLayoutBuilder {
     </div>''';
   }
 
-  String _buildVersionDropdown() {
+  String _buildVersionDropdown(String currentPath) {
     final versions = config.versions;
     if (versions == null || !versions.enabled || !versions.dropdown) return '';
     if (versions.list.isEmpty) return '';
@@ -149,7 +160,7 @@ class PageLayoutBuilder {
     final items = versions.list.map((entry) {
       final label = entry.label ?? 'v${entry.version}';
       final active = entry.version == selected ? ' active' : '';
-      return '<a href="${encodeHtmlAttribute(_versionRootHref(entry.path))}" class="version-dropdown-item$active">${encodeHtml(label)}</a>';
+      return '<a href="${encodeHtmlAttribute(_versionPageHref(entry, currentPath))}" class="version-dropdown-item$active">${encodeHtml(label)}</a>';
     }).join('\n        ');
 
     return '''

@@ -49,6 +49,10 @@ class StardustConfig {
   /// for a normal single-version build. Drives `noindex` and switcher state.
   final VersionEntry? activeVersion;
 
+  /// Page paths each version emits, keyed by version, during a `--all-versions`
+  /// run — lets the switcher link to the same page across versions.
+  final Map<String, Set<String>>? versionPages;
+
   const StardustConfig({
     required this.name,
     this.description,
@@ -75,6 +79,7 @@ class StardustConfig {
     this.dev = const DevConfig(),
     this.devMode = false,
     this.activeVersion,
+    this.versionPages,
   });
 
   I18nStrings get i18nStrings => i18n?.strings ?? const I18nStrings();
@@ -136,12 +141,19 @@ class StardustConfig {
         dev: dev,
         devMode: true,
         activeVersion: activeVersion,
+        versionPages: versionPages,
       );
 
   /// Derives a build for a single [entry]: content sourced from [source], URLs
   /// prefixed with [versionBasePath] (null = site root), tagged as active so
   /// pages emit the right switcher state and `noindex` on non-current versions.
-  StardustConfig withVersion(VersionEntry entry, {required String source, required String? versionBasePath}) =>
+  /// [versionPages] is the cross-version page index for the switcher.
+  StardustConfig withVersion(
+    VersionEntry entry, {
+    required String source,
+    required String? versionBasePath,
+    Map<String, Set<String>>? versionPages,
+  }) =>
       StardustConfig(
         name: name,
         description: description,
@@ -168,5 +180,6 @@ class StardustConfig {
         dev: dev,
         devMode: devMode,
         activeVersion: entry,
+        versionPages: versionPages ?? this.versionPages,
       );
 }

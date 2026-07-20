@@ -100,6 +100,11 @@ stardust build --all-versions
 
 When `dropdown: true`, a version selector appears in the header next to the theme toggle. It shows the current version and lists all available versions as links.
 
+Under `--all-versions` the switcher is **page-preserving**: from `/v2/guide/` it
+links each version to *its* `/guide` when that version has the page, and falls
+back to the version's root otherwise. (A page that exists only as a `draft` in
+another version also falls back to the root.)
+
 To hide the dropdown while still using the banner:
 
 ```yaml
