@@ -93,6 +93,13 @@ void main() {
       expect(issues.single.message, contains('"ghost"'));
     });
 
+    test('check: false skips a page own links but still indexes it as a target', () async {
+      fileSystem.addFile('docs/demo.md', '---\ncheck: false\n---\n\n[x](/nowhere)');
+      fileSystem.addFile('docs/index.md', '[see the demo](/demo)');
+
+      expect(await run(const StardustConfig(name: 'T')), isEmpty);
+    });
+
     test('component syntax inside code fences is not treated as a live link', () async {
       fileSystem.addFile('docs/index.md', '```html\n<a href="/nowhere">x</a>\n```');
 

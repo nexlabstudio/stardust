@@ -1,6 +1,7 @@
 ---
 title: Cards
 description: Create visually appealing navigation and content cards.
+check: false
 ---
 
 # Cards
@@ -52,10 +53,10 @@ Use a standalone card for featured content:
 ## Cards with Emoji Icons
 
 <Cards>
-  <Card title="Documentation" icon="📖" href="/">
+  <Card title="Documentation" icon="📖" href="/docs">
     Comprehensive guides and references.
   </Card>
-  <Card title="Examples" icon="💡" href="/quickstart">
+  <Card title="Examples" icon="💡" href="/examples">
     Real-world usage examples.
   </Card>
   <Card title="Community" icon="👥" href="https://github.com/nexlabstudio/stardust">
@@ -65,10 +66,10 @@ Use a standalone card for featured content:
 
 ```markdown
 <Cards>
-  <Card title="Documentation" icon="📖" href="/">
+  <Card title="Documentation" icon="📖" href="/docs">
     Comprehensive guides and references.
   </Card>
-  <Card title="Examples" icon="💡" href="/quickstart">
+  <Card title="Examples" icon="💡" href="/examples">
     Real-world usage examples.
   </Card>
 </Cards>

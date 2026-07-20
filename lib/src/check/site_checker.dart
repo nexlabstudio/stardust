@@ -39,7 +39,7 @@ class SiteChecker {
     final issues = <CheckIssue>[];
 
     // Links can target any page, so index every page before validating any.
-    final pages = <({String path, String source, String html})>[];
+    final pages = <({String path, String source, String html, bool validate})>[];
     final pathToSource = <String, String>{};
     final anchorsByPath = <String, Set<String>>{};
 
@@ -50,15 +50,16 @@ class SiteChecker {
         issues.add(CheckIssue(file, 'duplicate page path "$path" (also produced by $existing)'));
         continue;
       }
-      final html = contentParser.parse(await fileSystem.readFile(file)).html;
+      final parsed = contentParser.parse(await fileSystem.readFile(file));
       pathToSource[path] = file;
-      anchorsByPath[path] = _headingIdPattern.allMatches(html).map((m) => m.group(1) ?? '').toSet();
-      pages.add((path: path, source: file, html: html));
+      anchorsByPath[path] = _headingIdPattern.allMatches(parsed.html).map((m) => m.group(1) ?? '').toSet();
+      pages.add((path: path, source: file, html: parsed.html, validate: parsed.frontmatter['check'] != false));
     }
 
     final pagePaths = pathToSource.keys.toSet();
 
     for (final page in pages) {
+      if (!page.validate) continue;
       for (final match in _linkPattern.allMatches(page.html)) {
         _checkLink(match.group(1) ?? '', page, pagePaths, anchorsByPath, issues);
       }
@@ -73,7 +74,7 @@ class SiteChecker {
 
   void _checkLink(
     String href,
-    ({String path, String source, String html}) page,
+    ({String path, String source, String html, bool validate}) page,
     Set<String> pagePaths,
     Map<String, Set<String>> anchorsByPath,
     List<CheckIssue> issues,

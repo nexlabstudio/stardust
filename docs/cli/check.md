@@ -37,6 +37,21 @@ Example output:
 External links (`http`, `mailto:`, `tel:`), protocol-relative URLs, and links
 or images inside code blocks are ignored.
 
+## Excluding a page
+
+Pages whose links are intentionally illustrative — component demos, generated API
+stubs — can opt out with `check: false` in their frontmatter:
+
+```yaml
+---
+title: Cards
+check: false
+---
+```
+
+The page is still indexed as a link *target* (links pointing to it are validated),
+but its own links, anchors, and images are skipped.
+
 ## Options
 
 | Option | Description | Default |
