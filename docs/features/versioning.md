@@ -19,6 +19,8 @@ For each entry in `versions.list` it builds that version's content into the
 entry's `path` (e.g. `/v1/`), prefixes every URL and the search index
 accordingly, and adds `<meta name="robots" content="noindex, follow">` to every
 version except `versions.current` so search engines only rank the latest docs.
+Those `noindex` versions are also left out of `sitemap.xml` — only the current
+version is listed, so crawlers are never handed URLs they are told not to index.
 
 Each version's content comes from its `source` directory; an entry without a
 `source` builds from the live `content.dir`. A single deploy directory contains

@@ -368,6 +368,11 @@ class SiteGenerator {
       return;
     }
 
+    if (config.activeVersion case final active? when active.version != config.versions?.current) {
+      logger.log('⏭️  Skipping sitemap.xml (noindex version ${active.version})');
+      return;
+    }
+
     final buffer = StringBuffer();
     buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
     buffer.writeln('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
