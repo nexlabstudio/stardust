@@ -80,9 +80,21 @@ class RedirectGenerator {
     final outputPath = p.joinAll([outputDir, ...segments, 'index.html']);
 
     final destinationUrl = sanitizeUrl(basePath.isEmpty ? to : '$basePath$to');
-    final attrUrl = encodeHtmlAttribute(destinationUrl);
+    await fileSystem.writeFile(outputPath, _redirectHtml(destinationUrl));
+  }
 
-    final html = '''<!DOCTYPE html>
+  /// Writes the site-root `index.html` as a redirect to [to] (already an
+  /// absolute URL). Used by `--all-versions` when the current version lives
+  /// under a path prefix, so the bare root does not 404.
+  Future<void> writeRootIndexRedirect(String to) async {
+    final destinationUrl = sanitizeUrl(to);
+    await fileSystem.writeFile(p.join(outputDir, 'index.html'), _redirectHtml(destinationUrl));
+    logger.log('↪️  Root redirects to $destinationUrl');
+  }
+
+  String _redirectHtml(String destinationUrl) {
+    final attrUrl = encodeHtmlAttribute(destinationUrl);
+    return '''<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -96,8 +108,6 @@ class RedirectGenerator {
 </body>
 </html>
 ''';
-
-    await fileSystem.writeFile(outputPath, html);
   }
 
   Future<void> _generateNetlifyRedirects(List<RedirectConfig> redirects) async {

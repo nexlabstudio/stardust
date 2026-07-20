@@ -26,6 +26,20 @@ void main() {
       );
     });
 
+    group('writeRootIndexRedirect', () {
+      test('writes a root index.html that redirects to the current version', () async {
+        final generator = RedirectGenerator(outputDir: 'dist', logger: logger, fileSystem: fileSystem);
+
+        await generator.writeRootIndexRedirect('/v2/');
+
+        final html = fileSystem.fileAt(p.join('dist', 'index.html'));
+        expect(html, contains('<meta http-equiv="refresh" content="0; url=/v2/">'));
+        expect(html, contains('<link rel="canonical" href="/v2/">'));
+        expect(html, contains('window.location.href = "/v2/"'));
+        expect(logs, contains(contains('Root redirects to /v2/')));
+      });
+    });
+
     group('generateAll', () {
       test('returns 0 when no redirects configured', () async {
         final generator = RedirectGenerator(

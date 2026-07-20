@@ -96,6 +96,11 @@ stardust build --all-versions
 # dist/v1/         → v1.0 (noindex)
 ```
 
+Keeping the current version at `path: /` serves it at the site root. If instead
+every version lives under a prefix (e.g. current at `/v2/`), Stardust writes a
+root `index.html` that redirects to the current version so the bare domain does
+not 404.
+
 #### Building an older version from a git tag
 
 To avoid keeping old content in the tree, point `source` at a git tag or ref.

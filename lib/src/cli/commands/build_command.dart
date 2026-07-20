@@ -5,6 +5,7 @@ import '../../config/config.dart';
 import '../../config/config_loader.dart';
 import '../../core/file_system.dart';
 import '../../core/stardust_factory.dart';
+import '../../generator/redirect_generator.dart';
 import '../../generator/version_planner.dart';
 import '../../generator/version_source_resolver.dart';
 import '../../search/pagefind_runner.dart';
@@ -167,10 +168,30 @@ class BuildCommand extends Command<int> {
         if (count == null) return null;
         total += count;
       }
+
+      await _redirectRootToCurrent(config, outputDir, resolved, logger);
       return total;
     } finally {
       await resolver.cleanup();
     }
+  }
+
+  /// When the current version builds under a path prefix, the site root has no
+  /// index — write one that redirects to the current version so it does not 404.
+  Future<void> _redirectRootToCurrent(
+    StardustConfig config,
+    String outputDir,
+    List<({VersionBuildTask task, String dir})> resolved,
+    Logger logger,
+  ) async {
+    final current = resolved
+        .map((r) => r.task)
+        .where((t) => t.entry.version == config.versions?.current && t.outputDir != outputDir)
+        .firstOrNull;
+    if (current == null) return;
+
+    await RedirectGenerator(outputDir: outputDir, fileSystem: fileSystem, logger: logger)
+        .writeRootIndexRedirect('${current.versionBasePath ?? ''}/');
   }
 
   Future<int?> _buildOne(
