@@ -12,7 +12,7 @@ Display rich media content including images, videos, diagrams, and file structur
 Enhanced images with captions, zoom, and styling options:
 
 <Image
-  src="/images/example.png"
+  src="/images/stardust-logo.png"
   alt="Example screenshot"
   caption="An example image with caption"
   rounded
@@ -20,7 +20,7 @@ Enhanced images with captions, zoom, and styling options:
 
 ```markdown
 <Image
-  src="/images/example.png"
+  src="/images/stardust-logo.png"
   alt="Example screenshot"
   caption="An example image with caption"
   rounded
