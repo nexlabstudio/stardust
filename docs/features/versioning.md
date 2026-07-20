@@ -67,7 +67,7 @@ Each item in `list` has:
 | `path` | `string` | Yes | URL path where this version is deployed (`/` for the site root) |
 | `label` | `string` | No | Display label in dropdown. Defaults to `v{version}` |
 | `banner` | `string` | No | Warning banner text (supports HTML). Shown when viewing this version |
-| `source` | `string` | No | Content directory for this version under `--all-versions`. Defaults to `content.dir` |
+| `source` | `string` or `{tag/ref}` | No | Where this version's content comes from under `--all-versions`: a content directory, or a git ref checked out at build time. Defaults to `content.dir` |
 
 ### Building all versions at once
 
@@ -95,6 +95,27 @@ stardust build --all-versions
 # dist/            → v2.0 (indexed)
 # dist/v1/         → v1.0 (noindex)
 ```
+
+#### Building an older version from a git tag
+
+To avoid keeping old content in the tree, point `source` at a git tag or ref.
+Stardust checks it out into a throwaway worktree, builds it, and cleans up — the
+current checkout is never touched:
+
+```yaml
+versions:
+  enabled: true
+  current: "2.0"
+  list:
+    - version: "2.0"
+      path: /
+    - version: "1.0"
+      path: /v1/
+      source:
+        tag: v1.0.0
+```
+
+The ref must be reachable in the local repository (`git fetch --tags` in CI first).
 
 ## Version Dropdown
 
