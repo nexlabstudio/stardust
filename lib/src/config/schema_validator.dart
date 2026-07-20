@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../utils/text_utils.dart';
 import 'stardust_schema.dart';
 
 /// A single problem found while validating stardust.yaml.
@@ -117,7 +118,7 @@ class SchemaValidator {
       } else if (schema['additionalProperties'] case final Map<String, dynamic> extraSchema) {
         _validateNode(extraSchema, entry.value, childPath, issues);
       } else if (schema['additionalProperties'] == false && properties.isNotEmpty) {
-        final hint = switch (_closestKey(key, properties.keys)) {
+        final hint = switch (closestMatch(key, properties.keys, maxDistance: 2, caseInsensitive: true)) {
           final suggestion? => ' — did you mean "$suggestion"?',
           null => '',
         };
@@ -160,32 +161,5 @@ class SchemaValidator {
     final types = branches.map((b) => b['type']).whereType<String>().toList();
     if (failures.length == 1) return failures.single.map((i) => i.message).join('; ');
     return 'must be ${types.isEmpty ? 'one of the allowed shapes' : types.join(' or ')}';
-  }
-
-  String? _closestKey(String key, Iterable<String> candidates) {
-    String? best;
-    var bestDistance = 3;
-    for (final candidate in candidates) {
-      final distance = _levenshtein(key.toLowerCase(), candidate.toLowerCase());
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = candidate;
-      }
-    }
-    return best;
-  }
-
-  int _levenshtein(String a, String b) {
-    if ((a.length - b.length).abs() > 2) return 3;
-    var previous = List<int>.generate(b.length + 1, (i) => i);
-    for (var i = 0; i < a.length; i++) {
-      final current = [i + 1, ...List.filled(b.length, 0)];
-      for (var j = 0; j < b.length; j++) {
-        final substitution = previous[j] + (a[i] == b[j] ? 0 : 1);
-        current[j + 1] = [substitution, previous[j + 1] + 1, current[j] + 1].reduce((x, y) => x < y ? x : y);
-      }
-      previous = current;
-    }
-    return previous[b.length];
   }
 }

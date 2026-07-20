@@ -102,6 +102,8 @@ sidebar:
         label: stardust dev
       - slug: cli/build
         label: stardust build
+      - slug: cli/check
+        label: stardust check
       - slug: cli/serve
         label: stardust serve
       - slug: cli/new
