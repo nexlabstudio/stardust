@@ -13,7 +13,7 @@ void main() {
         current: '2.0',
         list: [
           VersionEntry(version: '2.0', path: '/', label: 'v2'),
-          VersionEntry(version: '1.0', path: '/v1/', source: 'versions/1.0'),
+          VersionEntry(version: '1.0', path: '/v1/', source: DirSource('versions/1.0')),
         ],
       ),
     );
@@ -26,7 +26,7 @@ void main() {
       final root = planVersionBuilds(config, 'dist').first;
 
       expect(root.entry.version, '2.0');
-      expect(root.source, 'docs', reason: 'defaults to the live content dir');
+      expect(root.source, const DirSource('docs'), reason: 'defaults to the live content dir');
       expect(root.outputDir, 'dist');
       expect(root.versionBasePath, isNull);
       expect(root.noindex, isFalse, reason: 'the current version stays indexable');
@@ -35,10 +35,26 @@ void main() {
     test('routes an older version into its path segment with noindex', () {
       final old = planVersionBuilds(config, 'dist')[1];
 
-      expect(old.source, 'versions/1.0');
+      expect(old.source, const DirSource('versions/1.0'));
       expect(old.outputDir, p.join('dist', 'v1'));
       expect(old.versionBasePath, '/v1');
       expect(old.noindex, isTrue);
+    });
+
+    test('carries a git source through to the build task', () {
+      const gitConfig = StardustConfig(
+        name: 'T',
+        versions: VersionsConfig(
+          enabled: true,
+          current: '2.0',
+          list: [
+            VersionEntry(version: '2.0', path: '/'),
+            VersionEntry(version: '1.0', path: '/v1/', source: GitSource('v1.0.0')),
+          ],
+        ),
+      );
+
+      expect(planVersionBuilds(gitConfig, 'dist')[1].source, const GitSource('v1.0.0'));
     });
 
     test('nests version prefixes under an existing site basePath', () {

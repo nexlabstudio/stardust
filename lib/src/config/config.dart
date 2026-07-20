@@ -17,6 +17,7 @@ export 'navigation_config.dart';
 export 'search_config.dart';
 export 'seo_config.dart';
 export 'theme_config.dart';
+export 'version_source.dart';
 
 /// Main Stardust configuration
 class StardustConfig {

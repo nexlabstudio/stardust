@@ -555,8 +555,24 @@ const stardustSchemaJson = r'''
                 "type": "string"
               },
               "source": {
-                "type": "string",
-                "description": "Content directory for this version when building with --all-versions (defaults to the live content.dir)"
+                "description": "Where this version's content comes from under --all-versions: a content directory, or a git ref checked out at build time. Defaults to the live content.dir",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "tag": {
+                        "type": "string"
+                      },
+                      "ref": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
               }
             },
             "required": [

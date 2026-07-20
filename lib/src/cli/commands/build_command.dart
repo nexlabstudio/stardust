@@ -6,6 +6,7 @@ import '../../config/config_loader.dart';
 import '../../core/file_system.dart';
 import '../../core/stardust_factory.dart';
 import '../../generator/version_planner.dart';
+import '../../generator/version_source_resolver.dart';
 import '../../search/pagefind_runner.dart';
 import '../../utils/logger.dart';
 import '../output_guard.dart';
@@ -145,24 +146,31 @@ class BuildCommand extends Command<int> {
       return null;
     }
 
-    final tasks = planVersionBuilds(config, outputDir);
-    final versionPages = <String, Set<String>>{};
-    for (final task in tasks) {
-      versionPages[task.entry.version] = await discoverPagePaths(fileSystem, task.source, config.content);
-    }
+    final resolver = VersionSourceResolver();
+    try {
+      final resolved = <({VersionBuildTask task, String dir})>[];
+      final versionPages = <String, Set<String>>{};
+      for (final task in planVersionBuilds(config, outputDir)) {
+        final dir = await resolver.resolve(task.source, config.content.dir);
+        resolved.add((task: task, dir: dir));
+        versionPages[task.entry.version] = await discoverPagePaths(fileSystem, dir, config.content);
+      }
 
-    var total = 0;
-    for (final task in tasks) {
-      final label = task.entry.label ?? 'v${task.entry.version}';
-      logger.log('📦 $label → ${p.relative(task.outputDir)}${task.noindex ? '  (noindex)' : ''}');
-      final versioned = config.withVersion(task.entry,
-          source: task.source, versionBasePath: task.versionBasePath, versionPages: versionPages);
-      final count =
-          await _buildOne(factory, versioned, task.outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger);
-      if (count == null) return null;
-      total += count;
+      var total = 0;
+      for (final (:task, :dir) in resolved) {
+        final label = task.entry.label ?? 'v${task.entry.version}';
+        logger.log('📦 $label → ${p.relative(task.outputDir)}${task.noindex ? '  (noindex)' : ''}');
+        final versioned = config.withVersion(task.entry,
+            source: dir, versionBasePath: task.versionBasePath, versionPages: versionPages);
+        final count = await _buildOne(factory, versioned, task.outputDir,
+            skipSearch: skipSearch, verbose: verbose, logger: logger);
+        if (count == null) return null;
+        total += count;
+      }
+      return total;
+    } finally {
+      await resolver.cleanup();
     }
-    return total;
   }
 
   Future<int?> _buildOne(

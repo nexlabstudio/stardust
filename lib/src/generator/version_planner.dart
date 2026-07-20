@@ -8,7 +8,7 @@ import '../core/file_system.dart';
 /// content comes from, where it is written, and how its URLs are prefixed.
 class VersionBuildTask {
   final VersionEntry entry;
-  final String source;
+  final VersionSource source;
   final String outputDir;
   final String? versionBasePath;
   final bool noindex;
@@ -38,7 +38,7 @@ List<VersionBuildTask> planVersionBuilds(StardustConfig config, String baseOutpu
     final segment = entry.path.replaceAll(RegExp(r'^/+|/+$'), '');
     tasks.add(VersionBuildTask(
       entry: entry,
-      source: entry.source ?? config.content.dir,
+      source: entry.source ?? DirSource(config.content.dir),
       outputDir: segment.isEmpty ? baseOutputDir : p.join(baseOutputDir, segment),
       versionBasePath: segment.isEmpty ? (base.isEmpty ? null : base) : '$base/$segment',
       noindex: versions.current != null && entry.version != versions.current,

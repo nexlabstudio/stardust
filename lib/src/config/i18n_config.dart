@@ -1,3 +1,5 @@
+import 'version_source.dart';
+
 class VersionsConfig {
   final bool enabled;
   final String? current;
@@ -30,7 +32,7 @@ class VersionEntry {
   final String? label;
   final String path;
   final String? banner;
-  final String? source;
+  final VersionSource? source;
 
   const VersionEntry({required this.version, this.label, required this.path, this.banner, this.source});
 
@@ -39,7 +41,7 @@ class VersionEntry {
         label: yaml['label'] as String?,
         path: yaml['path'] as String,
         banner: yaml['banner'] as String?,
-        source: yaml['source'] as String?,
+        source: yaml['source'] == null ? null : VersionSource.fromYaml(yaml['source']),
       );
 }
 
