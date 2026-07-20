@@ -347,7 +347,7 @@ llm: false
         expect(other, contains(RegExp(r'\.\./assets/styles\.css\?v=[0-9a-f]{8}')));
       });
 
-      test('writes a .nojekyll file so GitHub Pages serves _pagefind', () async {
+      test('writes a .nojekyll file for GitHub Pages', () async {
         await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
 
         final config = StardustConfig(name: 'Test Site', content: ContentConfig(dir: contentDir));

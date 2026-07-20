@@ -371,7 +371,7 @@ ${buildAppJs()}
       async function ensurePagefind() {
         if (pagefind || loadError) return;
         try {
-          pagefind = await import(BASE + '/_pagefind/pagefind.js');
+          pagefind = await import(BASE + '/pagefind/pagefind.js');
           await pagefind.options({ baseUrl: BASE || '/', excerptLength: 30 });
           await pagefind.init();
         } catch (e) {
