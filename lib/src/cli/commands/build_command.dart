@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
+import '../../config/config.dart';
 import '../../config/config_loader.dart';
 import '../../core/file_system.dart';
 import '../../core/stardust_factory.dart';
+import '../../generator/version_planner.dart';
 import '../../search/pagefind_runner.dart';
 import '../../utils/logger.dart';
 import '../output_guard.dart';
@@ -52,6 +54,11 @@ class BuildCommand extends Command<int> {
       help: 'Skip search index generation',
       negatable: false,
     );
+    argParser.addFlag(
+      'all-versions',
+      help: 'Build every entry in versions.list into its own path prefix',
+      negatable: false,
+    );
   }
 
   @override
@@ -65,6 +72,7 @@ class BuildCommand extends Command<int> {
     final clean = args['clean'] as bool;
     final verbose = args['verbose'] as bool;
     final skipSearch = args['skip-search'] as bool;
+    final allVersions = args['all-versions'] as bool;
 
     logger.log('🔨 Building Stardust site...');
     logger.log('');
@@ -97,19 +105,13 @@ class BuildCommand extends Command<int> {
     await fileSystem.writeFile(p.join(outputDir, buildMarker), buildMarkerContent);
 
     final factory = StardustFactory(fileSystem: fileSystem, logger: logger);
-    final generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
 
     try {
-      final pageCount = await generator.generate();
-
-      if (!skipSearch && config.search.enabled && config.search.provider == 'pagefind') {
-        logger.log('');
-        logger.log('🔍 Building search index...');
-        if (!await PagefindRunner.run(outputDir, verbose: verbose, logger: logger)) {
-          logger.error('❌ Search indexing failed. Use --skip-search to build without search.');
-          return 1;
-        }
-      }
+      final pageCount = allVersions
+          ? await _buildAllVersions(factory, config, outputDir,
+              skipSearch: skipSearch, verbose: verbose, logger: logger)
+          : await _buildOne(factory, config, outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger);
+      if (pageCount == null) return 1;
 
       stopwatch.stop();
       logger.log('');
@@ -123,5 +125,60 @@ class BuildCommand extends Command<int> {
       if (verbose) logger.error('$stackTrace');
       return 1;
     }
+  }
+
+  Future<int?> _buildAllVersions(
+    StardustFactory factory,
+    StardustConfig config,
+    String outputDir, {
+    required bool skipSearch,
+    required bool verbose,
+    required Logger logger,
+  }) async {
+    final versions = config.versions;
+    if (versions == null || !versions.enabled || versions.list.isEmpty) {
+      logger.error('❌ --all-versions needs a versions.list in your config. See the versioning docs.');
+      return null;
+    }
+    if (versions.current == null) {
+      logger.error('❌ --all-versions needs versions.current set to the canonical (indexed) version.');
+      return null;
+    }
+
+    var total = 0;
+    for (final task in planVersionBuilds(config, outputDir)) {
+      final label = task.entry.label ?? 'v${task.entry.version}';
+      logger.log('📦 $label → ${p.relative(task.outputDir)}${task.noindex ? '  (noindex)' : ''}');
+      final versioned = config.withVersion(task.entry, source: task.source, versionBasePath: task.versionBasePath);
+      final count =
+          await _buildOne(factory, versioned, task.outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger);
+      if (count == null) return null;
+      total += count;
+    }
+    return total;
+  }
+
+  Future<int?> _buildOne(
+    StardustFactory factory,
+    StardustConfig config,
+    String outputDir, {
+    required bool skipSearch,
+    required bool verbose,
+    required Logger logger,
+  }) async {
+    await fileSystem.createDirectory(outputDir, recursive: true);
+    final generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
+    final pageCount = await generator.generate();
+
+    if (!skipSearch && config.search.enabled && config.search.provider == 'pagefind') {
+      logger.log('');
+      logger.log('🔍 Building search index...');
+      if (!await PagefindRunner.run(outputDir, verbose: verbose, logger: logger)) {
+        logger.error('❌ Search indexing failed. Use --skip-search to build without search.');
+        return null;
+      }
+    }
+
+    return pageCount;
   }
 }

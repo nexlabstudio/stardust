@@ -553,6 +553,10 @@ const stardustSchemaJson = r'''
               },
               "banner": {
                 "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "description": "Content directory for this version when building with --all-versions (defaults to the live content.dir)"
               }
             },
             "required": [

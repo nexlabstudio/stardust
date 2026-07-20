@@ -9,14 +9,24 @@ Stardust supports versioned documentation, allowing you to maintain docs for mul
 
 ## How It Works
 
-Stardust follows a **single-build-per-version** model:
+Run one command and Stardust builds every version into its own path prefix:
 
-1. Each `stardust build` invocation produces one version of your docs
-2. The `versions` config tells Stardust about all versions so it can render the UI (dropdown, banner)
-3. You deploy each version's output to a different path (e.g. `/v1/`, `/v2/`)
-4. Orchestration (building multiple versions, merging outputs) is handled externally — typically in CI
+```bash
+stardust build --all-versions
+```
 
-This is the same proven approach used by [mike](https://github.com/jimporter/mike) (MkDocs) and similar tools.
+For each entry in `versions.list` it builds that version's content into the
+entry's `path` (e.g. `/v1/`), prefixes every URL and the search index
+accordingly, and adds `<meta name="robots" content="noindex, follow">` to every
+version except `versions.current` so search engines only rank the latest docs.
+
+Each version's content comes from its `source` directory; an entry without a
+`source` builds from the live `content.dir`. A single deploy directory contains
+all versions — no external merge step.
+
+> If you prefer to orchestrate builds yourself (one `stardust build` per branch,
+> merged in CI), the [manual workflow](#workflow) below still works — the config
+> is identical, you just skip `--all-versions`.
 
 ## Configuration
 
@@ -54,9 +64,37 @@ Each item in `list` has:
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `version` | `string` | Yes | Version identifier (e.g. `"2.0"`) |
-| `path` | `string` | Yes | URL path where this version is deployed |
+| `path` | `string` | Yes | URL path where this version is deployed (`/` for the site root) |
 | `label` | `string` | No | Display label in dropdown. Defaults to `v{version}` |
 | `banner` | `string` | No | Warning banner text (supports HTML). Shown when viewing this version |
+| `source` | `string` | No | Content directory for this version under `--all-versions`. Defaults to `content.dir` |
+
+### Building all versions at once
+
+Keep each older version's content in a directory and point its `source` at it:
+
+```yaml
+content:
+  dir: docs            # live/latest content
+versions:
+  enabled: true
+  current: "2.0"
+  list:
+    - version: "2.0"
+      label: "v2.0 (Latest)"
+      path: /           # latest at the site root
+    - version: "1.0"
+      label: "v1.0"
+      path: /v1/
+      source: versions/1.0
+      banner: "You're viewing an older version. <a href='/'>Go to latest</a>."
+```
+
+```bash
+stardust build --all-versions
+# dist/            → v2.0 (indexed)
+# dist/v1/         → v1.0 (noindex)
+```
 
 ## Version Dropdown
 

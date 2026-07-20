@@ -144,6 +144,28 @@ void main() {
         expect(result, contains('<link rel="canonical" href="https://example.com/docs/intro">'));
       });
 
+      test('marks a non-current version noindex', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          url: 'https://example.com',
+          versions: VersionsConfig(current: '2.0'),
+          activeVersion: VersionEntry(version: '1.0', path: '/v1/'),
+        );
+
+        expect(PageMetaBuilder(config: config).build(testPage), contains('content="noindex, follow"'));
+      });
+
+      test('does not noindex the current version', () {
+        const config = StardustConfig(
+          name: 'Test Site',
+          url: 'https://example.com',
+          versions: VersionsConfig(current: '2.0'),
+          activeVersion: VersionEntry(version: '2.0', path: '/'),
+        );
+
+        expect(PageMetaBuilder(config: config).build(testPage), isNot(contains('noindex')));
+      });
+
       test('builds OG url', () {
         final result = builder.build(testPage);
 

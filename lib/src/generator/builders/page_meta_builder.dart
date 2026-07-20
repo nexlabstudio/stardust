@@ -30,6 +30,12 @@ class PageMetaBuilder {
   String build(Page page) {
     final buffer = StringBuffer();
 
+    if (config.activeVersion case final active?) {
+      if (config.versions?.current case final current? when active.version != current) {
+        buffer.writeln('  <meta name="robots" content="noindex, follow">');
+      }
+    }
+
     if (urls.absolute(switch (page.path) { '/' => '', final p => p }) case final canonical?) {
       buffer.writeln('  <link rel="canonical" href="${encodeHtmlAttribute(canonical)}">');
     }

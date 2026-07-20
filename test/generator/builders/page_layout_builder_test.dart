@@ -8,6 +8,57 @@ void main() {
   group('PageLayoutBuilder', () {
     late PageLayoutBuilder builder;
 
+    group('version switcher under --all-versions', () {
+      const versions = VersionsConfig(
+        enabled: true,
+        current: '2.0',
+        list: [
+          VersionEntry(version: '2.0', path: '/'),
+          VersionEntry(version: '1.0', path: '/v1/', banner: 'Old.'),
+        ],
+      );
+
+      test('dropdown links to version roots without double-prefixing', () {
+        const config = StardustConfig(
+          name: 'T',
+          versions: versions,
+          build: BuildConfig(basePath: '/v1'),
+          activeVersion: VersionEntry(version: '1.0', path: '/v1/'),
+        );
+
+        final header = PageLayoutBuilder(config: config).buildHeader();
+
+        expect(header, contains('href="/v1/" class="version-dropdown-item active"'));
+        expect(header, contains('href="/" class="version-dropdown-item"'));
+        expect(header, isNot(contains('/v1/v1/')));
+      });
+
+      test('nests version roots under a deployment base path', () {
+        const config = StardustConfig(
+          name: 'T',
+          versions: versions,
+          build: BuildConfig(basePath: '/docs/v1'),
+          activeVersion: VersionEntry(version: '1.0', path: '/v1/'),
+        );
+
+        final header = PageLayoutBuilder(config: config).buildHeader();
+
+        expect(header, contains('href="/docs/v1/"'));
+        expect(header, contains('href="/docs/"'));
+      });
+
+      test('the active version drives the banner, not config.current', () {
+        const config = StardustConfig(
+          name: 'T',
+          versions: versions,
+          build: BuildConfig(basePath: '/v1'),
+          activeVersion: VersionEntry(version: '1.0', path: '/v1/', banner: 'Old.'),
+        );
+
+        expect(PageLayoutBuilder(config: config).buildHeader(), contains('version-banner'));
+      });
+    });
+
     group('with minimal config', () {
       setUp(() {
         const config = StardustConfig(name: 'Test Site');

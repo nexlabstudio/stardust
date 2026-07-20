@@ -30,14 +30,16 @@ class VersionEntry {
   final String? label;
   final String path;
   final String? banner;
+  final String? source;
 
-  const VersionEntry({required this.version, this.label, required this.path, this.banner});
+  const VersionEntry({required this.version, this.label, required this.path, this.banner, this.source});
 
   factory VersionEntry.fromYaml(Map yaml) => VersionEntry(
         version: yaml['version'] as String,
         label: yaml['label'] as String?,
         path: yaml['path'] as String,
         banner: yaml['banner'] as String?,
+        source: yaml['source'] as String?,
       );
 }
 

@@ -35,6 +35,18 @@ class BuildConfig {
           ),
         _ => const BuildConfig(),
       };
+
+  BuildConfig withBasePath(String? basePath) => BuildConfig(
+        outDir: outDir,
+        basePath: basePath,
+        cleanUrls: cleanUrls,
+        trailingSlash: trailingSlash,
+        sitemap: sitemap,
+        robots: robots,
+        llms: llms,
+        assets: assets,
+        redirects: redirects,
+      );
 }
 
 class SitemapConfig {

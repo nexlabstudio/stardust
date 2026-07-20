@@ -14,6 +14,19 @@ class PageLayoutBuilder {
 
   String _prefixPath(String path) => urls.href(path);
 
+  /// Href for a cross-version link. [path] is already absolute from the site
+  /// root (e.g. `/v1/`), so it takes only the deployment base, not the active
+  /// version's own prefix — otherwise `/v1/` would become `/v1/v1/`.
+  String _versionRootHref(String path) {
+    if (config.activeVersion case final active?) {
+      final base = config.basePath;
+      final segment = active.path.replaceAll(RegExp(r'^/+|/+$'), '');
+      final siteBase = segment.isEmpty ? base : base.substring(0, base.length - segment.length - 1);
+      return '$siteBase$path';
+    }
+    return _prefixPath(path);
+  }
+
   String buildHeader() {
     final navLinks = config.nav.map((item) {
       final external = item.external ? ' target="_blank" rel="noopener"' : '';
@@ -105,7 +118,8 @@ class PageLayoutBuilder {
     final versions = config.versions;
     if (versions == null || !versions.enabled) return '';
 
-    final currentEntry = versions.list.where((e) => e.version == versions.current).firstOrNull;
+    final selected = config.activeVersion?.version ?? versions.current;
+    final currentEntry = versions.list.where((e) => e.version == selected).firstOrNull;
     if (currentEntry == null || currentEntry.banner == null) return '';
 
     // banner is documented as raw HTML and is deliberately not escaped
@@ -126,15 +140,16 @@ class PageLayoutBuilder {
     if (versions == null || !versions.enabled || !versions.dropdown) return '';
     if (versions.list.isEmpty) return '';
 
+    final selected = config.activeVersion?.version ?? versions.current;
     final currentLabel =
-        versions.list.where((e) => e.version == versions.current).map((e) => e.label ?? 'v${e.version}').firstOrNull ??
-            versions.current ??
+        versions.list.where((e) => e.version == selected).map((e) => e.label ?? 'v${e.version}').firstOrNull ??
+            selected ??
             '';
 
     final items = versions.list.map((entry) {
       final label = entry.label ?? 'v${entry.version}';
-      final active = entry.version == versions.current ? ' active' : '';
-      return '<a href="${encodeHtmlAttribute(_prefixPath(entry.path))}" class="version-dropdown-item$active">${encodeHtml(label)}</a>';
+      final active = entry.version == selected ? ' active' : '';
+      return '<a href="${encodeHtmlAttribute(_versionRootHref(entry.path))}" class="version-dropdown-item$active">${encodeHtml(label)}</a>';
     }).join('\n        ');
 
     return '''

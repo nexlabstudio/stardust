@@ -45,6 +45,10 @@ class StardustConfig {
   final DevConfig dev;
   final bool devMode;
 
+  /// The version this build represents during a `--all-versions` run, or null
+  /// for a normal single-version build. Drives `noindex` and switcher state.
+  final VersionEntry? activeVersion;
+
   const StardustConfig({
     required this.name,
     this.description,
@@ -70,6 +74,7 @@ class StardustConfig {
     this.build = const BuildConfig(),
     this.dev = const DevConfig(),
     this.devMode = false,
+    this.activeVersion,
   });
 
   I18nStrings get i18nStrings => i18n?.strings ?? const I18nStrings();
@@ -130,5 +135,38 @@ class StardustConfig {
         build: build,
         dev: dev,
         devMode: true,
+        activeVersion: activeVersion,
+      );
+
+  /// Derives a build for a single [entry]: content sourced from [source], URLs
+  /// prefixed with [versionBasePath] (null = site root), tagged as active so
+  /// pages emit the right switcher state and `noindex` on non-current versions.
+  StardustConfig withVersion(VersionEntry entry, {required String source, required String? versionBasePath}) =>
+      StardustConfig(
+        name: name,
+        description: description,
+        tagline: tagline,
+        logo: logo,
+        favicon: favicon,
+        url: url,
+        content: content.withDir(source),
+        nav: nav,
+        sidebar: sidebar,
+        toc: toc,
+        theme: theme,
+        code: code,
+        components: components,
+        search: search,
+        seo: seo,
+        social: social,
+        header: header,
+        footer: footer,
+        versions: versions,
+        i18n: i18n,
+        integrations: integrations,
+        build: build.withBasePath(versionBasePath),
+        dev: dev,
+        devMode: devMode,
+        activeVersion: entry,
       );
 }
