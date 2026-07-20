@@ -298,6 +298,23 @@ Published content
         expect(robotsContent, contains('Sitemap: https://example.com/sitemap.xml'));
       });
 
+      test('skips per-version robots.txt during a versioned build', () async {
+        final indexFile = File(p.join(contentDir, 'index.md'));
+        await indexFile.writeAsString('# Home');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+          build: const BuildConfig(robots: RobotsConfig(enabled: true)),
+          versions: const VersionsConfig(enabled: true, current: '2.0'),
+          activeVersion: const VersionEntry(version: '2.0', path: '/v2/'),
+        );
+
+        await SiteGenerator(config: config, outputDir: outputDir).generate();
+
+        expect(File(p.join(outputDir, 'robots.txt')).existsSync(), isFalse);
+      });
+
       test('generates llms.txt when enabled', () async {
         final indexFile = File(p.join(contentDir, 'index.md'));
         await indexFile.writeAsString('''

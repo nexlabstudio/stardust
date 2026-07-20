@@ -21,6 +21,7 @@ import '../utils/logger.dart';
 import 'og_image_generator.dart';
 import 'page_builder.dart';
 import 'redirect_generator.dart';
+import 'robots_generator.dart';
 import 'url_resolver.dart';
 
 class SiteGenerator {
@@ -77,7 +78,7 @@ class SiteGenerator {
       await _generateSitemap(pagesWithNav);
     }
 
-    if (config.build.robots.enabled) {
+    if (config.build.robots.enabled && config.activeVersion == null) {
       await _generateRobots();
     }
 
@@ -402,24 +403,17 @@ class SiteGenerator {
   }
 
   Future<void> _generateRobots() async {
-    final buffer = StringBuffer();
-    buffer.writeln('User-agent: *');
-
-    for (final path in config.build.robots.allow) {
-      buffer.writeln('Allow: $path');
-    }
-
-    for (final path in config.build.robots.disallow) {
-      buffer.writeln('Disallow: $path');
-    }
-
-    if (config.url != null && config.build.sitemap.enabled) {
-      buffer.writeln('');
-      buffer.writeln('Sitemap: ${config.url}/sitemap.xml');
-    }
-
-    await fileSystem.writeFile(p.join(outputDir, 'robots.txt'), buffer.toString());
-    logger.log('🤖 Generated robots.txt');
+    final sitemapUrl = switch (config.url) {
+      final url? when config.build.sitemap.enabled => '$url/sitemap.xml',
+      _ => null,
+    };
+    await RobotsGenerator(
+      outputDir: outputDir,
+      robots: config.build.robots,
+      sitemapUrl: sitemapUrl,
+      logger: logger,
+      fileSystem: fileSystem,
+    ).generate();
   }
 
   Future<void> _generateLlms(List<Page> pages) async {

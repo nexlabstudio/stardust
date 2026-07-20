@@ -6,6 +6,7 @@ import '../../config/config_loader.dart';
 import '../../core/file_system.dart';
 import '../../core/stardust_factory.dart';
 import '../../generator/redirect_generator.dart';
+import '../../generator/robots_generator.dart';
 import '../../generator/version_planner.dart';
 import '../../generator/version_source_resolver.dart';
 import '../../search/pagefind_runner.dart';
@@ -170,6 +171,7 @@ class BuildCommand extends Command<int> {
       }
 
       await _redirectRootToCurrent(config, outputDir, resolved, logger);
+      await _writeRootRobots(config, outputDir, resolved, logger);
       return total;
     } finally {
       await resolver.cleanup();
@@ -192,6 +194,40 @@ class BuildCommand extends Command<int> {
 
     await RedirectGenerator(outputDir: outputDir, fileSystem: fileSystem, logger: logger)
         .writeRootIndexRedirect('${current.versionBasePath ?? ''}/');
+  }
+
+  /// robots.txt is only read from the origin root, so versioned builds skip it
+  /// per version and write one at the site root, pointing at the current
+  /// version's sitemap wherever it lives.
+  Future<void> _writeRootRobots(
+    StardustConfig config,
+    String outputDir,
+    List<({VersionBuildTask task, String dir})> resolved,
+    Logger logger,
+  ) async {
+    if (!config.build.robots.enabled) return;
+
+    final currentPath = resolved
+        .map((r) => r.task.entry)
+        .where((e) => e.version == config.versions?.current)
+        .map((e) => e.path.replaceAll(RegExp(r'^/+|/+$'), ''))
+        .firstOrNull;
+    final versionSegment = switch (currentPath) {
+      final segment? when segment.isNotEmpty => '/$segment',
+      _ => '',
+    };
+    final sitemapUrl = switch (config.url) {
+      final url? when config.build.sitemap.enabled => '$url$versionSegment/sitemap.xml',
+      _ => null,
+    };
+
+    await RobotsGenerator(
+      outputDir: outputDir,
+      robots: config.build.robots,
+      sitemapUrl: sitemapUrl,
+      logger: logger,
+      fileSystem: fileSystem,
+    ).generate();
   }
 
   Future<int?> _buildOne(

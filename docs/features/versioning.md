@@ -21,6 +21,8 @@ accordingly, and adds `<meta name="robots" content="noindex, follow">` to every
 version except `versions.current` so search engines only rank the latest docs.
 Those `noindex` versions are also left out of `sitemap.xml` — only the current
 version is listed, so crawlers are never handed URLs they are told not to index.
+`robots.txt` is written once at the site root (never per version, since crawlers
+only read it from the origin root) and points at the current version's sitemap.
 
 Each version's content comes from its `source` directory; an entry without a
 `source` builds from the live `content.dir`. A single deploy directory contains
