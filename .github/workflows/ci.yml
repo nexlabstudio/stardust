@@ -30,6 +30,9 @@ jobs:
       - name: Analyze
         run: dart analyze --fatal-infos
 
+      - name: Check docs for broken links
+        run: dart run bin/stardust.dart check
+
   test:
     name: Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

@@ -5,6 +5,7 @@ import 'package:args/command_runner.dart';
 import '../utils/exceptions.dart';
 import '../version.dart';
 import 'commands/build_command.dart';
+import 'commands/check_command.dart';
 import 'commands/clean_command.dart';
 import 'commands/dev_command.dart';
 import 'commands/init_command.dart';
@@ -21,6 +22,7 @@ class StardustCliRunner extends CommandRunner<int> {
         ) {
     addCommand(InitCommand());
     addCommand(BuildCommand());
+    addCommand(CheckCommand());
     addCommand(DevCommand());
     addCommand(ServeCommand());
     addCommand(NewCommand());
