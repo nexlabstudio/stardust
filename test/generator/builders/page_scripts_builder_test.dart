@@ -36,7 +36,7 @@ void main() {
     final modal = PageScriptsBuilder(config: config).buildSearchModal('.');
 
     test('drives the raw search API, not the PagefindUI widget', () {
-      expect(modal, contains("import(BASE + '/_pagefind/pagefind.js')"));
+      expect(modal, contains("import(BASE + '/pagefind/pagefind.js')"));
       expect(modal, contains('debouncedSearch'));
       expect(modal, isNot(contains('PagefindUI')));
       expect(modal, isNot(contains('pagefind-ui')));
