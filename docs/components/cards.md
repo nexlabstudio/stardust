@@ -39,12 +39,12 @@ Cards provide an attractive way to highlight content, create navigation, and org
 
 Use a standalone card for featured content:
 
-<Card title="New in v2.0" icon="sparkles" href="/changelog">
+<Card title="New in v2.0" icon="sparkles" href="/features/openapi">
   Check out the latest features including OpenAPI import and LLM-friendly output.
 </Card>
 
 ```markdown
-<Card title="New in v2.0" icon="sparkles" href="/changelog">
+<Card title="New in v2.0" icon="sparkles" href="/features/openapi">
   Check out the latest features including OpenAPI import and LLM-friendly output.
 </Card>
 ```
@@ -52,23 +52,23 @@ Use a standalone card for featured content:
 ## Cards with Emoji Icons
 
 <Cards>
-  <Card title="Documentation" icon="📖" href="/docs">
+  <Card title="Documentation" icon="📖" href="/">
     Comprehensive guides and references.
   </Card>
-  <Card title="Examples" icon="💡" href="/examples">
+  <Card title="Examples" icon="💡" href="/quickstart">
     Real-world usage examples.
   </Card>
-  <Card title="Community" icon="👥" href="/community">
+  <Card title="Community" icon="👥" href="https://github.com/nexlabstudio/stardust">
     Join our community discussions.
   </Card>
 </Cards>
 
 ```markdown
 <Cards>
-  <Card title="Documentation" icon="📖" href="/docs">
+  <Card title="Documentation" icon="📖" href="/">
     Comprehensive guides and references.
   </Card>
-  <Card title="Examples" icon="💡" href="/examples">
+  <Card title="Examples" icon="💡" href="/quickstart">
     Real-world usage examples.
   </Card>
 </Cards>

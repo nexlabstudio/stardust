@@ -373,7 +373,7 @@ Available themes include:
 - `monokai`
 - And many more...
 
-See [Code Configuration](/config/overview#code-configuration) for more code-related settings.
+See the [Configuration Overview](/config/overview) for the full settings reference.
 
 ## Logo
 
