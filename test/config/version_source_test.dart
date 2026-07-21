@@ -17,4 +17,20 @@ void main() {
       expect(() => VersionSource.fromYaml({'branch': 'main'}), throwsA(isA<ConfigException>()));
     });
   });
+
+  group('equality', () {
+    test('DirSource compares by dir and never equals another type', () {
+      expect(const DirSource('a') == const DirSource('a'), isTrue);
+      expect(const DirSource('a') == const DirSource('b'), isFalse);
+      expect(const DirSource('a') == const GitSource('a'), isFalse);
+      expect(const DirSource('a').hashCode, const DirSource('a').hashCode);
+    });
+
+    test('GitSource compares by ref and never equals another type', () {
+      expect(const GitSource('r') == const GitSource('r'), isTrue);
+      expect(const GitSource('r') == const GitSource('s'), isFalse);
+      expect(const GitSource('r') == const DirSource('r'), isFalse);
+      expect(const GitSource('r').hashCode, const GitSource('r').hashCode);
+    });
+  });
 }

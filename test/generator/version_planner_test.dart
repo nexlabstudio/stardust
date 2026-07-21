@@ -77,4 +77,58 @@ void main() {
       expect(tasks[1].versionBasePath, '/stardust/v1');
     });
   });
+
+  group('rootRedirectTarget', () {
+    List<VersionBuildTask> tasksFor(String currentPath) => planVersionBuilds(
+          StardustConfig(
+            name: 'T',
+            versions: VersionsConfig(
+              enabled: true,
+              current: '2.0',
+              list: [
+                VersionEntry(version: '2.0', path: currentPath),
+                const VersionEntry(version: '1.0', path: '/v1/'),
+              ],
+            ),
+          ),
+          'dist',
+        );
+
+    test('is null when the current version builds at the root', () {
+      expect(rootRedirectTarget(tasksFor('/'), 'dist', '2.0'), isNull);
+    });
+
+    test('points at the current version when it lives under a prefix', () {
+      expect(rootRedirectTarget(tasksFor('/v2/'), 'dist', '2.0'), '/v2/');
+    });
+  });
+
+  group('currentVersionSitemapUrl', () {
+    StardustConfig configFor({String? url, String path = '/', bool sitemap = true}) => StardustConfig(
+          name: 'T',
+          url: url,
+          build: BuildConfig(sitemap: SitemapConfig(enabled: sitemap)),
+          versions: VersionsConfig(
+            enabled: true,
+            current: '2.0',
+            list: [VersionEntry(version: '2.0', path: path)],
+          ),
+        );
+
+    test('is null without a site url or with sitemaps disabled', () {
+      expect(currentVersionSitemapUrl(configFor(url: null)), isNull);
+      expect(currentVersionSitemapUrl(configFor(url: 'https://example.com', sitemap: false)), isNull);
+    });
+
+    test('targets the root sitemap when the current version is at the root', () {
+      expect(currentVersionSitemapUrl(configFor(url: 'https://example.com')), 'https://example.com/sitemap.xml');
+    });
+
+    test('targets the prefixed sitemap when the current version is under a prefix', () {
+      expect(
+        currentVersionSitemapUrl(configFor(url: 'https://example.com', path: '/v2/')),
+        'https://example.com/v2/sitemap.xml',
+      );
+    });
+  });
 }

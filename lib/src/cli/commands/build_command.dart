@@ -170,64 +170,24 @@ class BuildCommand extends Command<int> {
         total += count;
       }
 
-      await _redirectRootToCurrent(config, outputDir, resolved, logger);
-      await _writeRootRobots(config, outputDir, resolved, logger);
+      final tasks = [for (final r in resolved) r.task];
+      if (rootRedirectTarget(tasks, outputDir, config.versions?.current) case final target?) {
+        await RedirectGenerator(outputDir: outputDir, fileSystem: fileSystem, logger: logger)
+            .writeRootIndexRedirect(target);
+      }
+      if (config.build.robots.enabled) {
+        await RobotsGenerator(
+          outputDir: outputDir,
+          robots: config.build.robots,
+          sitemapUrl: currentVersionSitemapUrl(config),
+          logger: logger,
+          fileSystem: fileSystem,
+        ).generate();
+      }
       return total;
     } finally {
       await resolver.cleanup();
     }
-  }
-
-  /// When the current version builds under a path prefix, the site root has no
-  /// index — write one that redirects to the current version so it does not 404.
-  Future<void> _redirectRootToCurrent(
-    StardustConfig config,
-    String outputDir,
-    List<({VersionBuildTask task, String dir})> resolved,
-    Logger logger,
-  ) async {
-    final current = resolved
-        .map((r) => r.task)
-        .where((t) => t.entry.version == config.versions?.current && t.outputDir != outputDir)
-        .firstOrNull;
-    if (current == null) return;
-
-    await RedirectGenerator(outputDir: outputDir, fileSystem: fileSystem, logger: logger)
-        .writeRootIndexRedirect('${current.versionBasePath ?? ''}/');
-  }
-
-  /// robots.txt is only read from the origin root, so versioned builds skip it
-  /// per version and write one at the site root, pointing at the current
-  /// version's sitemap wherever it lives.
-  Future<void> _writeRootRobots(
-    StardustConfig config,
-    String outputDir,
-    List<({VersionBuildTask task, String dir})> resolved,
-    Logger logger,
-  ) async {
-    if (!config.build.robots.enabled) return;
-
-    final currentPath = resolved
-        .map((r) => r.task.entry)
-        .where((e) => e.version == config.versions?.current)
-        .map((e) => e.path.replaceAll(RegExp(r'^/+|/+$'), ''))
-        .firstOrNull;
-    final versionSegment = switch (currentPath) {
-      final segment? when segment.isNotEmpty => '/$segment',
-      _ => '',
-    };
-    final sitemapUrl = switch (config.url) {
-      final url? when config.build.sitemap.enabled => '$url$versionSegment/sitemap.xml',
-      _ => null,
-    };
-
-    await RobotsGenerator(
-      outputDir: outputDir,
-      robots: config.build.robots,
-      sitemapUrl: sitemapUrl,
-      logger: logger,
-      fileSystem: fileSystem,
-    ).generate();
   }
 
   Future<int?> _buildOne(

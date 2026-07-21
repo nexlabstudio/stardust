@@ -47,6 +47,28 @@ List<VersionBuildTask> planVersionBuilds(StardustConfig config, String baseOutpu
   return tasks;
 }
 
+/// The root-relative URL the site root should redirect to when the current
+/// version builds under a path prefix, or null when it already builds at the
+/// root (so the root has real content and needs no redirect).
+String? rootRedirectTarget(List<VersionBuildTask> tasks, String baseOutputDir, String? currentVersion) {
+  final current = tasks.where((t) => t.entry.version == currentVersion && t.outputDir != baseOutputDir).firstOrNull;
+  return current == null ? null : '${current.versionBasePath ?? ''}/';
+}
+
+/// The absolute sitemap URL for the site-root `robots.txt`, pointing at the
+/// current version's sitemap wherever it lives, or null when there is no site
+/// URL or sitemaps are disabled.
+String? currentVersionSitemapUrl(StardustConfig config) {
+  final url = config.url;
+  if (url == null || !config.build.sitemap.enabled) return null;
+  final segment = config.versions?.list
+          .where((e) => e.version == config.versions?.current)
+          .map((e) => e.path.replaceAll(RegExp(r'^/+|/+$'), ''))
+          .firstOrNull ??
+      '';
+  return segment.isEmpty ? '$url/sitemap.xml' : '$url/$segment/sitemap.xml';
+}
+
 /// The site-root page paths (e.g. `/`, `/guide`) a version would emit from
 /// [contentDir], for a page-preserving version switcher. Mirrors the build's
 /// slug rule but reads only the filesystem — drafts are indexed here even
