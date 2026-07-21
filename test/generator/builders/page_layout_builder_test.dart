@@ -47,6 +47,42 @@ void main() {
         expect(header, contains('href="/docs/"'));
       });
 
+      test('switcher preserves the current page when the target version has it', () {
+        const config = StardustConfig(
+          name: 'T',
+          versions: versions,
+          build: BuildConfig(basePath: '/v1'),
+          activeVersion: VersionEntry(version: '1.0', path: '/v1/'),
+          versionPages: {
+            '2.0': {'/', '/guide'},
+            '1.0': {'/', '/guide'},
+          },
+        );
+
+        final header = PageLayoutBuilder(config: config).buildHeader('/guide');
+
+        expect(header, contains('href="/guide" class="version-dropdown-item"'));
+        expect(header, contains('href="/v1/guide" class="version-dropdown-item active"'));
+      });
+
+      test('switcher falls back to the version root when the page is absent there', () {
+        const config = StardustConfig(
+          name: 'T',
+          versions: versions,
+          build: BuildConfig(basePath: '/v1'),
+          activeVersion: VersionEntry(version: '1.0', path: '/v1/'),
+          versionPages: {
+            '2.0': {'/'},
+            '1.0': {'/', '/guide'},
+          },
+        );
+
+        final header = PageLayoutBuilder(config: config).buildHeader('/guide');
+
+        expect(header, contains('href="/" class="version-dropdown-item"'));
+        expect(header, isNot(contains('href="/guide"')));
+      });
+
       test('the active version drives the banner, not config.current', () {
         const config = StardustConfig(
           name: 'T',

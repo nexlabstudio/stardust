@@ -1,3 +1,6 @@
+import 'navigation_config.dart';
+import 'version_source.dart';
+
 class VersionsConfig {
   final bool enabled;
   final String? current;
@@ -30,16 +33,28 @@ class VersionEntry {
   final String? label;
   final String path;
   final String? banner;
-  final String? source;
+  final VersionSource? source;
 
-  const VersionEntry({required this.version, this.label, required this.path, this.banner, this.source});
+  /// Sidebar for this version, replacing the shared one. Set it when a version
+  /// has pages the current sidebar no longer lists.
+  final List<SidebarGroup>? sidebar;
+
+  const VersionEntry({
+    required this.version,
+    this.label,
+    required this.path,
+    this.banner,
+    this.source,
+    this.sidebar,
+  });
 
   factory VersionEntry.fromYaml(Map yaml) => VersionEntry(
         version: yaml['version'] as String,
         label: yaml['label'] as String?,
         path: yaml['path'] as String,
         banner: yaml['banner'] as String?,
-        source: yaml['source'] as String?,
+        source: yaml['source'] == null ? null : VersionSource.fromYaml(yaml['source']),
+        sidebar: (yaml['sidebar'] as List?)?.map((e) => SidebarGroup.fromYaml(e as Map)).toList(),
       );
 }
 

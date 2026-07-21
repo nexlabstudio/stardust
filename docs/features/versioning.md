@@ -19,6 +19,10 @@ For each entry in `versions.list` it builds that version's content into the
 entry's `path` (e.g. `/v1/`), prefixes every URL and the search index
 accordingly, and adds `<meta name="robots" content="noindex, follow">` to every
 version except `versions.current` so search engines only rank the latest docs.
+Those `noindex` versions are also left out of `sitemap.xml` — only the current
+version is listed, so crawlers are never handed URLs they are told not to index.
+`robots.txt` is written once at the site root (never per version, since crawlers
+only read it from the origin root) and points at the current version's sitemap.
 
 Each version's content comes from its `source` directory; an entry without a
 `source` builds from the live `content.dir`. A single deploy directory contains
@@ -67,7 +71,8 @@ Each item in `list` has:
 | `path` | `string` | Yes | URL path where this version is deployed (`/` for the site root) |
 | `label` | `string` | No | Display label in dropdown. Defaults to `v{version}` |
 | `banner` | `string` | No | Warning banner text (supports HTML). Shown when viewing this version |
-| `source` | `string` | No | Content directory for this version under `--all-versions`. Defaults to `content.dir` |
+| `source` | `string` or `{tag/ref}` | No | Where this version's content comes from under `--all-versions`: a content directory, or a git ref checked out at build time. Defaults to `content.dir` |
+| `sidebar` | `array` | No | Sidebar for this version, replacing the shared one. Defaults to the shared sidebar narrowed to the pages this version has |
 
 ### Building all versions at once
 
@@ -96,9 +101,40 @@ stardust build --all-versions
 # dist/v1/         → v1.0 (noindex)
 ```
 
+Keeping the current version at `path: /` serves it at the site root. If instead
+every version lives under a prefix (e.g. current at `/v2/`), Stardust writes a
+root `index.html` that redirects to the current version so the bare domain does
+not 404.
+
+#### Building an older version from a git tag
+
+To avoid keeping old content in the tree, point `source` at a git tag or ref.
+Stardust checks it out into a throwaway worktree, builds it, and cleans up — the
+current checkout is never touched:
+
+```yaml
+versions:
+  enabled: true
+  current: "2.0"
+  list:
+    - version: "2.0"
+      path: /
+    - version: "1.0"
+      path: /v1/
+      source:
+        tag: v1.0.0
+```
+
+The ref must be reachable in the local repository (`git fetch --tags` in CI first).
+
 ## Version Dropdown
 
 When `dropdown: true`, a version selector appears in the header next to the theme toggle. It shows the current version and lists all available versions as links.
+
+Under `--all-versions` the switcher is **page-preserving**: from `/v2/guide/` it
+links each version to *its* `/guide` when that version has the page, and falls
+back to the version's root otherwise. (A page that exists only as a `draft` in
+another version also falls back to the root.)
 
 To hide the dropdown while still using the banner:
 

@@ -5,7 +5,10 @@ import '../../config/config.dart';
 import '../../config/config_loader.dart';
 import '../../core/file_system.dart';
 import '../../core/stardust_factory.dart';
+import '../../generator/redirect_generator.dart';
+import '../../generator/robots_generator.dart';
 import '../../generator/version_planner.dart';
+import '../../generator/version_source_resolver.dart';
 import '../../search/pagefind_runner.dart';
 import '../../utils/logger.dart';
 import '../output_guard.dart';
@@ -145,17 +148,51 @@ class BuildCommand extends Command<int> {
       return null;
     }
 
-    var total = 0;
-    for (final task in planVersionBuilds(config, outputDir)) {
-      final label = task.entry.label ?? 'v${task.entry.version}';
-      logger.log('📦 $label → ${p.relative(task.outputDir)}${task.noindex ? '  (noindex)' : ''}');
-      final versioned = config.withVersion(task.entry, source: task.source, versionBasePath: task.versionBasePath);
-      final count =
-          await _buildOne(factory, versioned, task.outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger);
-      if (count == null) return null;
-      total += count;
+    final resolver = VersionSourceResolver();
+    try {
+      final resolved = <({VersionBuildTask task, String dir})>[];
+      final versionPages = <String, Set<String>>{};
+      for (final task in planVersionBuilds(config, outputDir)) {
+        final dir = await resolver.resolve(task.source, config.content.dir);
+        resolved.add((task: task, dir: dir));
+        versionPages[task.entry.version] = await discoverPagePaths(fileSystem, dir, config.content);
+      }
+
+      var total = 0;
+      for (final (:task, :dir) in resolved) {
+        final label = task.entry.label ?? 'v${task.entry.version}';
+        logger.log('📦 $label → ${p.relative(task.outputDir)}${task.noindex ? '  (noindex)' : ''}');
+        final versioned = config.withVersion(
+          task.entry,
+          source: dir,
+          versionBasePath: task.versionBasePath,
+          versionPages: versionPages,
+          sidebar: task.entry.sidebar ?? sidebarForVersion(config.sidebar, versionPages[task.entry.version]),
+        );
+        final count = await _buildOne(factory, versioned, task.outputDir,
+            skipSearch: skipSearch, verbose: verbose, logger: logger);
+        if (count == null) return null;
+        total += count;
+      }
+
+      final tasks = [for (final r in resolved) r.task];
+      if (rootRedirectTarget(tasks, outputDir, config.versions?.current) case final target?) {
+        await RedirectGenerator(outputDir: outputDir, fileSystem: fileSystem, logger: logger)
+            .writeRootIndexRedirect(target);
+      }
+      if (config.build.robots.enabled) {
+        await RobotsGenerator(
+          outputDir: outputDir,
+          robots: config.build.robots,
+          sitemapUrl: currentVersionSitemapUrl(config),
+          logger: logger,
+          fileSystem: fileSystem,
+        ).generate();
+      }
+      return total;
+    } finally {
+      await resolver.cleanup();
     }
-    return total;
   }
 
   Future<int?> _buildOne(

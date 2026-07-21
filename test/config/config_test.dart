@@ -3,6 +3,48 @@ import 'package:test/test.dart';
 
 void main() {
   group('StardustConfig', () {
+    group('withVersion', () {
+      const base = StardustConfig(
+        name: 'Docs',
+        url: 'https://example.com',
+        content: ContentConfig(dir: 'docs'),
+        versions: VersionsConfig(enabled: true, current: '2.0'),
+      );
+
+      test('overrides content dir and base path, tags the active version', () {
+        const entry = VersionEntry(version: '1.0', path: '/v1/');
+
+        final v = base.withVersion(
+          entry,
+          source: 'versions/1.0',
+          versionBasePath: '/v1',
+          versionPages: {
+            '1.0': {'/'},
+          },
+        );
+
+        expect(v.content.dir, 'versions/1.0');
+        expect(v.basePath, '/v1');
+        expect(v.activeVersion, entry);
+        expect(v.versionPages, {
+          '1.0': {'/'},
+        });
+        expect(v.name, 'Docs', reason: 'unrelated fields carry through');
+        expect(v.versions, base.versions);
+      });
+
+      test('a null base path builds at the site root', () {
+        final v = base.withVersion(
+          const VersionEntry(version: '2.0', path: '/'),
+          source: 'docs',
+          versionBasePath: null,
+        );
+
+        expect(v.basePath, '');
+        expect(v.versionPages, isNull, reason: 'falls back to the existing index when none is passed');
+      });
+    });
+
     group('basePath', () {
       test('returns empty string when no URL or explicit basePath', () {
         const config = StardustConfig(name: 'Test');

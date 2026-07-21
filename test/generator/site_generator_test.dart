@@ -197,6 +197,48 @@ Published content
         expect(sitemapContent, contains('https://example.com'));
       });
 
+      test('skips sitemap for a noindex (non-current) version', () async {
+        final indexFile = File(p.join(contentDir, 'index.md'));
+        await indexFile.writeAsString('# Home');
+
+        final config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.com',
+          content: ContentConfig(dir: contentDir),
+          build: const BuildConfig(sitemap: SitemapConfig(enabled: true)),
+          versions: const VersionsConfig(enabled: true, current: '2.0'),
+          activeVersion: const VersionEntry(version: '1.0', path: '/v1/'),
+        );
+
+        final logs = <String>[];
+        final generator = SiteGenerator(config: config, outputDir: outputDir, logger: Logger(onLog: logs.add));
+
+        await generator.generate();
+
+        expect(File(p.join(outputDir, 'sitemap.xml')).existsSync(), isFalse);
+        expect(logs.any((l) => l.contains('noindex version 1.0')), isTrue);
+      });
+
+      test('still generates sitemap for the current version', () async {
+        final indexFile = File(p.join(contentDir, 'index.md'));
+        await indexFile.writeAsString('# Home');
+
+        final config = StardustConfig(
+          name: 'Test',
+          url: 'https://example.com',
+          content: ContentConfig(dir: contentDir),
+          build: const BuildConfig(sitemap: SitemapConfig(enabled: true)),
+          versions: const VersionsConfig(enabled: true, current: '2.0'),
+          activeVersion: const VersionEntry(version: '2.0', path: '/'),
+        );
+
+        final generator = SiteGenerator(config: config, outputDir: outputDir);
+
+        await generator.generate();
+
+        expect(File(p.join(outputDir, 'sitemap.xml')).existsSync(), isTrue);
+      });
+
       test('skips sitemap when url not configured', () async {
         final indexFile = File(p.join(contentDir, 'index.md'));
         await indexFile.writeAsString('# Home');
@@ -254,6 +296,23 @@ Published content
         expect(robotsContent, contains('Allow: /'));
         expect(robotsContent, contains('Disallow: /private'));
         expect(robotsContent, contains('Sitemap: https://example.com/sitemap.xml'));
+      });
+
+      test('skips per-version robots.txt during a versioned build', () async {
+        final indexFile = File(p.join(contentDir, 'index.md'));
+        await indexFile.writeAsString('# Home');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+          build: const BuildConfig(robots: RobotsConfig(enabled: true)),
+          versions: const VersionsConfig(enabled: true, current: '2.0'),
+          activeVersion: const VersionEntry(version: '2.0', path: '/v2/'),
+        );
+
+        await SiteGenerator(config: config, outputDir: outputDir).generate();
+
+        expect(File(p.join(outputDir, 'robots.txt')).existsSync(), isFalse);
       });
 
       test('generates llms.txt when enabled', () async {
