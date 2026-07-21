@@ -44,6 +44,34 @@ List<VersionBuildTask> planVersionBuilds(StardustConfig config, String baseOutpu
   return tasks;
 }
 
+/// [sidebar] narrowed to the pages a version actually has, so an older version
+/// never links to a page added after it. Groups that autogenerate their pages
+/// are left alone; groups left with nothing are dropped.
+List<SidebarGroup> sidebarForVersion(List<SidebarGroup> sidebar, Set<String>? pagePaths) {
+  if (pagePaths == null) return sidebar;
+
+  final groups = <SidebarGroup>[];
+  for (final group in sidebar) {
+    if (group.autogenerate != null) {
+      groups.add(group);
+      continue;
+    }
+    final kept = [
+      for (final page in group.pages)
+        if (pagePaths.contains(page.slug == 'index' ? '/' : '/${page.slug}')) page,
+    ];
+    if (kept.isEmpty) continue;
+    groups.add(SidebarGroup(
+      group: group.group,
+      icon: group.icon,
+      collapsed: group.collapsed,
+      pages: kept,
+      autogenerate: group.autogenerate,
+    ));
+  }
+  return groups;
+}
+
 /// The root-relative URL the site root should redirect to when the current
 /// version builds under a path prefix, or null when it already builds at the
 /// root (so the root has real content and needs no redirect).

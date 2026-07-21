@@ -1,4 +1,4 @@
-import 'package:stardust/src/config/version_source.dart';
+import 'package:stardust/src/config/config.dart';
 import 'package:stardust/src/utils/exceptions.dart';
 import 'package:test/test.dart';
 
@@ -15,6 +15,28 @@ void main() {
 
     test('rejects a map that is neither tag nor ref', () {
       expect(() => VersionSource.fromYaml({'branch': 'main'}), throwsA(isA<ConfigException>()));
+    });
+  });
+
+  group('VersionEntry.fromYaml', () {
+    test('reads an optional per-version sidebar', () {
+      final entry = VersionEntry.fromYaml({
+        'version': '1.0',
+        'path': '/v1/',
+        'sidebar': [
+          {
+            'group': 'Guides',
+            'pages': ['index', 'legacy'],
+          },
+        ],
+      });
+
+      expect(entry.sidebar?.single.group, 'Guides');
+      expect(entry.sidebar?.single.pages.map((p) => p.slug), ['index', 'legacy']);
+    });
+
+    test('leaves the sidebar null when not given', () {
+      expect(VersionEntry.fromYaml({'version': '1.0', 'path': '/v1/'}).sidebar, isNull);
     });
   });
 

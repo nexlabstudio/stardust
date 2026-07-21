@@ -162,8 +162,13 @@ class BuildCommand extends Command<int> {
       for (final (:task, :dir) in resolved) {
         final label = task.entry.label ?? 'v${task.entry.version}';
         logger.log('📦 $label → ${p.relative(task.outputDir)}${task.noindex ? '  (noindex)' : ''}');
-        final versioned = config.withVersion(task.entry,
-            source: dir, versionBasePath: task.versionBasePath, versionPages: versionPages);
+        final versioned = config.withVersion(
+          task.entry,
+          source: dir,
+          versionBasePath: task.versionBasePath,
+          versionPages: versionPages,
+          sidebar: task.entry.sidebar ?? sidebarForVersion(config.sidebar, versionPages[task.entry.version]),
+        );
         final count = await _buildOne(factory, versioned, task.outputDir,
             skipSearch: skipSearch, verbose: verbose, logger: logger);
         if (count == null) return null;

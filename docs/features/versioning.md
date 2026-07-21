@@ -72,6 +72,7 @@ Each item in `list` has:
 | `label` | `string` | No | Display label in dropdown. Defaults to `v{version}` |
 | `banner` | `string` | No | Warning banner text (supports HTML). Shown when viewing this version |
 | `source` | `string` or `{tag/ref}` | No | Where this version's content comes from under `--all-versions`: a content directory, or a git ref checked out at build time. Defaults to `content.dir` |
+| `sidebar` | `array` | No | Sidebar for this version, replacing the shared one. Defaults to the shared sidebar narrowed to the pages this version has |
 
 ### Building all versions at once
 

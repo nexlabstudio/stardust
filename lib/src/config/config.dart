@@ -154,6 +154,7 @@ class StardustConfig {
     required String source,
     required String? versionBasePath,
     Map<String, Set<String>>? versionPages,
+    List<SidebarGroup>? sidebar,
   }) =>
       StardustConfig(
         name: name,
@@ -164,7 +165,7 @@ class StardustConfig {
         url: url,
         content: content.withDir(source),
         nav: nav,
-        sidebar: sidebar,
+        sidebar: sidebar ?? this.sidebar,
         toc: toc,
         theme: theme,
         code: code,

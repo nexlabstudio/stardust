@@ -220,6 +220,28 @@ void main() {
 
     Future<int?> build() => runner.run(['build', '-c', configPath, '-o', 'out', '--all-versions', '--skip-search']);
 
+    test('narrows each version sidebar to the pages that version has', () async {
+      await File(p.join(docsDir, 'newfeature.md')).writeAsString('# New');
+      fileSystem.addFile(p.join(docsDir, 'newfeature.md'), '# New');
+      await writeConfig('sidebar:\n'
+          '  - group: Guides\n'
+          '    pages: [index, newfeature]\n'
+          'versions:\n'
+          '  enabled: true\n'
+          '  current: "2.0"\n'
+          '  list:\n'
+          '    - version: "2.0"\n'
+          '      path: /\n'
+          '    - version: "1.0"\n'
+          '      path: /v1/\n'
+          '      source: $v1Dir\n');
+
+      expect(await build(), 0);
+      expect(fileSystem.fileAt(p.join('out', 'index.html')), contains('href="/newfeature"'));
+      expect(fileSystem.fileAt(p.join('out', 'v1', 'index.html')), isNot(contains('/v1/newfeature')),
+          reason: 'v1 predates the page, so it must not be linked');
+    });
+
     test('fails when no versions are configured', () async {
       await writeConfig('');
 

@@ -554,6 +554,13 @@ const stardustSchemaJson = r'''
               "banner": {
                 "type": "string"
               },
+              "sidebar": {
+                "type": "array",
+                "description": "Sidebar for this version, replacing the shared one. Defaults to the shared sidebar narrowed to the pages this version has",
+                "items": {
+                  "$ref": "#/$defs/sidebarGroup"
+                }
+              },
               "source": {
                 "description": "Where this version's content comes from under --all-versions: a content directory, or a git ref checked out at build time. Defaults to the live content.dir",
                 "oneOf": [
