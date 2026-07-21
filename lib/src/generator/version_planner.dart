@@ -22,12 +22,9 @@ class VersionBuildTask {
   });
 }
 
-/// Plans the per-version builds for [config] writing under [baseOutputDir].
-///
-/// Pure (no IO) so the routing math stays unit-testable. A version whose
-/// [VersionEntry.source] is unset builds from the live content dir; a version
-/// whose path is `/` builds at the site root, others under their path segment.
-/// Every version except [VersionsConfig.current] is marked `noindex`.
+/// Plans the per-version builds for [config] writing under [baseOutputDir]: a
+/// version whose path is `/` builds at the site root, others under their path
+/// segment, and every version but [VersionsConfig.current] is marked `noindex`.
 List<VersionBuildTask> planVersionBuilds(StardustConfig config, String baseOutputDir) {
   final versions = config.versions;
   if (versions == null) return const [];
@@ -70,10 +67,8 @@ String? currentVersionSitemapUrl(StardustConfig config) {
 }
 
 /// The site-root page paths (e.g. `/`, `/guide`) a version would emit from
-/// [contentDir], for a page-preserving version switcher. Mirrors the build's
-/// slug rule but reads only the filesystem — drafts are indexed here even
-/// though the build skips them, so a switcher link to a draft falls through
-/// to that version's root on click rather than resolving.
+/// [contentDir]. Drafts are indexed here even though the build skips them, so a
+/// switcher link to one falls back to that version's root rather than resolving.
 Future<Set<String>> discoverPagePaths(FileSystem fileSystem, String contentDir, ContentConfig content) async {
   if (!await fileSystem.directoryExists(contentDir)) return const {};
 

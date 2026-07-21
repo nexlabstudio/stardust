@@ -17,8 +17,6 @@ void main() {
     });
 
     test('with no working directory, checks a ref out of the process repository', () async {
-      // The exact production construction: null workingDirectory → git runs in
-      // the process cwd, which under `dart test` is this repository.
       final resolver = VersionSourceResolver();
       try {
         final dir = await resolver.resolve(const GitSource('HEAD'), 'docs');

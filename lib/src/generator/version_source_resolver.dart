@@ -5,13 +5,11 @@ import 'package:path/path.dart' as p;
 import '../config/config.dart';
 import '../utils/exceptions.dart';
 
-/// Resolves a [VersionSource] to a directory to build from. Directory sources
-/// pass through untouched; git sources are checked out into a throwaway
-/// worktree so building an old tag never disturbs the current checkout.
-/// Call [cleanup] once every version has built to remove the worktrees.
+/// Resolves a [VersionSource] to a directory to build from: directory sources
+/// pass through, git refs are checked out into a throwaway worktree that
+/// [cleanup] removes, so building an old tag never disturbs the current checkout.
 class VersionSourceResolver {
-  /// Directory the `git` commands run in — the repository whose refs are checked
-  /// out. Defaults to the process working directory (the project being built).
+  /// Repository the `git` commands run in; defaults to the process directory.
   final String? workingDirectory;
 
   final _worktrees = <({String target, Directory parent})>[];
