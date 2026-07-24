@@ -67,14 +67,6 @@ scoop install https://raw.githubusercontent.com/nexlabstudio/stardust/dev/scoop/
 choco install stardust
 ```
 
-### Dart/Flutter Developers
-
-If you already have Dart installed:
-
-```bash
-dart pub global activate stardust
-```
-
 ### Manual Download
 
 Download pre-built binaries from the [Releases](https://github.com/nexlabstudio/stardust/releases) page.
