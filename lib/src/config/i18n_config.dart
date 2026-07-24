@@ -92,7 +92,18 @@ class LocaleConfig {
   /// `<content.dir>/<code>`; untranslated pages fall back to the default locale.
   final String? source;
 
-  const LocaleConfig({required this.code, required this.label, this.dir = 'ltr', required this.path, this.source});
+  /// Sidebar for this locale, replacing the shared one — used to translate group
+  /// titles and page labels. Defaults to the shared sidebar.
+  final List<SidebarGroup>? sidebar;
+
+  const LocaleConfig({
+    required this.code,
+    required this.label,
+    this.dir = 'ltr',
+    required this.path,
+    this.source,
+    this.sidebar,
+  });
 
   factory LocaleConfig.fromYaml(Map yaml) => LocaleConfig(
         code: yaml['code'] as String,
@@ -100,6 +111,7 @@ class LocaleConfig {
         dir: yaml['dir'] as String? ?? 'ltr',
         path: yaml['path'] as String,
         source: yaml['source'] as String?,
+        sidebar: (yaml['sidebar'] as List?)?.map((e) => SidebarGroup.fromYaml(e as Map)).toList(),
       );
 }
 

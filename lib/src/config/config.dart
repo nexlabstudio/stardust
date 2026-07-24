@@ -211,6 +211,7 @@ class StardustConfig {
     required String? localeBasePath,
     Set<String>? untranslatedPaths,
     List<String> excludeSubdirs = const [],
+    List<SidebarGroup>? sidebar,
   }) =>
       StardustConfig(
         name: name,
@@ -221,7 +222,7 @@ class StardustConfig {
         url: url,
         content: content.withDir(contentDir, addExcludes: excludeSubdirs),
         nav: nav,
-        sidebar: sidebar,
+        sidebar: sidebar ?? this.sidebar,
         toc: toc,
         theme: theme,
         code: code,

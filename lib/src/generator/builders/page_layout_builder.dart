@@ -14,31 +14,32 @@ class PageLayoutBuilder {
 
   String _prefixPath(String path) => urls.href(path);
 
-  /// The deployment base with [activePath]'s own prefix stripped off, so a
-  /// cross-version/locale link to `/v1/` doesn't become `/v1/v1/`.
-  String _siteBaseWithout(String activePath) {
-    final base = config.basePath;
-    final segment = activePath.replaceAll(RegExp(r'^/+|/+$'), '');
-    return segment.isEmpty ? base : base.substring(0, base.length - segment.length - 1);
-  }
-
-  /// Href for a cross-version link. [path] is already absolute from the site
-  /// root (e.g. `/v1/`), so it takes only the deployment base, not the active
-  /// version's own prefix.
-  String _versionRootHref(String path) => switch (config.activeVersion) {
-        final active? => '${_siteBaseWithout(active.path)}$path',
-        null => _prefixPath(path),
+  /// A leading `/segment` for [path] (`/v1/` → `/v1`), or empty for the root.
+  static String _segmentOf(String? path) => switch (path?.replaceAll(RegExp(r'^/+|/+$'), '')) {
+        final s? when s.isNotEmpty => '/$s',
+        _ => '',
       };
 
-  /// Cross-version link that preserves [currentPath] when [entry]'s version has
-  /// that page, else falls back to the version root.
+  /// The deployment base with the active version and locale prefixes stripped
+  /// off, so a cross-version/locale link can re-compose them from scratch.
+  String get _siteBase {
+    var base = config.basePath;
+    base = _stripTrailing(base, config.activeLocale?.path);
+    base = _stripTrailing(base, config.activeVersion?.path);
+    return base;
+  }
+
+  String _stripTrailing(String base, String? path) {
+    final segment = _segmentOf(path);
+    return segment.isEmpty ? base : base.substring(0, base.length - segment.length);
+  }
+
+  /// Cross-version link that keeps the active locale and preserves [currentPath]
+  /// when [entry]'s version has that page, else lands on the version root.
   String _versionPageHref(VersionEntry entry, String currentPath) {
-    final root = _versionRootHref(entry.path);
-    if (currentPath == '/' || !(config.versionPages?[entry.version]?.contains(currentPath) ?? false)) {
-      return root;
-    }
-    final trimmed = root.endsWith('/') ? root.substring(0, root.length - 1) : root;
-    return '$trimmed$currentPath';
+    final root = '$_siteBase${_segmentOf(entry.path)}${_segmentOf(config.activeLocale?.path)}';
+    final hasPage = config.versionPages?[entry.version]?.contains(currentPath) ?? config.versionPages == null;
+    return currentPath == '/' || !hasPage ? '$root/' : '$root$currentPath';
   }
 
   String buildHeader([String currentPath = '/']) {
@@ -182,15 +183,11 @@ class PageLayoutBuilder {
       </div>''';
   }
 
-  /// Cross-locale link that preserves [currentPath] — every locale builds the
-  /// full page set, so the same page always exists under the target prefix.
+  /// Cross-locale link that keeps the active version and preserves [currentPath]
+  /// — every locale builds the full page set, so the page always exists.
   String _localePageHref(LocaleConfig locale, String currentPath) {
-    final root = config.activeLocale == null
-        ? _prefixPath(locale.path)
-        : '${_siteBaseWithout(config.activeLocale?.path ?? '/')}${locale.path}';
-    if (currentPath == '/') return root;
-    final trimmed = root.endsWith('/') ? root.substring(0, root.length - 1) : root;
-    return '$trimmed$currentPath';
+    final root = '$_siteBase${_segmentOf(config.activeVersion?.path)}${_segmentOf(locale.path)}';
+    return currentPath == '/' ? '$root/' : '$root$currentPath';
   }
 
   String _buildUntranslatedNotice(String currentPath) {

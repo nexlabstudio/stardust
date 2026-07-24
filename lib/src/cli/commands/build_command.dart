@@ -157,6 +157,9 @@ class BuildCommand extends Command<int> {
       return null;
     }
 
+    final i18n = config.i18n;
+    final multiLocale = i18n != null && i18n.enabled && i18n.locales.length > 1;
+
     final resolver = VersionSourceResolver();
     try {
       final resolved = <({VersionBuildTask task, String dir})>[];
@@ -178,8 +181,11 @@ class BuildCommand extends Command<int> {
           versionPages: versionPages,
           sidebar: task.entry.sidebar ?? sidebarForVersion(config.sidebar, versionPages[task.entry.version]),
         );
-        final count = await _buildOne(factory, versioned, task.outputDir,
-            skipSearch: skipSearch, verbose: verbose, logger: logger);
+        final count = multiLocale
+            ? await _buildAllLocales(factory, versioned, task.outputDir,
+                skipSearch: skipSearch, verbose: verbose, logger: logger)
+            : await _buildOne(factory, versioned, task.outputDir,
+                skipSearch: skipSearch, verbose: verbose, logger: logger);
         if (count == null) return null;
         total += count;
       }
@@ -255,7 +261,8 @@ class BuildCommand extends Command<int> {
             contentDir: dir,
             localeBasePath: task.localeBasePath,
             untranslatedPaths: untranslated,
-            excludeSubdirs: translationExcludes);
+            excludeSubdirs: translationExcludes,
+            sidebar: task.locale.sidebar);
         final count = await _buildOne(factory, localized, task.outputDir,
             skipSearch: skipSearch, verbose: verbose, logger: logger);
         if (count == null) return null;

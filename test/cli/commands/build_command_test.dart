@@ -220,6 +220,35 @@ void main() {
 
     Future<int?> build() => runner.run(['build', '-c', configPath, '-o', 'out', '--all-versions', '--skip-search']);
 
+    test('builds the full version × locale matrix with combined switchers', () async {
+      fileSystem.addFile(p.join(docsDir, 'es', 'index.md'), '# v2 inicio');
+      fileSystem.addFile(p.join(v1Dir, 'es', 'index.md'), '# v1 inicio');
+      await writeConfig('i18n:\n'
+          '  enabled: true\n'
+          '  defaultLocale: en\n'
+          '  locales:\n'
+          '    - {code: en, label: English, path: /}\n'
+          '    - {code: es, label: Español, path: /es/}\n'
+          'versions:\n'
+          '  enabled: true\n'
+          '  current: "2.0"\n'
+          '  list:\n'
+          '    - {version: "2.0", path: /}\n'
+          '    - {version: "1.0", path: /v1/, source: $v1Dir}\n');
+
+      expect(await build(), 0, reason: errors.join('\n'));
+
+      for (final path in ['index.html', 'es/index.html', 'v1/index.html', 'v1/es/index.html']) {
+        expect(fileSystem.hasFile(p.join('out', p.joinAll(path.split('/')))), isTrue, reason: path);
+      }
+      final v1es = fileSystem.fileAt(p.join('out', 'v1', 'es', 'index.html'));
+      expect(v1es, contains('lang="es"'));
+      expect(v1es, contains('noindex'));
+      // Version switch keeps the locale; locale switch keeps the version.
+      expect(v1es, contains('href="/es/" class="version-dropdown-item"'));
+      expect(v1es, contains('href="/v1/" class="locale-dropdown-item"'));
+    });
+
     test('narrows each version sidebar to the pages that version has', () async {
       await File(p.join(docsDir, 'newfeature.md')).writeAsString('# New');
       fileSystem.addFile(p.join(docsDir, 'newfeature.md'), '# New');
@@ -353,6 +382,29 @@ void main() {
       expect(fileSystem.hasFile(p.join('out', 'en', 'index.html')), isTrue);
       expect(fileSystem.fileAt(p.join('out', 'index.html')), contains('http-equiv="refresh"'));
       expect(fileSystem.fileAt(p.join('out', 'index.html')), contains('/en/'));
+    });
+
+    test('applies a per-locale sidebar to translate its labels', () async {
+      await File(configPath).writeAsString('name: Test\n'
+          'content:\n  dir: $docsDir\n'
+          'sidebar:\n'
+          '  - group: Guides\n'
+          '    pages: [index]\n'
+          'i18n:\n'
+          '  enabled: true\n'
+          '  defaultLocale: en\n'
+          '  locales:\n'
+          '    - {code: en, label: English, path: /}\n'
+          '    - code: es\n'
+          '      label: Español\n'
+          '      path: /es/\n'
+          '      sidebar:\n'
+          '        - group: Guías\n'
+          '          pages: [index]\n');
+
+      expect(await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']), 0, reason: errors.join('\n'));
+      expect(fileSystem.fileAt(p.join('out', 'index.html')), contains('Guides'));
+      expect(fileSystem.fileAt(p.join('out', 'es', 'index.html')), contains('Guías'));
     });
 
     test('resolves locale-suffixed sibling files without leaking them', () async {
