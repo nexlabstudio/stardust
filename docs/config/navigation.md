@@ -238,6 +238,7 @@ Add footer content:
 
 ```yaml
 footer:
+  poweredBy: false   # hide the "Powered by Stardust" badge (default: true)
   copyright: "© 2024 My Project. All rights reserved."
   links:
     - group: Product

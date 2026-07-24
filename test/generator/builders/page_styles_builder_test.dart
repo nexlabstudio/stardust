@@ -144,6 +144,36 @@ void main() {
       expect(PageStylesBuilder(config: config).buildFonts(), contains('fonts.googleapis.com'));
     });
 
+    group('design tokens', () {
+      test('emits token overrides in :root and .dark', () {
+        const config = StardustConfig(
+          name: 'T',
+          theme: ThemeConfig(
+            tokens: {'color-primary': '#ff0000', 'color-border': '#abc'},
+            tokensDark: {'color-border': '#111'},
+          ),
+        );
+
+        final css = PageStylesBuilder(config: config).buildCss();
+
+        expect(css, contains('--color-primary: #ff0000;'));
+        expect(css, contains('--color-border: #abc;'));
+        expect(css, contains('--color-border: #111;'));
+      });
+
+      test('drops unsafe token names so a value cannot break out of the block', () {
+        final config = StardustConfig(
+          name: 'T',
+          theme: ThemeConfig(
+              tokens: ThemeConfig.fromYaml({
+            'tokens': {'color-x; } body{display:none': 'red'},
+          }).tokens),
+        );
+
+        expect(PageStylesBuilder(config: config).buildCss(), isNot(contains('display:none')));
+      });
+    });
+
     group('section assembly', () {
       final css = PageStylesBuilder(config: const StardustConfig(name: 'T')).buildCss();
 
