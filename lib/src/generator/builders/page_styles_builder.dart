@@ -76,6 +76,7 @@ ${_section('footer')}
 ${_section('social')}
 ${_section('syntax-highlighting')}
 ${_section('responsive')}
+${_section('landing')}
 ${_buildCustomStyles()}
 ''';
   }

@@ -3,6 +3,7 @@ import '../core/interfaces.dart';
 import 'components/accordion_builder.dart';
 import 'components/api_builder.dart';
 import 'components/base_component.dart';
+import 'components/button_builder.dart';
 import 'components/callout_builder.dart';
 import 'components/card_builder.dart';
 import 'components/embed_builder.dart';
@@ -21,6 +22,7 @@ class ComponentTransformer implements ContentTransformer {
 
   ComponentTransformer({ComponentsConfig config = const ComponentsConfig()}) {
     register(CalloutBuilder(config: config));
+    register(ButtonBuilder());
     register(TabBuilder());
     register(AccordionBuilder());
     register(StepBuilder());

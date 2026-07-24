@@ -1,0 +1,108 @@
+/* Splash / landing layout */
+.splash {
+  max-width: 60rem;
+  margin-inline: auto;
+  padding: 2rem 1.5rem 4rem;
+  width: 100%;
+}
+
+/* The splash body is full-width — override the reading-column cap on .prose. */
+.splash > .prose {
+  max-width: none;
+}
+
+.hero {
+  padding: 4rem 1.5rem 2rem;
+  text-align: center;
+}
+
+.hero-inner {
+  max-width: 48rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.hero-image {
+  max-height: 8rem;
+  width: auto;
+}
+
+.hero-title {
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+  line-height: 1.1;
+  font-weight: 800;
+  margin: 0;
+}
+
+.hero-tagline {
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 40rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.hero-action,
+.button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.4rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.hero-action--primary,
+.button--primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.hero-action--primary:hover,
+.button--primary:hover {
+  opacity: 0.9;
+}
+
+.hero-action--secondary,
+.button--secondary {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.hero-action--secondary:hover,
+.button--secondary:hover {
+  border-color: var(--color-primary);
+}
+
+/* A <Button> used inside prose body content. */
+.button {
+  margin: 0.25rem 0.5rem 0.25rem 0;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 2.5rem 1rem 1.5rem;
+  }
+
+  .hero-actions {
+    width: 100%;
+  }
+
+  .hero-action {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}

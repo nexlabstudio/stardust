@@ -13,6 +13,71 @@ void main() {
       builder = PageBuilder(config: testConfig);
     });
 
+    group('splash layout', () {
+      const splashPage = Page(
+        path: '/',
+        sourcePath: 'content/index.md',
+        title: 'Stardust',
+        content: '<p>Cards go here</p>',
+        frontmatter: {
+          'layout': 'splash',
+          'hero': {
+            'tagline': 'Docs you <own>',
+            'image': '/images/logo.svg',
+            'actions': [
+              {'label': 'Get Started', 'href': '/quickstart', 'variant': 'primary'},
+              {'label': 'GitHub', 'href': 'https://x.com', 'external': true},
+              {'label': 'Bad', 'href': 'javascript:alert(1)'},
+            ],
+          },
+        },
+      );
+
+      test('renders the hero and full-width splash, dropping docs chrome', () {
+        final html = builder.build(splashPage, sidebar: [
+          const SidebarGroup(group: 'Guides', pages: [SidebarPage(slug: 'guide')]),
+        ]);
+
+        expect(html, contains('class="hero"'));
+        expect(html, contains('<main class="splash">'));
+        expect(html, contains('Cards go here'));
+        expect(html, isNot(contains('class="sidebar"')));
+        expect(html, isNot(contains('class="toc"')));
+        expect(html, isNot(contains('page-nav')));
+      });
+
+      test('renders hero title, tagline, and typed action buttons', () {
+        final html = builder.build(splashPage, sidebar: []);
+
+        expect(html, contains('<h1 class="hero-title">Stardust</h1>'));
+        expect(html, contains('hero-action--primary'));
+        expect(html, contains('href="/quickstart"'));
+        expect(html, contains('target="_blank" rel="noopener"'));
+      });
+
+      test('escapes hero content and strips unsafe action hrefs', () {
+        final html = builder.build(splashPage, sidebar: []);
+
+        expect(html, contains('Docs you &lt;own&gt;'));
+        expect(html, isNot(contains('javascript:alert(1)')));
+      });
+
+      test('a splash page without hero data renders no hero', () {
+        const noHero = Page(
+          path: '/',
+          sourcePath: 'content/index.md',
+          title: 'Home',
+          content: '<p>Just cards</p>',
+          frontmatter: {'layout': 'splash'},
+        );
+
+        final html = builder.build(noHero, sidebar: []);
+
+        expect(html, contains('class="splash"'));
+        expect(html, isNot(contains('class="hero"')));
+      });
+    });
+
     group('build', () {
       test('generates valid HTML structure', () {
         const page = Page(
