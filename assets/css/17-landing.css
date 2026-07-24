@@ -106,3 +106,15 @@
     justify-content: center;
   }
 }
+
+/* Per-page metadata (reading time, last updated, contributors) */
+.page-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}

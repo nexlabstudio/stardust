@@ -94,6 +94,8 @@ sidebar:
         label: Internationalization
       - slug: features/landing-page
         label: Landing Page
+      - slug: features/page-metadata
+        label: Page Metadata
 
   - group: CLI Reference
     icon: terminal
@@ -133,6 +135,11 @@ header:
     link: https://github.com/nexlabstudio/stardust
     dismissible: true
     style: info
+
+pageInfo:
+  readingTime: true
+  lastUpdated: true
+  contributors: true
 
 footer:
   copyright: "© 2026 Nexlab Studio. All rights reserved."

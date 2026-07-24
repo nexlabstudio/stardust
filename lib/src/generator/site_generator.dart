@@ -19,6 +19,7 @@ import '../utils/html_utils.dart';
 import '../utils/logger.dart';
 import 'og_image_generator.dart';
 import 'page_builder.dart';
+import 'page_info.dart';
 import 'redirect_generator.dart';
 import 'robots_generator.dart';
 import 'url_resolver.dart';
@@ -59,6 +60,16 @@ class SiteGenerator {
 
     final pages = await _parsePages(files, contentDir);
     final pagesWithNav = _addNavigation(pages);
+
+    if (config.pageInfo.needsGit) {
+      if (await const GitMetadataCollector().collect() case final git?) {
+        pageBuilder.gitMetadata = {
+          for (final page in pagesWithNav)
+            if (git.files[p.relative(page.sourcePath, from: git.root).replaceAll('\\', '/')] case final meta?)
+              page.sourcePath: meta,
+        };
+      }
+    }
 
     for (final chunk in chunked(pagesWithNav, Platform.numberOfProcessors)) {
       await Future.wait(chunk.map((page) async {

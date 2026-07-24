@@ -67,6 +67,7 @@ class ConfigLoader {
       social: SocialConfig.fromYaml(yaml['social'] as Map?),
       header: HeaderConfig.fromYaml(yaml['header'] as Map?),
       footer: FooterConfig.fromYaml(yaml['footer'] as Map?),
+      pageInfo: PageInfoConfig.fromYaml(yaml['pageInfo'] as Map?),
       versions: yaml['versions'] != null ? VersionsConfig.fromYaml(yaml['versions'] as Map) : null,
       i18n: yaml['i18n'] != null ? I18nConfig.fromYaml(yaml['i18n'] as Map) : null,
       integrations: IntegrationsConfig.fromYaml(yaml['integrations'] as Map?),

@@ -7,6 +7,7 @@ import 'builders/page_layout_builder.dart';
 import 'builders/page_meta_builder.dart';
 import 'builders/page_scripts_builder.dart';
 import 'builders/page_styles_builder.dart';
+import 'page_info.dart';
 import 'url_resolver.dart';
 
 /// Builds HTML pages from parsed content
@@ -22,6 +23,10 @@ class PageBuilder {
   /// Content hashes for the shared assets, set by the site generator after
   /// writing assets/styles.css and assets/app.js; used for cache busting.
   ({String css, String js})? assetVersions;
+
+  /// Per-file git history keyed by `Page.sourcePath`, set by the site generator
+  /// when `pageInfo.lastUpdated`/`contributors` is on. Null when git is off.
+  Map<String, GitFileMeta>? gitMetadata;
 
   PageBuilder({required this.config}) {
     _metaBuilder = PageMetaBuilder(config: config);
@@ -100,12 +105,39 @@ $copyPageButton
         <article class="prose"$pagefindAttr>
           ${_prefixContentPaths(page.content)}
         </article>
+        ${_buildPageMeta(page)}
         ${_layoutBuilder.buildEditLink(page)}
         ${_layoutBuilder.buildPageNav(page)}
       </main>
       ${_layoutBuilder.buildToc(page.toc)}
     </div>''';
   }
+
+  /// Reading time + git last-updated/contributors below the article, per
+  /// `config.pageInfo`. Empty when nothing is enabled or git data is missing.
+  String _buildPageMeta(Page page) {
+    final info = config.pageInfo;
+    final git = gitMetadata?[page.sourcePath];
+    final items = <String>[];
+
+    if (info.readingTime) {
+      final minutes = readingMinutes(page.content);
+      if (minutes > 0) items.add(_metaItem(config.i18nStrings.readingTime.replaceAll('%s', '$minutes')));
+    }
+    if (info.lastUpdated && git != null) {
+      items.add(_metaItem(config.i18nStrings.lastUpdated.replaceAll('%s', _formatDate(git.lastModified))));
+    }
+    if (info.contributors && git != null && git.authors.isNotEmpty) {
+      items.add(_metaItem(git.authors.map(encodeHtml).join(', ')));
+    }
+
+    return items.isEmpty ? '' : '<div class="page-meta">${items.join()}</div>';
+  }
+
+  String _metaItem(String text) => '<span class="page-meta-item">$text</span>';
+
+  String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   String _splashBody(Page page, String pagefindAttr) => '''
     ${_buildHero(page)}
