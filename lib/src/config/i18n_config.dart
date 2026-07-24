@@ -88,13 +88,18 @@ class LocaleConfig {
   final String dir;
   final String path;
 
-  const LocaleConfig({required this.code, required this.label, this.dir = 'ltr', required this.path});
+  /// Directory holding this locale's translations. Defaults to
+  /// `<content.dir>/<code>`; untranslated pages fall back to the default locale.
+  final String? source;
+
+  const LocaleConfig({required this.code, required this.label, this.dir = 'ltr', required this.path, this.source});
 
   factory LocaleConfig.fromYaml(Map yaml) => LocaleConfig(
         code: yaml['code'] as String,
         label: yaml['label'] as String,
         dir: yaml['dir'] as String? ?? 'ltr',
         path: yaml['path'] as String,
+        source: yaml['source'] as String?,
       );
 }
 
@@ -116,6 +121,7 @@ class I18nStrings {
   final String searchMore;
   final String searchUnavailable;
   final String localeSelect;
+  final String localeUntranslated;
 
   const I18nStrings({
     this.navPrevious = '← Previous',
@@ -135,6 +141,7 @@ class I18nStrings {
     this.searchMore = 'Load more results',
     this.searchUnavailable = 'Search is unavailable',
     this.localeSelect = 'Select language',
+    this.localeUntranslated = 'This page has not been translated yet.',
   });
 
   static const _keyMap = {
@@ -155,6 +162,7 @@ class I18nStrings {
     'search.more': 'searchMore',
     'search.unavailable': 'searchUnavailable',
     'locale.select': 'localeSelect',
+    'locale.untranslated': 'localeUntranslated',
   };
 
   factory I18nStrings.fromYaml(Map? yaml) {
@@ -186,6 +194,7 @@ class I18nStrings {
       searchMore: overrides['searchMore'] ?? 'Load more results',
       searchUnavailable: overrides['searchUnavailable'] ?? 'Search is unavailable',
       localeSelect: overrides['localeSelect'] ?? 'Select language',
+      localeUntranslated: overrides['localeUntranslated'] ?? 'This page has not been translated yet.',
     );
   }
 }

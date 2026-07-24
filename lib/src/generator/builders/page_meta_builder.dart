@@ -73,7 +73,7 @@ class PageMetaBuilder {
 
   String _buildHreflangTags(Page page) {
     final i18n = config.i18n;
-    if (i18n == null || !i18n.enabled || i18n.locales.isEmpty) return '';
+    if (i18n == null || !i18n.enabled || i18n.locales.length < 2) return '';
     if (config.url == null) return '';
 
     final pagePath = switch (page.path) { '/' => '/', final p => p };

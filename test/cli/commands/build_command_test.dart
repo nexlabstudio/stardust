@@ -294,4 +294,47 @@ void main() {
       expect(fileSystem.fileAt(p.join('out', 'index.html')), contains('/v2/'));
     });
   });
+
+  group('i18n', () {
+    late Directory tempDir;
+    late String configPath;
+    late String docsDir;
+
+    setUp(() async {
+      tempDir = await Directory.systemTemp.createTemp('stardust_i18n_test');
+      docsDir = p.join(tempDir.path, 'docs');
+      fileSystem.addFile(p.join(docsDir, 'index.md'), '# Home');
+      fileSystem.addFile(p.join(docsDir, 'guide.md'), '# Guide');
+      fileSystem.addFile(p.join(docsDir, 'es', 'index.md'), '# Inicio');
+      configPath = p.join(tempDir.path, 'stardust.yaml');
+      await File(configPath).writeAsString('name: Test\n'
+          'content:\n  dir: $docsDir\n'
+          'i18n:\n'
+          '  enabled: true\n'
+          '  defaultLocale: en\n'
+          '  locales:\n'
+          '    - {code: en, label: English, path: /}\n'
+          '    - {code: es, label: Español, path: /es/}\n');
+      fileSystem.addFile(configPath, 'seeded');
+    });
+
+    tearDown(() async => tempDir.delete(recursive: true));
+
+    test('builds each locale, falling back to the default with a notice', () async {
+      final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
+
+      expect(code, 0, reason: errors.join('\n'));
+      expect(fileSystem.hasFile(p.join('out', 'index.html')), isTrue);
+      expect(fileSystem.hasFile(p.join('out', 'es', 'index.html')), isTrue);
+
+      // The translation subdir must not leak into the default build.
+      expect(fileSystem.hasFile(p.join('out', 'es', 'index', 'index.html')), isFalse);
+
+      expect(fileSystem.fileAt(p.join('out', 'es', 'index.html')), contains('lang="es"'));
+
+      expect(fileSystem.hasFile(p.join('out', 'es', 'guide', 'index.html')), isTrue);
+      expect(fileSystem.fileAt(p.join('out', 'es', 'guide', 'index.html')), contains('untranslated-notice'));
+      expect(fileSystem.fileAt(p.join('out', 'es', 'index.html')), isNot(contains('untranslated-notice')));
+    });
+  });
 }

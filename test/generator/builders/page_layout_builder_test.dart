@@ -95,6 +95,47 @@ void main() {
       });
     });
 
+    group('locale switcher under i18n', () {
+      const i18n = I18nConfig(
+        enabled: true,
+        defaultLocale: 'en',
+        locales: [
+          LocaleConfig(code: 'en', label: 'English', path: '/'),
+          LocaleConfig(code: 'es', label: 'Español', path: '/es/'),
+        ],
+      );
+
+      test('switcher preserves the current page across locales without double-prefixing', () {
+        const config = StardustConfig(
+          name: 'T',
+          i18n: i18n,
+          build: BuildConfig(basePath: '/es'),
+          activeLocale: LocaleConfig(code: 'es', label: 'Español', path: '/es/'),
+        );
+
+        final header = PageLayoutBuilder(config: config).buildHeader('/guide');
+
+        expect(header, contains('href="/guide" class="locale-dropdown-item"'));
+        expect(header, contains('href="/es/guide" class="locale-dropdown-item active"'));
+        expect(header, isNot(contains('/es/es/')));
+      });
+
+      test('shows the untranslated notice only on a fallen-back page', () {
+        const config = StardustConfig(
+          name: 'T',
+          i18n: i18n,
+          build: BuildConfig(basePath: '/es'),
+          activeLocale: LocaleConfig(code: 'es', label: 'Español', path: '/es/'),
+          untranslatedPaths: {'/guide'},
+        );
+
+        final builder = PageLayoutBuilder(config: config);
+
+        expect(builder.buildHeader('/guide'), contains('untranslated-notice'));
+        expect(builder.buildHeader('/'), isNot(contains('untranslated-notice')));
+      });
+    });
+
     group('with minimal config', () {
       setUp(() {
         const config = StardustConfig(name: 'Test Site');

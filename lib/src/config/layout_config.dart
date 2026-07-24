@@ -38,7 +38,12 @@ class ContentConfig {
         _ => const ContentConfig(),
       };
 
-  ContentConfig withDir(String dir) => ContentConfig(dir: dir, index: index, include: include, exclude: exclude);
+  ContentConfig withDir(String dir, {List<String> addExcludes = const []}) => ContentConfig(
+        dir: dir,
+        index: index,
+        include: include,
+        exclude: addExcludes.isEmpty ? exclude : [...exclude, ...addExcludes],
+      );
 }
 
 class HeaderConfig {

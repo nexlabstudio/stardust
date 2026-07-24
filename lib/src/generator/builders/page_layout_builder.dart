@@ -14,18 +14,21 @@ class PageLayoutBuilder {
 
   String _prefixPath(String path) => urls.href(path);
 
+  /// The deployment base with [activePath]'s own prefix stripped off, so a
+  /// cross-version/locale link to `/v1/` doesn't become `/v1/v1/`.
+  String _siteBaseWithout(String activePath) {
+    final base = config.basePath;
+    final segment = activePath.replaceAll(RegExp(r'^/+|/+$'), '');
+    return segment.isEmpty ? base : base.substring(0, base.length - segment.length - 1);
+  }
+
   /// Href for a cross-version link. [path] is already absolute from the site
   /// root (e.g. `/v1/`), so it takes only the deployment base, not the active
-  /// version's own prefix — otherwise `/v1/` would become `/v1/v1/`.
-  String _versionRootHref(String path) {
-    if (config.activeVersion case final active?) {
-      final base = config.basePath;
-      final segment = active.path.replaceAll(RegExp(r'^/+|/+$'), '');
-      final siteBase = segment.isEmpty ? base : base.substring(0, base.length - segment.length - 1);
-      return '$siteBase$path';
-    }
-    return _prefixPath(path);
-  }
+  /// version's own prefix.
+  String _versionRootHref(String path) => switch (config.activeVersion) {
+        final active? => '${_siteBaseWithout(active.path)}$path',
+        null => _prefixPath(path),
+      };
 
   /// Cross-version link that preserves [currentPath] when [entry]'s version has
   /// that page, else falls back to the version root.
@@ -49,11 +52,13 @@ class PageLayoutBuilder {
     final logoHtml = _buildLogo();
     final announcement = _buildAnnouncement();
     final versionBanner = _buildVersionBanner();
+    final untranslatedNotice = _buildUntranslatedNotice(currentPath);
     final versionDropdown = _buildVersionDropdown(currentPath);
-    final localeDropdown = _buildLocaleDropdown();
+    final localeDropdown = _buildLocaleDropdown(currentPath);
 
     return '''
     $versionBanner
+    $untranslatedNotice
     $announcement
     <header class="header">
       <div class="header-inner">
@@ -177,17 +182,36 @@ class PageLayoutBuilder {
       </div>''';
   }
 
-  String _buildLocaleDropdown() {
+  /// Cross-locale link that preserves [currentPath] — every locale builds the
+  /// full page set, so the same page always exists under the target prefix.
+  String _localePageHref(LocaleConfig locale, String currentPath) {
+    final root = config.activeLocale == null
+        ? _prefixPath(locale.path)
+        : '${_siteBaseWithout(config.activeLocale?.path ?? '/')}${locale.path}';
+    if (currentPath == '/') return root;
+    final trimmed = root.endsWith('/') ? root.substring(0, root.length - 1) : root;
+    return '$trimmed$currentPath';
+  }
+
+  String _buildUntranslatedNotice(String currentPath) {
+    if (config.activeLocale == null) return '';
+    if (!(config.untranslatedPaths?.contains(currentPath) ?? false)) return '';
+
+    return '''
+    <div class="untranslated-notice">${encodeHtml(config.i18nStrings.localeUntranslated)}</div>''';
+  }
+
+  String _buildLocaleDropdown(String currentPath) {
     final i18n = config.i18n;
     if (i18n == null || !i18n.enabled) return '';
     if (i18n.locales.length < 2) return '';
 
-    final currentLocale = i18n.locales.where((l) => l.code == i18n.defaultLocale).firstOrNull;
-    final currentLabel = currentLocale?.label ?? i18n.defaultLocale;
+    final selected = config.activeLocale?.code ?? i18n.defaultLocale;
+    final currentLabel = i18n.locales.where((l) => l.code == selected).map((l) => l.label).firstOrNull ?? selected;
 
     final items = i18n.locales.map((locale) {
-      final active = locale.code == i18n.defaultLocale ? ' active' : '';
-      return '<a href="${encodeHtmlAttribute(_prefixPath(locale.path))}" class="locale-dropdown-item$active">${encodeHtml(locale.label)}</a>';
+      final active = locale.code == selected ? ' active' : '';
+      return '<a href="${encodeHtmlAttribute(_localePageHref(locale, currentPath))}" class="locale-dropdown-item$active">${encodeHtml(locale.label)}</a>';
     }).join('\n        ');
 
     return '''

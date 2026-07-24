@@ -112,6 +112,18 @@ void main() {
     });
   });
 
+  group('routeUnderPath', () {
+    test('keeps a root path at the base with no prefix', () {
+      expect(routeUnderPath('/', '', 'dist'), (outputDir: 'dist', basePath: null));
+      expect(routeUnderPath('/', '/docs', 'dist'), (outputDir: 'dist', basePath: '/docs'));
+    });
+
+    test('nests a path segment under the base and output', () {
+      expect(routeUnderPath('/es/', '', 'dist'), (outputDir: p.join('dist', 'es'), basePath: '/es'));
+      expect(routeUnderPath('/v1/', '/docs', 'dist'), (outputDir: p.join('dist', 'v1'), basePath: '/docs/v1'));
+    });
+  });
+
   group('rootRedirectTarget', () {
     List<VersionBuildTask> tasksFor(String currentPath) => planVersionBuilds(
           StardustConfig(

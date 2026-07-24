@@ -22,6 +22,17 @@ class VersionBuildTask {
   });
 }
 
+/// Where a build routed under [path] (e.g. `/v1/`, `/es/`) writes and how its
+/// URLs are prefixed, beneath [base] (the site base path) and [baseOutputDir]. A
+/// `/` path stays at the root; a null base path means "no prefix".
+({String outputDir, String? basePath}) routeUnderPath(String path, String base, String baseOutputDir) {
+  final segment = path.replaceAll(RegExp(r'^/+|/+$'), '');
+  return (
+    outputDir: segment.isEmpty ? baseOutputDir : p.join(baseOutputDir, segment),
+    basePath: segment.isEmpty ? (base.isEmpty ? null : base) : '$base/$segment',
+  );
+}
+
 /// Plans the per-version builds for [config] writing under [baseOutputDir]: a
 /// version whose path is `/` builds at the site root, others under their path
 /// segment, and every version but [VersionsConfig.current] is marked `noindex`.
@@ -32,12 +43,12 @@ List<VersionBuildTask> planVersionBuilds(StardustConfig config, String baseOutpu
   final base = config.basePath;
   final tasks = <VersionBuildTask>[];
   for (final entry in versions.list) {
-    final segment = entry.path.replaceAll(RegExp(r'^/+|/+$'), '');
+    final route = routeUnderPath(entry.path, base, baseOutputDir);
     tasks.add(VersionBuildTask(
       entry: entry,
       source: entry.source ?? DirSource(config.content.dir),
-      outputDir: segment.isEmpty ? baseOutputDir : p.join(baseOutputDir, segment),
-      versionBasePath: segment.isEmpty ? (base.isEmpty ? null : base) : '$base/$segment',
+      outputDir: route.outputDir,
+      versionBasePath: route.basePath,
       noindex: versions.current != null && entry.version != versions.current,
     ));
   }

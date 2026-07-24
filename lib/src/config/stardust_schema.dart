@@ -626,6 +626,10 @@ const stardustSchemaJson = r'''
               "path": {
                 "type": "string",
                 "description": "URL path where this locale is deployed (e.g. /en/)"
+              },
+              "source": {
+                "type": "string",
+                "description": "Directory holding this locale's translations. Defaults to <content.dir>/<code>; untranslated pages fall back to the default locale"
               }
             },
             "required": [

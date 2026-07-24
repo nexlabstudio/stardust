@@ -45,6 +45,40 @@ void main() {
       });
     });
 
+    group('withLocale', () {
+      const base = StardustConfig(
+        name: 'Docs',
+        content: ContentConfig(dir: 'docs', exclude: ['drafts/**']),
+        i18n: I18nConfig(enabled: true, defaultLocale: 'en'),
+      );
+      const locale = LocaleConfig(code: 'es', label: 'Español', path: '/es/', dir: 'ltr');
+
+      test('overrides content dir/base path and tags the active locale', () {
+        final l = base.withLocale(
+          locale,
+          contentDir: '/tmp/merged',
+          localeBasePath: '/es',
+          untranslatedPaths: {'/guide'},
+          excludeSubdirs: ['es/**'],
+        );
+
+        expect(l.content.dir, '/tmp/merged');
+        expect(l.content.exclude, ['drafts/**', 'es/**'], reason: 'locale subdirs added to existing excludes');
+        expect(l.basePath, '/es');
+        expect(l.activeLocale, locale);
+        expect(l.untranslatedPaths, {'/guide'});
+        expect(l.lang, 'es', reason: 'lang follows the active locale');
+      });
+
+      test('the active locale drives lang and dir', () {
+        const rtl = LocaleConfig(code: 'ar', label: 'العربية', path: '/ar/', dir: 'rtl');
+        final l = base.withLocale(rtl, contentDir: 'docs', localeBasePath: '/ar');
+
+        expect(l.lang, 'ar');
+        expect(l.dir, 'rtl');
+      });
+    });
+
     group('basePath', () {
       test('returns empty string when no URL or explicit basePath', () {
         const config = StardustConfig(name: 'Test');
@@ -560,6 +594,11 @@ void main() {
 
       expect(parsed.searchOneResult, equals(strings.searchOneResult));
       expect(parsed.searchClear, equals(strings.searchClear));
+    });
+
+    test('overrides and defaults the untranslated notice', () {
+      expect(I18nStrings.fromYaml({'locale.untranslated': 'Aún no traducido'}).localeUntranslated, 'Aún no traducido');
+      expect(const I18nStrings().localeUntranslated, 'This page has not been translated yet.');
     });
 
     test('applies search string overrides', () {
