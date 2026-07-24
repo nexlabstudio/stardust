@@ -9,7 +9,7 @@ content:
 
 nav:
   - label: Docs
-    href: /
+    href: /introduction
   - label: Components
     href: /components/callouts
   - label: GitHub
@@ -20,7 +20,7 @@ sidebar:
   - group: Getting Started
     icon: rocket
     pages:
-      - slug: index
+      - slug: introduction
         label: Introduction
       - slug: installation
         label: Installation
@@ -92,6 +92,8 @@ sidebar:
         label: Versioning
       - slug: features/i18n
         label: Internationalization
+      - slug: features/landing-page
+        label: Landing Page
 
   - group: CLI Reference
     icon: terminal

@@ -47,6 +47,21 @@ description: Complete API documentation for all endpoints.
 ---
 ```
 
+### layout
+
+Set to `splash` for a sidebar-less full-width [landing page](/features/landing-page)
+with a frontmatter-driven hero. Any other value renders the normal docs layout.
+
+```yaml
+---
+layout: splash
+hero:
+  tagline: Docs you own.
+  actions:
+    - { label: Get Started, href: /quickstart, variant: primary }
+---
+```
+
 ### order
 
 Control the order of pages within a sidebar group.

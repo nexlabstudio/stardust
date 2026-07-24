@@ -1,5 +1,6 @@
 import 'package:stardust/src/config/config.dart';
 import 'package:stardust/src/generator/builders/page_styles_builder.dart';
+import 'package:stardust/src/generator/builders/stardust_css.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -141,6 +142,22 @@ void main() {
       const config = StardustConfig(name: 'T');
 
       expect(PageStylesBuilder(config: config).buildFonts(), contains('fonts.googleapis.com'));
+    });
+
+    group('section assembly', () {
+      final css = PageStylesBuilder(config: const StardustConfig(name: 'T')).buildCss();
+
+      test('assembles every embedded CSS section', () {
+        for (final entry in stardustCssSections.entries) {
+          expect(css, contains(entry.value.trim()),
+              reason: 'CSS section "${entry.key}" is embedded but missing from buildCss()');
+        }
+      });
+
+      test('includes the landing/splash styles', () {
+        expect(css, contains('.hero-action'));
+        expect(css, contains('.splash'));
+      });
     });
   });
 }
