@@ -171,6 +171,33 @@ void main() {
       });
     });
 
+    group('theming v1', () {
+      test('footer shows the powered-by badge by default and hides it when disabled', () {
+        expect(PageLayoutBuilder(config: const StardustConfig(name: 'T')).buildFooter(), contains('footer-powered'));
+
+        const off = StardustConfig(name: 'T', footer: FooterConfig(poweredBy: false));
+        expect(PageLayoutBuilder(config: off).buildFooter(), isNot(contains('footer-powered')));
+      });
+
+      test('injects header, footer, and sidebar slots', () {
+        const config = StardustConfig(
+          name: 'T',
+          theme: ThemeConfig(
+            slots: SlotsConfig(
+              header: '<span class="slot-h">H</span>',
+              footer: '<span class="slot-f">F</span>',
+              sidebar: '<span class="slot-s">S</span>',
+            ),
+          ),
+        );
+        final builder = PageLayoutBuilder(config: config);
+
+        expect(builder.buildHeader(), contains('<span class="slot-h">H</span>'));
+        expect(builder.buildFooter(), contains('<span class="slot-f">F</span>'));
+        expect(builder.buildSidebar(const [], '/'), contains('<span class="slot-s">S</span>'));
+      });
+    });
+
     group('with minimal config', () {
       setUp(() {
         const config = StardustConfig(name: 'Test Site');

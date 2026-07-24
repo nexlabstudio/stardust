@@ -195,6 +195,40 @@ theme:
       .header { border-bottom: 2px solid var(--color-primary); }
 ```
 
+## Design Tokens
+
+Override any design token from config — no CSS file needed. Keys are token names
+without the leading `--`; `tokens` applies in light mode, `tokensDark` in dark:
+
+```yaml
+theme:
+  tokens:
+    color-primary: "#6d28d9"
+    color-border: "#e5e7eb"
+    radius: "0.5rem"
+  tokensDark:
+    color-border: "#334155"
+```
+
+These are the stable, documented tokens (see the full list below). Unknown token
+names are ignored, and values are scoped to the token declaration.
+
+## Slots
+
+Inject raw HTML into the header, footer, or sidebar without overriding the whole
+layout:
+
+```yaml
+theme:
+  slots:
+    header: '<a class="hero-action hero-action--primary" href="/signup">Sign up</a>'
+    sidebar: '<div class="sidebar-note">Docs for v2.0</div>'
+    footer: '<p>© 2026 Acme Corp</p>'
+```
+
+Slot HTML is inserted verbatim (author-controlled, not escaped), so keep it to
+content you trust — the same trust level as custom CSS.
+
 ### CSS Variables
 
 Stardust exposes CSS variables you can override:

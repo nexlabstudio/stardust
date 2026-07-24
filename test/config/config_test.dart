@@ -79,6 +79,33 @@ void main() {
       });
     });
 
+    group('theme v1 parsing', () {
+      test('parses token overrides, keeping only safe names', () {
+        final theme = ThemeConfig.fromYaml({
+          'tokens': {'color-primary': '#f00', 'bad key!': 'x'},
+          'tokensDark': {'color-border': '#111'},
+        });
+
+        expect(theme.tokens, {'color-primary': '#f00'});
+        expect(theme.tokensDark, {'color-border': '#111'});
+      });
+
+      test('parses header/footer/sidebar slots', () {
+        final theme = ThemeConfig.fromYaml({
+          'slots': {'header': '<b>h</b>', 'footer': '<b>f</b>', 'sidebar': '<b>s</b>'},
+        });
+
+        expect(theme.slots.header, '<b>h</b>');
+        expect(theme.slots.footer, '<b>f</b>');
+        expect(theme.slots.sidebar, '<b>s</b>');
+      });
+
+      test('footer poweredBy defaults to true and reads false', () {
+        expect(const FooterConfig().poweredBy, isTrue);
+        expect(FooterConfig.fromYaml({'poweredBy': false}).poweredBy, isFalse);
+      });
+    });
+
     group('basePath', () {
       test('returns empty string when no URL or explicit basePath', () {
         const config = StardustConfig(name: 'Test');

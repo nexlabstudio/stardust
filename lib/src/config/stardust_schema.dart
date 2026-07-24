@@ -243,6 +243,36 @@ const stardustSchemaJson = r'''
               "description": "Path to a custom CSS file"
             }
           }
+        },
+        "tokens": {
+          "type": "object",
+          "description": "Design-token overrides applied in :root (light). Keys are token names without the leading -- (e.g. color-border)",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "tokensDark": {
+          "type": "object",
+          "description": "Design-token overrides applied in .dark",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "slots": {
+          "type": "object",
+          "description": "Raw HTML injected into the header, footer, and sidebar regions",
+          "additionalProperties": false,
+          "properties": {
+            "header": {
+              "type": "string"
+            },
+            "footer": {
+              "type": "string"
+            },
+            "sidebar": {
+              "type": "string"
+            }
+          }
         }
       }
     },
@@ -479,6 +509,11 @@ const stardustSchemaJson = r'''
       "properties": {
         "copyright": {
           "type": "string"
+        },
+        "poweredBy": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the \"Powered by Stardust\" footer badge"
         },
         "links": {
           "type": "array",

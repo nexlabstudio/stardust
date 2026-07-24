@@ -95,13 +95,15 @@ class AnnouncementConfig {
 class FooterConfig {
   final String? copyright;
   final List<FooterLinkGroup> links;
+  final bool poweredBy;
 
-  const FooterConfig({this.copyright, this.links = const []});
+  const FooterConfig({this.copyright, this.links = const [], this.poweredBy = true});
 
   factory FooterConfig.fromYaml(Map? yaml) => switch (yaml) {
         final Map yaml => FooterConfig(
             copyright: yaml['copyright'] as String?,
             links: (yaml['links'] as List?)?.map((e) => FooterLinkGroup.fromYaml(e as Map)).toList() ?? [],
+            poweredBy: yaml['poweredBy'] as bool? ?? true,
           ),
         _ => const FooterConfig(),
       };

@@ -50,7 +50,7 @@ ${buildCss()}
       --font-sans: '$sans', system-ui, sans-serif;
       --font-mono: '$mono', monospace;
       --radius: $radius;
-    }
+${_tokenOverrides(config.theme.tokens)}    }
 
     .dark {
       --color-bg: $bgDark;
@@ -58,7 +58,7 @@ ${buildCss()}
       --color-text: $textDark;
       --color-text-secondary: #94a3b8;
       --color-border: #334155;
-    }
+${_tokenOverrides(config.theme.tokensDark)}    }
 
 ${_section('base')}
 ${_section('announcement')}
@@ -82,6 +82,9 @@ ${_buildCustomStyles()}
   }
 
   String _section(String key) => stardustCssSections[key] ?? '';
+
+  String _tokenOverrides(Map<String, String> tokens) =>
+      tokens.entries.map((e) => '      --${e.key}: ${e.value};\n').join();
 
   String _buildCustomStyles() {
     final custom = config.theme.custom;

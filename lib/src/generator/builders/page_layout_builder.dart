@@ -99,6 +99,7 @@ class PageLayoutBuilder {
           </button>
           ''' : ''}
           $socialLinks
+          ${config.theme.slots.header ?? ''}
         </div>
       </div>
     </header>
@@ -381,6 +382,7 @@ class PageLayoutBuilder {
           </svg>
         </button>
         $groups
+        ${config.theme.slots.sidebar ?? ''}
       </aside>
 ''';
   }
@@ -480,18 +482,24 @@ class PageLayoutBuilder {
     final footerLinks = _buildFooterLinks();
     final copyright = config.footer.copyright;
 
-    return '''
-    <footer class="footer">
-      $footerLinks
-      ${copyright != null ? '<div class="footer-copyright">${encodeHtml(copyright)}</div>' : ''}
-      $footerSocial
+    final poweredBy = config.footer.poweredBy
+        ? '''
       <div class="footer-powered">
         ${encodeHtml(config.i18nStrings.footerPoweredBy)}
         <svg class="footer-hex" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/>
         </svg>
         <a href="https://github.com/nexlabstudio/stardust" target="_blank" rel="noopener">nexlabstudio/stardust</a>
-      </div>
+      </div>'''
+        : '';
+
+    return '''
+    <footer class="footer">
+      $footerLinks
+      ${copyright != null ? '<div class="footer-copyright">${encodeHtml(copyright)}</div>' : ''}
+      $footerSocial
+      $poweredBy
+      ${config.theme.slots.footer ?? ''}
     </footer>
 ''';
   }

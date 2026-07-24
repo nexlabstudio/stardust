@@ -5,12 +5,25 @@ class ThemeConfig {
   final String radius;
   final CustomThemeConfig? custom;
 
+  /// Design-token overrides applied in `:root` (light) — keys are token names
+  /// without the leading `--` (e.g. `color-border`), values are CSS values.
+  final Map<String, String> tokens;
+
+  /// Design-token overrides applied in `.dark`.
+  final Map<String, String> tokensDark;
+
+  /// Raw HTML injected into the header, footer, and sidebar regions.
+  final SlotsConfig slots;
+
   const ThemeConfig({
     this.colors = const ColorsConfig(),
     this.darkMode = const DarkModeConfig(),
     this.fonts = const FontsConfig(),
     this.radius = '8px',
     this.custom,
+    this.tokens = const {},
+    this.tokensDark = const {},
+    this.slots = const SlotsConfig(),
   });
 
   factory ThemeConfig.fromYaml(Map? yaml) => switch (yaml) {
@@ -23,8 +36,39 @@ class ThemeConfig {
               final Map custom => CustomThemeConfig.fromYaml(custom),
               _ => null,
             },
+            tokens: _tokens(yaml['tokens']),
+            tokensDark: _tokens(yaml['tokensDark']),
+            slots: SlotsConfig.fromYaml(yaml['slots'] as Map?),
           ),
         _ => const ThemeConfig(),
+      };
+
+  /// Reads a `{token: value}` map, keeping only safe token names so a value can
+  /// never break out of the CSS declaration via the key.
+  static Map<String, String> _tokens(Object? yaml) => switch (yaml) {
+        final Map map => {
+            for (final MapEntry(:key, :value) in map.entries)
+              if (RegExp(r'^[a-z0-9-]+$').hasMatch('$key')) '$key': '$value',
+          },
+        _ => const {},
+      };
+}
+
+/// Raw HTML injected at the end of the header, footer, and sidebar regions.
+class SlotsConfig {
+  final String? header;
+  final String? footer;
+  final String? sidebar;
+
+  const SlotsConfig({this.header, this.footer, this.sidebar});
+
+  factory SlotsConfig.fromYaml(Map? yaml) => switch (yaml) {
+        final Map yaml => SlotsConfig(
+            header: yaml['header'] as String?,
+            footer: yaml['footer'] as String?,
+            sidebar: yaml['sidebar'] as String?,
+          ),
+        _ => const SlotsConfig(),
       };
 }
 
