@@ -336,5 +336,36 @@ void main() {
       expect(fileSystem.fileAt(p.join('out', 'es', 'guide', 'index.html')), contains('untranslated-notice'));
       expect(fileSystem.fileAt(p.join('out', 'es', 'index.html')), isNot(contains('untranslated-notice')));
     });
+
+    test('redirects the site root when the default locale lives under a prefix', () async {
+      await File(configPath).writeAsString('name: Test\n'
+          'content:\n  dir: $docsDir\n'
+          'i18n:\n'
+          '  enabled: true\n'
+          '  defaultLocale: en\n'
+          '  locales:\n'
+          '    - {code: en, label: English, path: /en/}\n'
+          '    - {code: es, label: Español, path: /es/}\n');
+
+      final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
+
+      expect(code, 0, reason: errors.join('\n'));
+      expect(fileSystem.hasFile(p.join('out', 'en', 'index.html')), isTrue);
+      expect(fileSystem.fileAt(p.join('out', 'index.html')), contains('http-equiv="refresh"'));
+      expect(fileSystem.fileAt(p.join('out', 'index.html')), contains('/en/'));
+    });
+
+    test('resolves locale-suffixed sibling files without leaking them', () async {
+      fileSystem.addFile(p.join(docsDir, 'guide.md'), '# Guide EN');
+      fileSystem.addFile(p.join(docsDir, 'guide.es.md'), '# Guía ES');
+
+      final code = await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']);
+
+      expect(code, 0, reason: errors.join('\n'));
+      // The suffixed file is a translation, never its own page.
+      expect(fileSystem.hasFile(p.join('out', 'guide.es', 'index.html')), isFalse);
+      expect(fileSystem.fileAt(p.join('out', 'es', 'guide', 'index.html')), contains('Guía ES'));
+      expect(fileSystem.fileAt(p.join('out', 'guide', 'index.html')), contains('Guide EN'));
+    });
   });
 }

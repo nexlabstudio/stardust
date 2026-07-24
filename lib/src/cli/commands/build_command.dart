@@ -215,12 +215,19 @@ class BuildCommand extends Command<int> {
     final defaultDir = config.content.dir;
     final tasks = planLocaleBuilds(config, outputDir);
 
+    final localeCodes = {
+      for (final task in tasks)
+        if (!task.isDefault) task.locale.code
+    };
     final localeSubdirs = <String>{
       for (final task in tasks)
         if (!task.isDefault && p.isWithin(defaultDir, task.translatedDir))
           p.relative(task.translatedDir, from: defaultDir).replaceAll('\\', '/'),
     };
-    final subdirExcludes = [for (final s in localeSubdirs) '$s/**'];
+    final translationExcludes = [
+      for (final s in localeSubdirs) '$s/**',
+      for (final c in localeCodes) ...['*.$c.md', '**/*.$c.md', '*.$c.mdx', '**/*.$c.mdx'],
+    ];
 
     final materializer = LocaleContentMaterializer(fileSystem: fileSystem);
     try {
@@ -232,7 +239,13 @@ class BuildCommand extends Command<int> {
         final (dir, untranslated) = task.isDefault
             ? (defaultDir, const <String>{})
             : await materializer
-                .materialize(defaultDir: defaultDir, translatedDir: task.translatedDir, excludeSubdirs: localeSubdirs)
+                .materialize(
+                  defaultDir: defaultDir,
+                  localeCode: task.locale.code,
+                  subdir: task.translatedDir,
+                  excludeSubdirs: localeSubdirs,
+                  localeCodes: localeCodes,
+                )
                 .then((r) => (r.dir, r.untranslated));
 
         final suffix = untranslated.isEmpty ? '' : '  (${untranslated.length} untranslated)';
@@ -242,7 +255,7 @@ class BuildCommand extends Command<int> {
             contentDir: dir,
             localeBasePath: task.localeBasePath,
             untranslatedPaths: untranslated,
-            excludeSubdirs: subdirExcludes);
+            excludeSubdirs: translationExcludes);
         final count = await _buildOne(factory, localized, task.outputDir,
             skipSearch: skipSearch, verbose: verbose, logger: logger);
         if (count == null) return null;

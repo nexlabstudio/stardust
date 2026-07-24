@@ -10,47 +10,69 @@ void main() {
 
     setUp(() => fileSystem = MockFileSystem());
 
-    test('merges translations over the default and reports the fallbacks', () async {
+    Future<({String dir, Set<String> untranslated})> materialize({
+      Set<String> excludeSubdirs = const {'es'},
+      Set<String> localeCodes = const {'es'},
+    }) =>
+        LocaleContentMaterializer(fileSystem: fileSystem).materialize(
+          defaultDir: 'docs',
+          localeCode: 'es',
+          subdir: p.join('docs', 'es'),
+          excludeSubdirs: excludeSubdirs,
+          localeCodes: localeCodes,
+        );
+
+    test('resolves subdirectory translations and reports the fallbacks', () async {
       fileSystem.addFile('docs/index.md', '# Home');
       fileSystem.addFile('docs/guide.md', '# Guide');
       fileSystem.addFile('docs/api/auth.md', '# Auth');
       fileSystem.addFile('docs/es/guide.md', '# Guía');
 
-      final result = await LocaleContentMaterializer(fileSystem: fileSystem).materialize(
-        defaultDir: 'docs',
-        translatedDir: p.join('docs', 'es'),
-        excludeSubdirs: {'es'},
-      );
+      final result = await materialize();
 
-      expect(fileSystem.fileAt(p.join(result.dir, 'guide.md')), '# Guía', reason: 'translation wins');
+      expect(fileSystem.fileAt(p.join(result.dir, 'guide.md')), '# Guía', reason: 'subdir translation wins');
       expect(fileSystem.fileAt(p.join(result.dir, 'index.md')), '# Home', reason: 'fallback to default');
-      expect(fileSystem.fileAt(p.join(result.dir, 'api', 'auth.md')), '# Auth');
-      expect(result.untranslated, {'/', '/api/auth'}, reason: 'guide was translated, the rest fell back');
+      expect(result.untranslated, {'/', '/api/auth'});
     });
 
-    test('excludes locale subdirs from the default content', () async {
+    test('resolves locale-suffixed siblings and keeps them out of the base set', () async {
       fileSystem.addFile('docs/index.md', '# Home');
-      fileSystem.addFile('docs/es/index.md', '# Inicio');
-      fileSystem.addFile('docs/fr/index.md', '# Accueil');
+      fileSystem.addFile('docs/guide.md', '# Guide');
+      fileSystem.addFile('docs/guide.es.md', '# Guía');
 
-      final result = await LocaleContentMaterializer(fileSystem: fileSystem).materialize(
-        defaultDir: 'docs',
-        translatedDir: p.join('docs', 'es'),
-        excludeSubdirs: {'es', 'fr'},
-      );
+      final result = await materialize(excludeSubdirs: const {});
 
-      expect(fileSystem.hasFile(p.join(result.dir, 'es', 'index.md')), isFalse);
-      expect(fileSystem.hasFile(p.join(result.dir, 'fr', 'index.md')), isFalse);
-      expect(result.untranslated, isEmpty, reason: 'index.md was translated');
+      expect(fileSystem.fileAt(p.join(result.dir, 'guide.md')), '# Guía', reason: 'suffix translation used');
+      expect(fileSystem.hasFile(p.join(result.dir, 'guide.es.md')), isFalse, reason: 'suffix file is not a page');
+      expect(result.untranslated, {'/'}, reason: 'only index fell back');
     });
 
-    test('missing translation dir leaves every page untranslated', () async {
+    test('prefers a suffix sibling over a subdirectory translation', () async {
+      fileSystem.addFile('docs/guide.md', '# Guide');
+      fileSystem.addFile('docs/guide.es.md', '# Suffix');
+      fileSystem.addFile('docs/es/guide.md', '# Subdir');
+
+      final result = await materialize();
+
+      expect(fileSystem.fileAt(p.join(result.dir, 'guide.md')), '# Suffix');
+    });
+
+    test('excludes other locales suffix files and subdirs from the base set', () async {
       fileSystem.addFile('docs/index.md', '# Home');
+      fileSystem.addFile('docs/index.fr.md', '# Accueil');
+      fileSystem.addFile('docs/fr/guide.md', '# Guide FR');
 
-      final result = await LocaleContentMaterializer(fileSystem: fileSystem)
-          .materialize(defaultDir: 'docs', translatedDir: p.join('docs', 'de'));
+      final result = await materialize(excludeSubdirs: const {'es', 'fr'}, localeCodes: const {'es', 'fr'});
 
+      expect(fileSystem.hasFile(p.join(result.dir, 'index.fr.md')), isFalse);
+      expect(fileSystem.hasFile(p.join(result.dir, 'fr', 'guide.md')), isFalse);
       expect(result.untranslated, {'/'});
+    });
+
+    test('missing translations leave every page untranslated', () async {
+      fileSystem.addFile('docs/index.md', '# Home');
+
+      expect((await materialize()).untranslated, {'/'});
     });
   });
 }
