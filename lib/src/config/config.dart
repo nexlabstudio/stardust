@@ -54,6 +54,14 @@ class StardustConfig {
   /// run — lets the switcher link to the same page across versions.
   final Map<String, Set<String>>? versionPages;
 
+  /// The locale this build represents when i18n is enabled, or null for a
+  /// single-locale build. Drives `<html lang>`/`dir` and switcher state.
+  final LocaleConfig? activeLocale;
+
+  /// Page paths that fell back to the default locale during this locale's
+  /// build, so those pages can show a "not yet translated" notice.
+  final Set<String>? untranslatedPaths;
+
   const StardustConfig({
     required this.name,
     this.description,
@@ -81,13 +89,16 @@ class StardustConfig {
     this.devMode = false,
     this.activeVersion,
     this.versionPages,
+    this.activeLocale,
+    this.untranslatedPaths,
   });
 
   I18nStrings get i18nStrings => i18n?.strings ?? const I18nStrings();
 
-  String get lang => i18n?.defaultLocale ?? 'en';
+  String get lang => activeLocale?.code ?? i18n?.defaultLocale ?? 'en';
 
   String get dir {
+    if (activeLocale case final locale?) return locale.dir;
     final i18nConfig = i18n;
     if (i18nConfig == null || !i18nConfig.enabled) return 'ltr';
     final current = i18nConfig.locales.where((l) => l.code == i18nConfig.defaultLocale).firstOrNull;
@@ -143,6 +154,8 @@ class StardustConfig {
         devMode: true,
         activeVersion: activeVersion,
         versionPages: versionPages,
+        activeLocale: activeLocale,
+        untranslatedPaths: untranslatedPaths,
       );
 
   /// Derives a build for a single [entry]: content sourced from [source], URLs
@@ -183,5 +196,51 @@ class StardustConfig {
         devMode: devMode,
         activeVersion: entry,
         versionPages: versionPages ?? this.versionPages,
+        activeLocale: activeLocale,
+        untranslatedPaths: untranslatedPaths,
+      );
+
+  /// Derives a build for a single [locale]: content sourced from [contentDir]
+  /// (its translations merged over the default locale), URLs prefixed with
+  /// [localeBasePath] (null = site root), tagged active so pages emit the right
+  /// `lang`/`dir` and switcher state. [untranslatedPaths] are the pages that
+  /// fell back to the default locale.
+  StardustConfig withLocale(
+    LocaleConfig locale, {
+    required String contentDir,
+    required String? localeBasePath,
+    Set<String>? untranslatedPaths,
+    List<String> excludeSubdirs = const [],
+    List<SidebarGroup>? sidebar,
+  }) =>
+      StardustConfig(
+        name: name,
+        description: description,
+        tagline: tagline,
+        logo: logo,
+        favicon: favicon,
+        url: url,
+        content: content.withDir(contentDir, addExcludes: excludeSubdirs),
+        nav: nav,
+        sidebar: sidebar ?? this.sidebar,
+        toc: toc,
+        theme: theme,
+        code: code,
+        components: components,
+        search: search,
+        seo: seo,
+        social: social,
+        header: header,
+        footer: footer,
+        versions: versions,
+        i18n: i18n,
+        integrations: integrations,
+        build: build.withBasePath(localeBasePath),
+        dev: dev,
+        devMode: devMode,
+        activeVersion: activeVersion,
+        versionPages: versionPages,
+        activeLocale: locale,
+        untranslatedPaths: untranslatedPaths,
       );
 }

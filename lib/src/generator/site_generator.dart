@@ -5,7 +5,6 @@ import 'dart:isolate';
 import 'package:crypto/crypto.dart';
 
 import 'package:glob/glob.dart';
-import 'package:glob/list_local_fs.dart';
 import 'package:path/path.dart' as p;
 
 import '../config/config.dart';
@@ -128,27 +127,16 @@ class SiteGenerator {
       throw GeneratorException('Content directory not found: $contentDir');
     }
 
+    final includes = config.content.include.map(Glob.new).toList();
+    final excludes = config.content.exclude.map(Glob.new).toList();
     final paths = <String>{};
 
-    for (final pattern in config.content.include) {
-      final glob = Glob(pattern);
-      await for (final entity in glob.list(root: contentDir)) {
-        if (entity case final File file) {
-          final relativePath = p.relative(file.path, from: contentDir);
-
-          var excluded = false;
-          for (final excludePattern in config.content.exclude) {
-            if (Glob(excludePattern).matches(relativePath)) {
-              excluded = true;
-              break;
-            }
-          }
-
-          if (!excluded) {
-            paths.add(file.path);
-          }
-        }
-      }
+    await for (final entity in fileSystem.listDirectory(contentDir, recursive: true)) {
+      if (entity is! File) continue;
+      final relative = p.relative(entity.path, from: contentDir).replaceAll('\\', '/');
+      if (includes.isNotEmpty && !includes.any((g) => g.matches(relative))) continue;
+      if (excludes.any((g) => g.matches(relative))) continue;
+      paths.add(entity.path);
     }
 
     return (paths.toList()..sort()).map(File.new).toList();
@@ -163,7 +151,7 @@ class SiteGenerator {
 
     final sources = <(String, String)>[];
     for (final file in files) {
-      sources.add((file.path, await file.readAsString()));
+      sources.add((file.path, await fileSystem.readFile(file.path)));
     }
 
     final chunkSize = (sources.length / Platform.numberOfProcessors).ceil();

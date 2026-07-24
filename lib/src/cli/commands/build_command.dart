@@ -5,6 +5,8 @@ import '../../config/config.dart';
 import '../../config/config_loader.dart';
 import '../../core/file_system.dart';
 import '../../core/stardust_factory.dart';
+import '../../generator/locale_materializer.dart';
+import '../../generator/locale_planner.dart';
 import '../../generator/redirect_generator.dart';
 import '../../generator/robots_generator.dart';
 import '../../generator/version_planner.dart';
@@ -109,11 +111,18 @@ class BuildCommand extends Command<int> {
 
     final factory = StardustFactory(fileSystem: fileSystem, logger: logger);
 
+    final i18n = config.i18n;
+    final multiLocale = i18n != null && i18n.enabled && i18n.locales.length > 1;
+
     try {
-      final pageCount = allVersions
-          ? await _buildAllVersions(factory, config, outputDir,
-              skipSearch: skipSearch, verbose: verbose, logger: logger)
-          : await _buildOne(factory, config, outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger);
+      final pageCount = switch ((allVersions, multiLocale)) {
+        (true, _) =>
+          await _buildAllVersions(factory, config, outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger),
+        (false, true) =>
+          await _buildAllLocales(factory, config, outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger),
+        (false, false) =>
+          await _buildOne(factory, config, outputDir, skipSearch: skipSearch, verbose: verbose, logger: logger),
+      };
       if (pageCount == null) return 1;
 
       stopwatch.stop();
@@ -148,6 +157,9 @@ class BuildCommand extends Command<int> {
       return null;
     }
 
+    final i18n = config.i18n;
+    final multiLocale = i18n != null && i18n.enabled && i18n.locales.length > 1;
+
     final resolver = VersionSourceResolver();
     try {
       final resolved = <({VersionBuildTask task, String dir})>[];
@@ -169,8 +181,11 @@ class BuildCommand extends Command<int> {
           versionPages: versionPages,
           sidebar: task.entry.sidebar ?? sidebarForVersion(config.sidebar, versionPages[task.entry.version]),
         );
-        final count = await _buildOne(factory, versioned, task.outputDir,
-            skipSearch: skipSearch, verbose: verbose, logger: logger);
+        final count = multiLocale
+            ? await _buildAllLocales(factory, versioned, task.outputDir,
+                skipSearch: skipSearch, verbose: verbose, logger: logger)
+            : await _buildOne(factory, versioned, task.outputDir,
+                skipSearch: skipSearch, verbose: verbose, logger: logger);
         if (count == null) return null;
         total += count;
       }
@@ -192,6 +207,75 @@ class BuildCommand extends Command<int> {
       return total;
     } finally {
       await resolver.cleanup();
+    }
+  }
+
+  Future<int?> _buildAllLocales(
+    StardustFactory factory,
+    StardustConfig config,
+    String outputDir, {
+    required bool skipSearch,
+    required bool verbose,
+    required Logger logger,
+  }) async {
+    final defaultDir = config.content.dir;
+    final tasks = planLocaleBuilds(config, outputDir);
+
+    final localeCodes = {
+      for (final task in tasks)
+        if (!task.isDefault) task.locale.code
+    };
+    final localeSubdirs = <String>{
+      for (final task in tasks)
+        if (!task.isDefault && p.isWithin(defaultDir, task.translatedDir))
+          p.relative(task.translatedDir, from: defaultDir).replaceAll('\\', '/'),
+    };
+    final translationExcludes = [
+      for (final s in localeSubdirs) '$s/**',
+      for (final c in localeCodes) ...['*.$c.md', '**/*.$c.md', '*.$c.mdx', '**/*.$c.mdx'],
+    ];
+
+    final materializer = LocaleContentMaterializer(fileSystem: fileSystem);
+    try {
+      var total = 0;
+      LocaleBuildTask? defaultTask;
+      for (final task in tasks) {
+        if (task.isDefault) defaultTask = task;
+
+        final (dir, untranslated) = task.isDefault
+            ? (defaultDir, const <String>{})
+            : await materializer
+                .materialize(
+                  defaultDir: defaultDir,
+                  localeCode: task.locale.code,
+                  subdir: task.translatedDir,
+                  excludeSubdirs: localeSubdirs,
+                  localeCodes: localeCodes,
+                )
+                .then((r) => (r.dir, r.untranslated));
+
+        final suffix = untranslated.isEmpty ? '' : '  (${untranslated.length} untranslated)';
+        logger.log('🌐 ${task.locale.label} (${task.locale.code}) → ${p.relative(task.outputDir)}$suffix');
+
+        final localized = config.withLocale(task.locale,
+            contentDir: dir,
+            localeBasePath: task.localeBasePath,
+            untranslatedPaths: untranslated,
+            excludeSubdirs: translationExcludes,
+            sidebar: task.locale.sidebar);
+        final count = await _buildOne(factory, localized, task.outputDir,
+            skipSearch: skipSearch, verbose: verbose, logger: logger);
+        if (count == null) return null;
+        total += count;
+      }
+
+      if (defaultTask != null && defaultTask.outputDir != outputDir) {
+        await RedirectGenerator(outputDir: outputDir, fileSystem: fileSystem, logger: logger)
+            .writeRootIndexRedirect('${defaultTask.localeBasePath ?? ''}/');
+      }
+      return total;
+    } finally {
+      await materializer.cleanup();
     }
   }
 
