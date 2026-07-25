@@ -104,5 +104,11 @@ void main() {
         await dir.delete(recursive: true);
       }
     });
+
+    test('returns null when git cannot be launched', () async {
+      final dir = await Directory.systemTemp.createTemp('stardust-gone-');
+      await dir.delete();
+      expect(await GitMetadataCollector(workingDirectory: dir.path).collect(), isNull);
+    });
   });
 }
