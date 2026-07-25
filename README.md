@@ -240,17 +240,62 @@ Stardust generates a static site in `dist/`. Deploy anywhere static files are se
 
 ### GitHub Pages (recommended)
 
-Use GitHub Actions to build and deploy automatically:
+Use the official **Stardust Docs** action — it installs a checksum-verified binary, runs `stardust check`, and builds your site (no Node or Python toolchain). See [the action docs](docs/deployment/github-action.md) for all inputs and PR-preview recipes.
 
 ```yaml
 # .github/workflows/deploy.yml
-- run: curl -sSL https://raw.githubusercontent.com/nexlabstudio/stardust/dev/install.sh | bash
-- run: stardust build
-- uses: peaceiris/actions-gh-pages@v3
-  with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
-    publish_dir: ./dist
+name: Deploy docs
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nexlabstudio/stardust@v0.7.0   # pin to the latest release
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - uses: actions/deploy-pages@v4
 ```
+
+### GitHub Action
+
+The **Stardust Docs** action installs a pinned, checksum-verified binary, optionally runs `stardust check`, and builds your site — usable in any workflow, not just Pages.
+
+```yaml
+- uses: nexlabstudio/stardust@v0.7.0
+  with:
+    version: latest   # or a pinned release, e.g. v0.7.0
+    check: true       # run `stardust check` before building
+```
+
+**Inputs**
+
+| Input | Default | Description |
+|-------|---------|-------------|
+| `version` | `latest` | Release to install (pin to e.g. `v0.7.0` for reproducible builds) |
+| `config` | `stardust.yaml` | Path to your config file |
+| `output` | `dist` | Output directory |
+| `check` | `true` | Run `stardust check` before building |
+| `working-directory` | `.` | Directory to run in |
+| `args` | `''` | Extra arguments passed to `stardust build` |
+
+**Outputs**
+
+| Output | Description |
+|--------|-------------|
+| `output-dir` | Absolute path to the built site |
+| `version` | The Stardust version that was installed |
+
+See [the full action docs](docs/deployment/github-action.md) for PR-preview recipes (Netlify, Vercel, Cloudflare Pages).
 
 ### Vercel / Netlify / Cloudflare Pages
 

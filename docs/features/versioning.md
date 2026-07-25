@@ -267,39 +267,34 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0   # so git-ref-sourced versions can be checked out
 
-      - name: Install Stardust
-        run: curl -sSL https://raw.githubusercontent.com/nexlabstudio/stardust/dev/install.sh | bash
-
-      # Build latest (v2) — uses build.outDir from stardust.yaml
-      - run: stardust build
-
-      # Build v1 from tag
-      - run: |
-          git checkout v1.0
-          stardust build
-
-      # Merge and deploy
-      - run: |
-          mkdir -p deploy
-          cp -r build/v2/* deploy/v2/
-          cp -r build/v1/* deploy/v1/
-
-      - uses: peaceiris/actions-gh-pages@v3
+      - uses: nexlabstudio/stardust@v0.7.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./deploy
+          args: --all-versions
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - uses: actions/deploy-pages@v4
 ```
 
 <Tip>
-Each version's `stardust.yaml` should have a different `build.outDir` (e.g. `build/v2` for latest, `build/v1` for previous) so the outputs don't overwrite each other.
+`--all-versions` reads `versions.list` from your config and builds every version into `dist/`, each under its `path` (e.g. `/v1/`). Keep `fetch-depth: 0` on checkout if any version's `source` is a git ref, so its tag can be checked out at build time.
 </Tip>
 
 ## Styling

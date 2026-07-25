@@ -1,4 +1,4 @@
-name: 'Stardust'
+name: 'Stardust Docs'
 description: 'Install Stardust and build (and optionally check) a documentation site — no Node or Python toolchain.'
 author: 'Nexlab Studio'
 branding:
