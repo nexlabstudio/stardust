@@ -31,3 +31,6 @@ coverage/
 .stardust/
 dist/
 CLAUDE.md
+
+# macOS
+.DS_Store
