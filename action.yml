@@ -1,0 +1,68 @@
+name: 'Stardust'
+description: 'Install Stardust and build (and optionally check) a documentation site — no Node or Python toolchain.'
+author: 'Nexlab Studio'
+branding:
+  icon: 'book-open'
+  color: 'purple'
+
+inputs:
+  version:
+    description: 'Stardust release to install, e.g. v1.2.0. Defaults to the latest release.'
+    default: 'latest'
+  config:
+    description: 'Path to stardust.yaml.'
+    default: 'stardust.yaml'
+  output:
+    description: 'Output directory for the built site.'
+    default: 'dist'
+  check:
+    description: 'Run `stardust check` before building.'
+    default: 'true'
+  working-directory:
+    description: 'Directory to run the build in.'
+    default: '.'
+  args:
+    description: 'Extra arguments passed to `stardust build`.'
+    default: ''
+
+outputs:
+  output-dir:
+    description: 'Absolute path to the built output directory.'
+    value: ${{ steps.build.outputs.output-dir }}
+  version:
+    description: 'The Stardust version that was installed.'
+    value: ${{ steps.install.outputs.version }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: install
+      shell: bash
+      run: |
+        set -euo pipefail
+        # Run the installer bundled at this action's ref (not a mutable curl|bash),
+        # into an isolated dir added to PATH so no sudo is needed.
+        dir="$HOME/.stardust/bin"
+        mkdir -p "$dir"
+        export STARDUST_INSTALL_DIR="$dir"
+        if [ "${{ inputs.version }}" = "latest" ]; then
+          bash "$GITHUB_ACTION_PATH/install.sh"
+        else
+          bash "$GITHUB_ACTION_PATH/install.sh" "${{ inputs.version }}"
+        fi
+        echo "$dir" >> "$GITHUB_PATH"
+        echo "version=$("$dir/stardust" --version 2>/dev/null || echo "${{ inputs.version }}")" >> "$GITHUB_OUTPUT"
+
+    - id: check
+      if: ${{ inputs.check == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: stardust check -c "${{ inputs.config }}"
+
+    - id: build
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        set -euo pipefail
+        stardust build -c "${{ inputs.config }}" -o "${{ inputs.output }}" ${{ inputs.args }}
+        echo "output-dir=$(cd "${{ inputs.output }}" && pwd)" >> "$GITHUB_OUTPUT"
