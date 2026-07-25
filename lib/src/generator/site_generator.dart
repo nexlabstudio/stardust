@@ -56,6 +56,7 @@ class SiteGenerator {
     await fileSystem.writeFile(p.join(outputDir, '.nojekyll'), '');
 
     final contentDir = p.join(Directory.current.path, config.content.dir);
+    final pendingGit = _startGitCollect();
     final files = await _findMarkdownFiles(contentDir);
 
     logger.log('📄 Found ${files.length} markdown files');
@@ -63,7 +64,7 @@ class SiteGenerator {
     final pages = await _parsePages(files, contentDir);
     final pagesWithNav = _addNavigation(pages);
 
-    pageBuilder.gitMetadata = await _collectGitMetadata(pagesWithNav);
+    pageBuilder.gitMetadata = _mapGitMetadata(await pendingGit, pagesWithNav);
 
     for (final chunk in chunked(pagesWithNav, Platform.numberOfProcessors)) {
       await Future.wait(chunk.map((page) async {
@@ -100,20 +101,22 @@ class SiteGenerator {
     return count;
   }
 
-  /// Per-page git history keyed by source path, or null when the feature is off
-  /// or the tree isn't a repository. The log is scoped to the content directory
-  /// and each page is probed against that map, not the reverse.
-  Future<Map<String, GitFileMeta>?> _collectGitMetadata(List<Page> pages) async {
-    if (!config.pageInfo.needsGit) return null;
-    if (await gitMetadataCollector.collect(scope: config.content.dir) case final git?) {
-      return {
-        for (final page in pages)
-          if (git.files[p.relative(page.sourcePath, from: git.root).replaceAll('\\', '/')] case final meta?)
-            page.sourcePath: meta,
-      };
-    }
-    return null;
-  }
+  /// Starts the git-history walk (scoped to the content directory) up front so
+  /// its subprocess overlaps markdown parsing; resolves null when git metadata
+  /// isn't needed, git is unavailable, or the tree isn't a repository.
+  Future<({String root, Map<String, GitFileMeta> files})?> _startGitCollect() =>
+      config.pageInfo.needsGit ? gitMetadataCollector.collect(scope: config.content.dir) : Future.value(null);
+
+  /// Keys collected history by page source path, probing each page against the
+  /// history map (typically far larger than the page set), not the reverse.
+  Map<String, GitFileMeta>? _mapGitMetadata(({String root, Map<String, GitFileMeta> files})? git, List<Page> pages) =>
+      git == null
+          ? null
+          : {
+              for (final page in pages)
+                if (git.files[p.relative(page.sourcePath, from: git.root).replaceAll('\\', '/')] case final meta?)
+                  page.sourcePath: meta,
+            };
 
   /// Write the shared stylesheet and script once; pages link them by content hash.
   Future<void> _writeSharedAssets() async {
