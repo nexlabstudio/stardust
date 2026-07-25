@@ -122,6 +122,8 @@ sidebar:
         label: Overview
       - slug: deployment/github-pages
         label: GitHub Pages
+      - slug: deployment/github-action
+        label: GitHub Action
       - slug: deployment/vercel
         label: Vercel
       - slug: deployment/netlify
