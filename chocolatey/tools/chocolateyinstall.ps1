@@ -2,9 +2,9 @@ $ErrorActionPreference = 'Stop'
 
 $packageName = 'stardust'
 $toolsDir = "$(Split-Path -Parent $MyInvocation.MyCommand.Definition)"
-$version = '0.6.5'
+$version = '0.7.0'
 $url64 = "https://github.com/nexlabstudio/stardust/releases/download/v$version/stardust-windows-x64.zip"
-$checksum64 = '59dc4eabd8b960806401e729809eded1576d7e8a9139fd8f2a4f2ccf9598ae30'
+$checksum64 = 'b976e7c55213bdcdbf2c8934a5308b12405714502a27b7f6ad17c41063295f9d'
 
 $packageArgs = @{
   packageName    = $packageName
