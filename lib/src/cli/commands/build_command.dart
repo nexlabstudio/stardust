@@ -291,7 +291,7 @@ class BuildCommand extends Command<int> {
     final generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
     final pageCount = await generator.generate();
 
-    if (!skipSearch && config.search.enabled && config.search.provider == 'pagefind') {
+    if (!skipSearch && config.search.enabled) {
       logger.log('');
       logger.log('🔍 Building search index...');
       if (!await PagefindRunner.run(outputDir, verbose: verbose, logger: logger)) {

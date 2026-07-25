@@ -529,18 +529,15 @@ void main() {
       final config = SearchConfig.fromYaml(null);
 
       expect(config.enabled, isTrue);
-      expect(config.provider, equals('pagefind'));
     });
 
     test('fromYaml parses all fields', () {
       final config = SearchConfig.fromYaml({
         'enabled': false,
-        'provider': 'algolia',
         'placeholder': 'Type to search...',
       });
 
       expect(config.enabled, isFalse);
-      expect(config.provider, equals('algolia'));
       expect(config.placeholder, equals('Type to search...'));
     });
   });

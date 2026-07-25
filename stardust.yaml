@@ -181,7 +181,6 @@ code:
 
 search:
   enabled: true
-  provider: pagefind
   placeholder: "Search documentation..."
   hotkey: "/"
 

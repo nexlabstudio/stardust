@@ -5,16 +5,6 @@ import 'package:test/test.dart';
 
 void main() {
   group('ConfigLoader', () {
-    test('parse rejects unsupported search provider', () {
-      expect(
-        () => ConfigLoader.parse({
-          'name': 'Test',
-          'search': {'provider': 'algolia'}
-        }),
-        throwsA(isA<ConfigException>()),
-      );
-    });
-
     group('parse', () {
       test('parses minimal config with only name', () {
         final config = ConfigLoader.parse({'name': 'Test'});
@@ -187,12 +177,10 @@ void main() {
           'name': 'Test',
           'search': {
             'enabled': true,
-            'provider': 'pagefind',
           },
         });
 
         expect(config.search.enabled, isTrue);
-        expect(config.search.provider, equals('pagefind'));
       });
 
       test('parses SEO config', () {
@@ -358,11 +346,11 @@ void main() {
       test('fromYaml parses fields', () {
         final config = SearchConfig.fromYaml({
           'enabled': false,
-          'provider': 'algolia',
+          'placeholder': 'Type to search...',
         });
 
         expect(config.enabled, isFalse);
-        expect(config.provider, equals('algolia'));
+        expect(config.placeholder, equals('Type to search...'));
       });
     });
 

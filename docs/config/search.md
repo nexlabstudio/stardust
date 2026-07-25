@@ -143,7 +143,6 @@ During development (`stardust dev`), search uses a temporary index that updates 
 ```yaml
 search:
   enabled: true
-  provider: pagefind
   placeholder: "Search docs..."
   hotkey: "/"
   pageSize: 8  # results shown per page, with a Load more button

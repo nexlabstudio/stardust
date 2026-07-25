@@ -152,7 +152,6 @@ code:
 # Search
 search:
   enabled: true
-  provider: pagefind
 ''';
 
   String _indexMdTemplate(String projectName) => '''

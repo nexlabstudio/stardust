@@ -8,7 +8,6 @@ void main() {
       final config = SearchConfig.fromYaml(null);
 
       expect(config.enabled, isTrue);
-      expect(config.provider, equals('pagefind'));
       expect(config.placeholder, equals('Search docs...'));
       expect(config.hotkey, equals('/'));
     });
@@ -16,13 +15,11 @@ void main() {
     test('fromYaml parses all fields', () {
       final config = SearchConfig.fromYaml({
         'enabled': false,
-        'provider': 'pagefind',
         'placeholder': 'Search...',
         'hotkey': 'k',
       });
 
       expect(config.enabled, isFalse);
-      expect(config.provider, equals('pagefind'));
       expect(config.placeholder, equals('Search...'));
       expect(config.hotkey, equals('k'));
     });

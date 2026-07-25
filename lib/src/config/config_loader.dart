@@ -44,9 +44,6 @@ class ConfigLoader {
     }
 
     final search = SearchConfig.fromYaml(yaml['search'] as Map?);
-    if (search.provider != 'pagefind') {
-      throw ConfigException('search.provider "${search.provider}" is not supported — only "pagefind" is available');
-    }
 
     final config = StardustConfig(
       name: name,
