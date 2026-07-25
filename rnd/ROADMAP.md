@@ -15,7 +15,7 @@
 | 30+ components (callouts, tabs, steps, cards, accordions, code groups, trees, mermaid, embeds, API blocks…) | Breadth beats VitePress/mdBook already; parser fragility is the risk (see review §5.2) |
 | Syntax highlighting + copy button + line numbers | |
 | Dark mode | Real (localStorage + system pref); has a FOUC bug |
-| Full-text search (Pagefind) | Right engine; binary download needs checksum verification |
+| Full-text search (Pagefind) | Right engine; binary download is SHA-256-verified; configured hotkey wired; `search: false` frontmatter excludes a page from the index |
 | OG image generation | Differentiator — Docusaurus needs a plugin for this; slow implementation |
 | Sitemap, robots.txt, canonical/OG/Twitter meta, JSON-LD | |
 | Redirects (exact + Netlify/Vercel pattern files) | Most solid feature in the codebase |
@@ -32,32 +32,29 @@
 | Theming v1 | Config-driven design tokens (`theme.tokens`/`tokensDark`), `footer.poweredBy: false`, HTML slots for header/footer/sidebar. Not full override/eject — see [THEMING_SPEC.md](THEMING_SPEC.md) for v2 |
 | Page metadata | Reading time + last-updated + contributors from a single `git log` pass (repo-root resolved via `rev-parse`, so monorepo-safe); `pageInfo` toggles; live on our own docs |
 | Synced + persisted tabs/code-groups | Opt-in `group="…"` on `<Tabs>`/`<CodeGroup>`; same-group blocks switch together (matched by tab label) and the choice persists across pages via `localStorage`; ungrouped blocks stay independent |
+| LLM-friendly output | `llms.txt` index + `llms-full.txt` full content + per-page `.md` twin + "Copy page as Markdown" button; `llm: false` frontmatter opts a page out |
 | Official GitHub Action | Composite action: checksum-verified install, `stardust check` + build, outputs the built dir; PR-preview recipes for Netlify/Vercel/Cloudflare Pages. Ships with the `v0.7.0` release |
 
 ### ⚠️ Have on paper — partial, broken, or documented-but-unimplemented
 | Feature | Reality |
 |---|---|
-| llms.txt | Link index only; docs claim full content |
-| `llm: false` / `search: false` frontmatter | Documented, unimplemented |
-| Algolia search provider | Config parses; renders a dead search button |
-| OpenAPI import | Works for toy specs; drops `oneOf`/`anyOf`, nested objects, path-level params; "from URL" doesn't exist |
+| Algolia search provider | Config parses `provider`, and the search button renders whenever search is enabled — but the modal JS only initializes for `pagefind`, so `provider: algolia` yields a dead button |
+| OpenAPI import | Imports from a file **or URL**; resolves `$ref`/`allOf` and the first `oneOf`/`anyOf` variant. Still lossy on deeply combined schemas and shared path-level parameters |
 | Theming — full override | v1 shipped (tokens, `poweredBy`, slots); no partial/template replacement, `eject`, or component override yet (spec'd: [THEMING_SPEC.md](THEMING_SPEC.md)) |
-| Search hotkey config | Displayed in UI, ignored by JS |
-| Offline/self-contained output | Undermined by CDN loads: `lucide@latest`, `mermaid@10`, Google Fonts |
+| Offline/self-contained output | Lucide icons are now vendored/inlined; Mermaid is a pinned `@10.9.6` CDN load with SRI + a self-host option; **Google Fonts still loads from the CDN** by default |
 
 ### ❌ Don't have (and at least two major competitors do)
-- **Theming API**: template/partial overrides, stable design tokens, custom components (everyone has some answer)
+- **Theming API — full override**: template/partial overrides, custom components (tokens + slots shipped in v1; the rest is [THEMING_SPEC.md](THEMING_SPEC.md))
 - **Plugin/extension system** (Docusaurus, MkDocs, Starlight)
 - **Cut-a-version command** (`docs:version` in Docusaurus, `mike deploy`, Starlight's auto-archive) — we make you create the dir or tag by hand
 - **Cross-version search** (Rspress searches across versions; ours is per-version only)
 - **Incremental / cached builds** (Docusaurus, Hugo)
-- `llms-full.txt`, per-page `.md` export, "copy page as Markdown", MCP-friendly output (Mintlify, Fumadocs)
+- MCP server for the docs (Mintlify, docs.page v2) — note `llms-full.txt`, per-page `.md`, and the "Copy page as Markdown" button already ship
 - **API playground** ("try it" on OpenAPI pages) (Mintlify, Redocly)
-- Image pipeline: resize/optimize, lazy-load, zoom is there but no processing (Docusaurus/Starlight via ecosystem)
+- Image pipeline: resize/optimize/responsive `srcset` — lazy-load and zoom ship, but there's no image *processing* (Docusaurus/Starlight via ecosystem)
 - Feedback widget ("Was this page helpful?") (Mintlify, GitBook)
 - RSS / changelog feed (Docusaurus blog, GitBook)
-- CI/CD story: official GitHub Action, PR preview recipe (docs.page gets this for free)
-- `serve`, `new`, `clean`, shell completions; a11y/keyboard-nav audit; local font hosting
+- Shell completions; a11y/keyboard-nav audit; local font hosting
 
 ---
 
@@ -79,7 +76,7 @@
 | Link checking / content validation | ✅ (`stardust check`) | ✅ | ✅ built-in | ⚠️ strict mode | ⚠️ community | ✅ (`docs check` in v2 CLI) | ⚠️ third-party | ✅ |
 | OpenAPI docs | ⚠️ | ✅ | ⚠️ community | ⚠️ community | ⚠️ community | ❌ (explicitly punts to Mintlify) | ❌ | ✅ (fumadocs-class) |
 | API playground | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚠️ |
-| llms.txt + llms-full + per-page .md | ⚠️ index only | ✅ | ⚠️ community plugin | ⚠️ community | ⚠️ community | ✅ (v2, built-in) | ❌ | ✅ (built-in "SSG-MD") |
+| llms.txt + llms-full + per-page .md | ✅ (index + full + per-page `.md` + copy button) | ✅ | ⚠️ community plugin | ⚠️ community | ⚠️ community | ✅ (v2, built-in) | ❌ | ✅ (built-in "SSG-MD") |
 | MCP server for the docs | ❌ | ✅ auto per site | ❌ | ❌ | ❌ | ✅ (v2, on by default) | ❌ | ❌ |
 | OG image generation built in | ✅ | ✅ | ⚠️ plugin | ✅ (now free) | ⚠️ | ✅ | ❌ | ⚠️ |
 | Versioning + i18n **without CI gymnastics** | ✅ (one binary, git-tag sourced) | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ❌ | ✅ (versions × locales built in) |
