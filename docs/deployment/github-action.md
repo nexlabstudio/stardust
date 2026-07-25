@@ -10,7 +10,7 @@ The official `nexlabstudio/stardust` action installs a pinned Stardust binary
 — no Node or Python toolchain in your workflow.
 
 ```yaml
-- uses: nexlabstudio/stardust@v1
+- uses: nexlabstudio/stardust@dev
   with:
     version: latest   # or a pinned release, e.g. v1.2.0
     check: true       # run `stardust check` before building
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nexlabstudio/stardust@v1
+      - uses: nexlabstudio/stardust@dev
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nexlabstudio/stardust@v1
+      - uses: nexlabstudio/stardust@dev
       - uses: nwtgck/actions-netlify@v3
         with:
           publish-dir: dist
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nexlabstudio/stardust@v1
+      - uses: nexlabstudio/stardust@dev
       - uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nexlabstudio/stardust@v1
+      - uses: nexlabstudio/stardust@dev
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
