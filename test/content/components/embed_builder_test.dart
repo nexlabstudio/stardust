@@ -10,7 +10,7 @@ void main() {
     });
 
     test('tagNames includes all embed components', () {
-      expect(builder.tagNames, containsAll(['YouTube', 'Vimeo', 'Zapp', 'CodePen', 'StackBlitz']));
+      expect(builder.tagNames, containsAll(['YouTube', 'Vimeo', 'Zapp', 'DartPad', 'CodePen', 'StackBlitz']));
     });
 
     group('YouTube component', () {
@@ -200,6 +200,41 @@ void main() {
 
         expect(result, contains('embed-error'));
         expect(result, contains('Missing project ID'));
+      });
+    });
+
+    group('DartPad component', () {
+      test('builds a gist-backed embed pointing at dartpad.dev', () {
+        final result = builder.build('DartPad', {'id': 'abc123'}, '');
+
+        expect(result, contains('embed-dartpad'));
+        expect(result, contains('dartpad.dev/?id=abc123'));
+        expect(result, contains('theme=dark'));
+        expect(result, contains('loading="lazy"'));
+      });
+
+      test('uses content as gist ID when no id attribute', () {
+        final result = builder.build('DartPad', {}, 'gist_from_body');
+
+        expect(result, contains('id=gist_from_body'));
+      });
+
+      test('supports a custom theme', () {
+        expect(builder.build('DartPad', {'id': 'x', 'theme': 'light'}, ''), contains('theme=light'));
+      });
+
+      test('escapes the gist id into the query string', () {
+        final result = builder.build('DartPad', {'id': 'a b&c'}, '');
+
+        expect(result, contains('id=a+b%26c'));
+        expect(result, isNot(contains('id=a b&c')));
+      });
+
+      test('returns error when ID is empty', () {
+        final result = builder.build('DartPad', {}, '');
+
+        expect(result, contains('embed-error'));
+        expect(result, contains('Missing gist ID'));
       });
     });
 
