@@ -128,6 +128,20 @@ Embed interactive Dart and Flutter playgrounds:
 | `lazy` | boolean | `true` | Lazy load the embed |
 | `height` | string | `"500px"` | Container height |
 
+### DartPad (Dart/Flutter)
+
+Embed a runnable [DartPad](https://dartpad.dev) snippet from a GitHub Gist. DartPad detects whether the gist is Dart or Flutter automatically:
+
+```markdown
+<DartPad id="a1b2c3d4e5f6" />
+```
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `id` | string | required | GitHub Gist ID holding the snippet |
+| `theme` | string | `"dark"` | `"dark"` or `"light"` |
+| `height` | string | `"500px"` | Container height |
+
 ### CodePen
 
 Embed CodePen examples:
@@ -206,4 +220,5 @@ Embed StackBlitz projects:
 | Icon | Inline icons, visual cues, decoration |
 | Tooltip | Additional context, definitions, hints |
 | Update | Changelog entries, version announcements |
-| Zapp/CodePen/StackBlitz | Interactive code examples |
+| Zapp/DartPad | Runnable Dart & Flutter snippets |
+| CodePen/StackBlitz | Interactive code examples |

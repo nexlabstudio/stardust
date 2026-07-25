@@ -1833,6 +1833,7 @@ const stardustCssSections = <String, String>{
     }
 
     .embed-zapp,
+    .embed-dartpad,
     .embed-stackblitz,
     .embed-codepen {
       border: 1px solid var(--color-border);

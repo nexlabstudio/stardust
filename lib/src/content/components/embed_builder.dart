@@ -2,16 +2,17 @@ import '../../utils/html_utils.dart';
 import '../../utils/patterns.dart';
 import 'base_component.dart';
 
-/// Builds embed components: YouTube, Vimeo, Zapp, CodePen, StackBlitz
+/// Builds embed components: YouTube, Vimeo, Zapp, DartPad, CodePen, StackBlitz
 class EmbedBuilder extends ComponentBuilder {
   @override
-  List<String> get tagNames => ['YouTube', 'Vimeo', 'Zapp', 'CodePen', 'StackBlitz'];
+  List<String> get tagNames => ['YouTube', 'Vimeo', 'Zapp', 'DartPad', 'CodePen', 'StackBlitz'];
 
   @override
   String build(String tagName, Map<String, String> attributes, String content) => switch (tagName) {
         'YouTube' => _buildYouTube(attributes, content),
         'Vimeo' => _buildVimeo(attributes, content),
         'Zapp' => _buildZapp(attributes, content),
+        'DartPad' => _buildDartPad(attributes, content),
         'CodePen' => _buildCodePen(attributes, content),
         'StackBlitz' => _buildStackBlitz(attributes, content),
         _ => content
@@ -123,6 +124,31 @@ class EmbedBuilder extends ComponentBuilder {
   <iframe
     src="${encodeHtmlAttribute(embedUrl)}"
     title="Zapp Dart/Flutter Playground"
+    frameborder="0"
+    allow="clipboard-write"
+    loading="lazy"
+  ></iframe>
+</div>
+''';
+  }
+
+  String _buildDartPad(Map<String, String> attributes, String content) {
+    final id = attributes['id'] ?? content.trim();
+    final theme = attributes['theme'] ?? 'dark';
+    final height = attributes['height'] ?? '500px';
+
+    if (id.isEmpty) {
+      return '<div class="embed-error">DartPad: Missing gist ID</div>';
+    }
+
+    final embedUrl = 'https://dartpad.dev/?id=${Uri.encodeQueryComponent(id)}'
+        '&theme=${Uri.encodeQueryComponent(theme)}';
+
+    return '''
+<div class="embed embed-dartpad" style="height: ${sanitizeCssValue(height, fallback: '500px')}">
+  <iframe
+    src="${encodeHtmlAttribute(embedUrl)}"
+    title="DartPad"
     frameborder="0"
     allow="clipboard-write"
     loading="lazy"

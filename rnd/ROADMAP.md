@@ -34,6 +34,7 @@
 | Synced + persisted tabs/code-groups | Opt-in `group="…"` on `<Tabs>`/`<CodeGroup>`; same-group blocks switch together (matched by tab label) and the choice persists across pages via `localStorage`; ungrouped blocks stay independent |
 | LLM-friendly output | `llms.txt` index + `llms-full.txt` full content + per-page `.md` twin + "Copy page as Markdown" button; `llm: false` frontmatter opts a page out |
 | Official GitHub Action | Composite action: checksum-verified install, `stardust check` + build, outputs the built dir; PR-preview recipes for Netlify/Vercel/Cloudflare Pages. Ships with the `v0.7.0` release |
+| DartPad embeds | `<DartPad id="…">` runnable Dart/Flutter snippets from a gist — lazy-loaded `dartpad.dev/?id=…&theme=…` iframe (v0.8 item 3) |
 
 ### ⚠️ Have on paper — partial, broken, or documented-but-unimplemented
 | Feature | Reality |
@@ -170,6 +171,8 @@
 | 7 | Image pipeline: build-time resize/encode (we already ship the `image` package for OG), lazy-loading, dimensions to kill CLS | M |
 
 **Exit criteria**: a Flutter package can replace docs.page + dartdoc with one `stardust` command; a Claude/Cursor user can connect to any Stardust site's docs in two clicks without the site owner running a service.
+
+> **Status (2026-07-25)**: v0.8 opened with item 3 (**DartPad embeds**) — `<DartPad>` added to the existing `EmbedBuilder` alongside Zapp, rendering a lazy-loaded `dartpad.dev/?id=…&theme=…` iframe from a gist, with query-escaped inputs. Uses DartPad's *current* gist-embed URL (the older `embed-*.html` pages are deprecated per the official embedding guide; mode is auto-detected). Items 1, 2, 4–7 remain.
 
 ### v1.0 — "Platform" (commit to stability) · when the above is real
 - **Compatibility promise**: stable config schema (migrations for breaking changes), stable CSS tokens, stable component syntax.
