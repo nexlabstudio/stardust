@@ -8,6 +8,9 @@ class GitFileMeta {
   const GitFileMeta({required this.lastModified, required this.authors});
 }
 
+/// A repository root and its per-file git history, keyed by root-relative path.
+typedef GitHistory = ({String root, Map<String, GitFileMeta> files});
+
 /// Estimated reading time in minutes for rendered [html], at ~200 words/min.
 /// Returns 0 for empty content so the caller can omit the label.
 int readingMinutes(String html) {
@@ -52,14 +55,10 @@ class GitMetadataCollector {
 
   const GitMetadataCollector({this.workingDirectory});
 
-  /// The repository root and its per-file history (keyed by root-relative path),
-  /// or null when git is unavailable or the tree isn't a repository. The root is
-  /// resolved with `rev-parse` so callers can match files regardless of `cwd`.
-  ///
-  /// [scope] limits the history walk to a pathspec (e.g. the content directory)
-  /// so the log stays proportional to the docs rather than the whole repository;
-  /// emitted paths remain root-relative regardless.
-  Future<({String root, Map<String, GitFileMeta> files})?> collect({String? scope}) async {
+  /// Per-file git history, or null when git is unavailable or the tree isn't a
+  /// repository. [scope] limits the walk to a pathspec so the log stays
+  /// proportional to the docs, not the whole repository.
+  Future<GitHistory?> collect({String? scope}) async {
     try {
       final top = await Process.run('git', ['rev-parse', '--show-toplevel'], workingDirectory: workingDirectory);
       if (top.exitCode != 0) return null;

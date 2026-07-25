@@ -101,22 +101,21 @@ class SiteGenerator {
     return count;
   }
 
-  /// Starts the git-history walk (scoped to the content directory) up front so
-  /// its subprocess overlaps markdown parsing; resolves null when git metadata
-  /// isn't needed, git is unavailable, or the tree isn't a repository.
-  Future<({String root, Map<String, GitFileMeta> files})?> _startGitCollect() =>
+  /// Started before parsing so the git subprocess overlaps it; null when git
+  /// metadata isn't needed.
+  Future<GitHistory?> _startGitCollect() =>
       config.pageInfo.needsGit ? gitMetadataCollector.collect(scope: config.content.dir) : Future.value(null);
 
-  /// Keys collected history by page source path, probing each page against the
-  /// history map (typically far larger than the page set), not the reverse.
-  Map<String, GitFileMeta>? _mapGitMetadata(({String root, Map<String, GitFileMeta> files})? git, List<Page> pages) =>
-      git == null
-          ? null
-          : {
-              for (final page in pages)
-                if (git.files[p.relative(page.sourcePath, from: git.root).replaceAll('\\', '/')] case final meta?)
-                  page.sourcePath: meta,
-            };
+  /// Probes each page against the history map (far larger than the page set),
+  /// not the reverse.
+  Map<String, GitFileMeta>? _mapGitMetadata(GitHistory? git, List<Page> pages) => switch (git) {
+        null => null,
+        (:final root, :final files) => {
+            for (final page in pages)
+              if (files[p.relative(page.sourcePath, from: root).replaceAll('\\', '/')] case final meta?)
+                page.sourcePath: meta,
+          },
+      };
 
   /// Write the shared stylesheet and script once; pages link them by content hash.
   Future<void> _writeSharedAssets() async {

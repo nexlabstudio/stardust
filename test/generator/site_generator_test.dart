@@ -941,8 +941,8 @@ class CountingFileSystem extends LocalFileSystem {
 class _StubGitCollector extends GitMetadataCollector {
   _StubGitCollector(this.result);
 
-  final ({String root, Map<String, GitFileMeta> files})? result;
+  final GitHistory? result;
 
   @override
-  Future<({String root, Map<String, GitFileMeta> files})?> collect({String? scope}) async => result;
+  Future<GitHistory?> collect({String? scope}) async => result;
 }
