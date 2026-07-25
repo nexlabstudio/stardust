@@ -24,11 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Stardust
-        run: curl -sSL https://raw.githubusercontent.com/nexlabstudio/stardust/dev/install.sh | bash
-
-      - name: Build docs
-        run: stardust build
+      - name: Build docs with Stardust
+        uses: ./
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
