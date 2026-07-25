@@ -63,15 +63,7 @@ class SiteGenerator {
     final pages = await _parsePages(files, contentDir);
     final pagesWithNav = _addNavigation(pages);
 
-    if (config.pageInfo.needsGit) {
-      if (await gitMetadataCollector.collect() case final git?) {
-        pageBuilder.gitMetadata = {
-          for (final page in pagesWithNav)
-            if (git.files[p.relative(page.sourcePath, from: git.root).replaceAll('\\', '/')] case final meta?)
-              page.sourcePath: meta,
-        };
-      }
-    }
+    pageBuilder.gitMetadata = await _collectGitMetadata(pagesWithNav);
 
     for (final chunk in chunked(pagesWithNav, Platform.numberOfProcessors)) {
       await Future.wait(chunk.map((page) async {
@@ -106,6 +98,21 @@ class SiteGenerator {
     await _generateRedirects(pagesWithNav);
 
     return count;
+  }
+
+  /// Per-page git history keyed by source path, or null when the feature is off
+  /// or the tree isn't a repository. Probes each page against the full-history
+  /// file map (typically far larger than the page set), not the reverse.
+  Future<Map<String, GitFileMeta>?> _collectGitMetadata(List<Page> pages) async {
+    if (!config.pageInfo.needsGit) return null;
+    if (await gitMetadataCollector.collect() case final git?) {
+      return {
+        for (final page in pages)
+          if (git.files[p.relative(page.sourcePath, from: git.root).replaceAll('\\', '/')] case final meta?)
+            page.sourcePath: meta,
+      };
+    }
+    return null;
   }
 
   /// Write the shared stylesheet and script once; pages link them by content hash.
