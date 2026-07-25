@@ -133,7 +133,7 @@ sidebar:
 
 header:
   announcement:
-    text: "Stardust v1.0 is here! A Dart-native docs generator with zero config."
+    text: "Markdown in, stunning docs out. No JavaScript toolchain, no config. ⭐ Star us on GitHub"
     link: https://github.com/nexlabstudio/stardust
     dismissible: true
     style: info
