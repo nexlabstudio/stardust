@@ -81,7 +81,7 @@ class DevCommand extends Command<int> {
     var generator = factory.createSiteGenerator(config: config, outputDir: outputDir);
     await generator.generate();
 
-    if (config.search.enabled && config.search.provider == 'pagefind') {
+    if (config.search.enabled) {
       logger.log('🔍 Building search index...');
       if (!await PagefindRunner.run(outputDir, logger: logger)) {
         logger.error('⚠️  Search indexing failed — continuing without search');
@@ -193,7 +193,7 @@ class DevCommand extends Command<int> {
 
         await generator.generate();
 
-        if (config.search.enabled && config.search.provider == 'pagefind') {
+        if (config.search.enabled) {
           if (!await PagefindRunner.run(outputDir, logger: logger)) {
             logger.error('⚠️  Search re-index failed — search results may be stale');
           }

@@ -314,7 +314,7 @@ ${buildAppJs()}
   }
 
   String buildSearchModal(String basePath) {
-    if (!config.search.enabled || config.search.provider != 'pagefind') {
+    if (!config.search.enabled) {
       return '';
     }
 

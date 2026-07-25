@@ -38,7 +38,6 @@
 ### ⚠️ Have on paper — partial, broken, or documented-but-unimplemented
 | Feature | Reality |
 |---|---|
-| Algolia search provider | Config parses `provider`, and the search button renders whenever search is enabled — but the modal JS only initializes for `pagefind`, so `provider: algolia` yields a dead button |
 | OpenAPI import | Imports from a file **or URL**; resolves `$ref`/`allOf` and the first `oneOf`/`anyOf` variant. Still lossy on deeply combined schemas and shared path-level parameters |
 | Theming — full override | v1 shipped (tokens, `poweredBy`, slots); no partial/template replacement, `eject`, or component override yet (spec'd: [THEMING_SPEC.md](THEMING_SPEC.md)) |
 | Offline/self-contained output | Lucide icons are now vendored/inlined; Mermaid is a pinned `@10.9.6` CDN load with SRI + a self-host option; **Google Fonts still loads from the CDN** by default |

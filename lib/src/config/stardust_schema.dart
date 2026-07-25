@@ -360,13 +360,6 @@ const stardustSchemaJson = r'''
           "type": "boolean",
           "default": true
         },
-        "provider": {
-          "type": "string",
-          "enum": [
-            "pagefind"
-          ],
-          "default": "pagefind"
-        },
         "placeholder": {
           "type": "string",
           "default": "Search docs..."
