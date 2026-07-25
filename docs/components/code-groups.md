@@ -39,6 +39,17 @@ dependencies:
 </CodeGroup>
 ```
 
+## Synced Code Groups
+
+Like [Tabs](/components/tabs), a `CodeGroup` accepts a `group` attribute. Groups sharing a name switch together and remember the choice across pages, matched by the `Code` block's title:
+
+```markdown
+<CodeGroup group="pkg-manager">
+  <Code title="npm">npm install my-package</Code>
+  <Code title="pnpm">pnpm add my-package</Code>
+</CodeGroup>
+```
+
 ## Project Structure Example
 
 Show how files work together:

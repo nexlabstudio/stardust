@@ -41,6 +41,7 @@ class TabBuilder extends ComponentBuilder {
       tabButtons.writeln('''
     <button class="tab-button${isActive ? ' active' : ''}"
             data-tab="$tabId"
+            data-tab-label="${encodeHtmlAttribute(name)}"
             role="tab"
             aria-selected="${isActive ? 'true' : 'false'}">
       ${encodeHtml(name)}
@@ -55,7 +56,7 @@ $processedContent
     }
 
     return '''
-<div class="tabs" data-tabs-id="$tabsId">
+<div class="tabs" data-tabs-id="$tabsId"${_groupAttr(attributes)}>
   <div class="tab-buttons" role="tablist">
 $tabButtons  </div>
   <div class="tab-panels">
@@ -85,6 +86,7 @@ $tabPanels  </div>
       tabButtons.writeln('''
     <button class="tab-button${isActive ? ' active' : ''}"
             data-tab="$tabId"
+            data-tab-label="${encodeHtmlAttribute(title)}"
             role="tab"
             aria-selected="${isActive ? 'true' : 'false'}">
       ${encodeHtml(title)}
@@ -107,7 +109,7 @@ $processedContent
     }
 
     return '''
-<div class="code-group" data-code-group-id="$groupId">
+<div class="code-group" data-code-group-id="$groupId"${_groupAttr(attributes)}>
   <div class="tab-buttons" role="tablist">
 $tabButtons  </div>
   <div class="tab-panels">
@@ -115,6 +117,11 @@ $tabPanels  </div>
 </div>
 ''';
   }
+
+  String _groupAttr(Map<String, String> attributes) => switch (attributes['group']) {
+        final group? when group.isNotEmpty => ' data-tab-group="${encodeHtmlAttribute(group)}"',
+        _ => '',
+      };
 
   String _generateId() => '${_idCounter++}';
 

@@ -74,27 +74,59 @@ ${buildAppJs()}
       });
     });
 
-    document.querySelectorAll('.tabs').forEach(tabs => {
-      const buttons = tabs.querySelectorAll('.tab-button');
-      const panels = tabs.querySelectorAll('.tab-panel');
+    (function() {
+      const containers = document.querySelectorAll('.tabs, .code-group');
+      if (!containers.length) return;
 
-      buttons.forEach(button => {
-        button.addEventListener('click', () => {
-          const tabId = button.dataset.tab;
+      const groups = new Map();
+      const storeKey = 'stardust:tabs:';
 
-          buttons.forEach(b => {
-            b.classList.toggle('active', b === button);
-            b.setAttribute('aria-selected', b === button);
-          });
+      function apply(buttons, panels, activeButton) {
+        const tabId = activeButton.dataset.tab;
+        buttons.forEach(b => {
+          const on = b === activeButton;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-selected', on);
+        });
+        panels.forEach(panel => {
+          const on = panel.id === tabId;
+          panel.classList.toggle('active', on);
+          panel.hidden = !on;
+        });
+      }
 
-          panels.forEach(panel => {
-            const isActive = panel.id === tabId;
-            panel.classList.toggle('active', isActive);
-            panel.hidden = !isActive;
+      function selectByLabel(container, label) {
+        const buttons = container.querySelectorAll('.tab-button');
+        let target = null;
+        buttons.forEach(b => { if (b.dataset.tabLabel === label) target = b; });
+        if (target) apply(buttons, container.querySelectorAll('.tab-panel'), target);
+      }
+
+      containers.forEach(container => {
+        const group = container.dataset.tabGroup;
+        if (group) {
+          if (!groups.has(group)) groups.set(group, []);
+          groups.get(group).push(container);
+        }
+        const buttons = container.querySelectorAll('.tab-button');
+        const panels = container.querySelectorAll('.tab-panel');
+        buttons.forEach(button => {
+          button.addEventListener('click', () => {
+            apply(buttons, panels, button);
+            if (!group) return;
+            const label = button.dataset.tabLabel;
+            groups.get(group).forEach(c => { if (c !== container) selectByLabel(c, label); });
+            try { localStorage.setItem(storeKey + group, label); } catch (e) {}
           });
         });
       });
-    });
+
+      groups.forEach((members, group) => {
+        let saved = null;
+        try { saved = localStorage.getItem(storeKey + group); } catch (e) {}
+        if (saved) members.forEach(c => selectByLabel(c, saved));
+      });
+    })();
 
     const tocLinks = document.querySelectorAll('.toc-link');
     const headings = Array.from(tocLinks).map(link =>
@@ -220,28 +252,6 @@ ${buildAppJs()}
         if (e.key === 'Escape') dropdown.classList.remove('open');
       });
     })();
-
-    document.querySelectorAll('.code-group').forEach(group => {
-      const buttons = group.querySelectorAll('.tab-button');
-      const panels = group.querySelectorAll('.tab-panel');
-
-      buttons.forEach(button => {
-        button.addEventListener('click', () => {
-          const tabId = button.dataset.tab;
-
-          buttons.forEach(b => {
-            b.classList.toggle('active', b === button);
-            b.setAttribute('aria-selected', b === button);
-          });
-
-          panels.forEach(panel => {
-            const isActive = panel.id === tabId;
-            panel.classList.toggle('active', isActive);
-            panel.hidden = !isActive;
-          });
-        });
-      });
-    });
 
     (function() {
       const zoomableImages = document.querySelectorAll('.image-zoomable .image-zoom-wrapper');

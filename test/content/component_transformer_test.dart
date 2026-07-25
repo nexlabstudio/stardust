@@ -78,6 +78,45 @@ void main() {
         expect(output, contains('JavaScript'));
         expect(output, contains('Python'));
       });
+
+      test('Tabs with a group emit data-tab-group and per-button labels', () {
+        const input = '''<Tabs group="pkg-manager">
+<Tab label="npm">a</Tab>
+<Tab label="pnpm">b</Tab>
+</Tabs>''';
+
+        final output = transformer.transform(input);
+        expect(output, contains('data-tab-group="pkg-manager"'));
+        expect(output, contains('data-tab-label="npm"'));
+        expect(output, contains('data-tab-label="pnpm"'));
+      });
+
+      test('Tabs without a group omit data-tab-group', () {
+        const input = '''<Tabs>
+<Tab label="First">a</Tab>
+</Tabs>''';
+
+        final output = transformer.transform(input);
+        expect(output, isNot(contains('data-tab-group')));
+      });
+
+      test('CodeGroup with a group emits data-tab-group and labels', () {
+        const input = '''<CodeGroup group="pkg-manager">
+<Code title="npm">a</Code>
+<Code title="pnpm">b</Code>
+</CodeGroup>''';
+
+        final output = transformer.transform(input);
+        expect(output, contains('data-tab-group="pkg-manager"'));
+        expect(output, contains('data-tab-label="npm"'));
+      });
+
+      test('group value is escaped for the attribute context', () {
+        const input = '<Tabs group="a&b"><Tab label="x">c</Tab></Tabs>';
+        final output = transformer.transform(input);
+        expect(output, contains('data-tab-group="a&amp;b"'));
+        expect(output, isNot(contains('data-tab-group="a&b"')));
+      });
     });
 
     group('accordion components', () {

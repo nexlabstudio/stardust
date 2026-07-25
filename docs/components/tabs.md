@@ -89,9 +89,9 @@ Tabs can contain any Markdown content, not just code:
 
 ## Package Manager Examples
 
-A common use case — showing installation commands for different package managers:
+A common use case — showing installation commands for different package managers. Add `group="pkg-manager"` so every package-manager block on the page (and across your site) stays in sync:
 
-<Tabs>
+<Tabs group="pkg-manager">
   <Tab name="npm">
     ```bash
     npm install my-package
@@ -115,7 +115,7 @@ A common use case — showing installation commands for different package manage
 </Tabs>
 
 ````markdown
-<Tabs>
+<Tabs group="pkg-manager">
   <Tab name="npm">
     ```bash
     npm install my-package
@@ -172,11 +172,13 @@ A common use case — showing installation commands for different package manage
 - Don't nest tabs inside tabs
 </Info>
 
-## Persistent Tab Selection
+## Synced & Persistent Selection
 
-Tab selections are remembered within the page. When a user selects "Python" in one tab group, other tab groups with a "Python" option will also switch.
+Give related tab groups a shared `group` and they switch together — and the choice is remembered across reloads and every other page via `localStorage`. It's ideal for package managers or operating systems repeated throughout your docs: the reader picks once and the whole site follows.
 
-<Tabs>
+Matching is by tab **label**, so `<Tab name="pnpm">` syncs to every other `pnpm` tab in the same group, regardless of order. Tab groups without a `group` stay independent.
+
+<Tabs group="lang">
   <Tab name="Python">
     Variable declaration in Python:
     ```python
@@ -191,7 +193,7 @@ Tab selections are remembered within the page. When a user selects "Python" in o
   </Tab>
 </Tabs>
 
-<Tabs>
+<Tabs group="lang">
   <Tab name="Python">
     Function definition in Python:
     ```python
@@ -209,4 +211,11 @@ Tab selections are remembered within the page. When a user selects "Python" in o
   </Tab>
 </Tabs>
 
-Select a language above and watch both tab groups sync!
+Select a language above and watch both groups sync — then reload the page and your choice sticks.
+
+```markdown
+<Tabs group="lang">
+  <Tab name="Python">...</Tab>
+  <Tab name="JavaScript">...</Tab>
+</Tabs>
+```

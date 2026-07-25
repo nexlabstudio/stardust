@@ -31,6 +31,8 @@
 | Landing/splash page | `layout: splash` → sidebar-less full-width page with a frontmatter-driven hero (title, tagline, CTA buttons, image) + `<Button>` component; our own homepage uses it |
 | Theming v1 | Config-driven design tokens (`theme.tokens`/`tokensDark`), `footer.poweredBy: false`, HTML slots for header/footer/sidebar. Not full override/eject — see [THEMING_SPEC.md](THEMING_SPEC.md) for v2 |
 | Page metadata | Reading time + last-updated + contributors from a single `git log` pass (repo-root resolved via `rev-parse`, so monorepo-safe); `pageInfo` toggles; live on our own docs |
+| Synced + persisted tabs/code-groups | Opt-in `group="…"` on `<Tabs>`/`<CodeGroup>`; same-group blocks switch together (matched by tab label) and the choice persists across pages via `localStorage`; ungrouped blocks stay independent |
+| Official GitHub Action | Composite action: checksum-verified install, `stardust check` + build, outputs the built dir; PR-preview recipes for Netlify/Vercel/Cloudflare Pages. Ships with the `v0.7.0` release |
 
 ### ⚠️ Have on paper — partial, broken, or documented-but-unimplemented
 | Feature | Reality |
@@ -49,7 +51,6 @@
 - **Cut-a-version command** (`docs:version` in Docusaurus, `mike deploy`, Starlight's auto-archive) — we make you create the dir or tag by hand
 - **Cross-version search** (Rspress searches across versions; ours is per-version only)
 - **Incremental / cached builds** (Docusaurus, Hugo)
-- Synced + persisted tabs ("choose npm once, everywhere") (Docusaurus, MkDocs Material)
 - `llms-full.txt`, per-page `.md` export, "copy page as Markdown", MCP-friendly output (Mintlify, Fumadocs)
 - **API playground** ("try it" on OpenAPI pages) (Mintlify, Redocly)
 - Image pipeline: resize/optimize, lazy-load, zoom is there but no processing (Docusaurus/Starlight via ecosystem)
@@ -155,7 +156,9 @@
 
 > **Status (2026-07-24)**: items 1–3 shipped; **all three exit-criteria matrix rows have flipped** ("link checking", "versioned builds", "i18n"). Item 2 went beyond the spec (git-tag sourcing, per-version sidebars, full SEO layer). Item 3 delivered both translation layouts (subdirectory **and** `guide.es.md` suffix), untranslated fallback + notice, per-locale `lang`/`dir`/sidebar/search/hreflang, **and the versioning × i18n composition** (`/v1/es/`, both switchers preserve the other axis) — which also flips the "Versioning + i18n without CI gymnastics" row. A supporting refactor made the generator read content through the `FileSystem` abstraction, paying down the "site_generator glob" debt. Remaining i18n-adjacent gaps (out of item 3's scope): cut-a-version command, cross-version search, and version-prefixed hreflang on old (noindex) versions.
 >
-> **Also shipped**: item 8 (landing/splash page — `layout: splash` + hero + `<Button>`, now live on our own homepage) and item 6 (Theming v1 — config tokens, `footer.poweredBy: false`, HTML slots). Both exit criteria are now met: the three matrix rows flipped, *and* a Stardust site can present a product homepage. Full theming (partial/template override + `eject` + component templates) is deferred to a v0.8 "Theming v2" item, spec'd in [THEMING_SPEC.md](THEMING_SPEC.md). Item 5 (git metadata) also shipped — reading time + last-updated + contributors from one `git log` pass (`rev-parse`-resolved root, so it's monorepo-safe), plus the note that page-level `og:image`/frontmatter overrides already existed. **Still open in v0.7: items 4 (synced tabs) and 7 (GitHub Action)** — both S.
+> **Also shipped**: item 8 (landing/splash page — `layout: splash` + hero + `<Button>`, now live on our own homepage) and item 6 (Theming v1 — config tokens, `footer.poweredBy: false`, HTML slots). Both exit criteria are now met: the three matrix rows flipped, *and* a Stardust site can present a product homepage. Full theming (partial/template override + `eject` + component templates) is deferred to a v0.8 "Theming v2" item, spec'd in [THEMING_SPEC.md](THEMING_SPEC.md). Item 5 (git metadata) also shipped — reading time + last-updated + contributors from one `git log` pass (`rev-parse`-resolved root, so it's monorepo-safe), plus the note that page-level `og:image`/frontmatter overrides already existed. At this point items 4 (synced tabs) and 7 (GitHub Action) remained — both S.
+>
+> **Status (2026-07-25)**: **v0.7 is feature-complete — all eight items shipped.** Item 4 (synced + persisted tabs/code-groups) landed last: an opt-in `group="…"` on `<Tabs>`/`<CodeGroup>` switches every same-group block together, matched by tab **label** (not index), and persists the choice across reloads and pages via `localStorage`; ungrouped blocks stay independent. The two duplicate client tab handlers were unified into one, and the pre-existing "tabs auto-sync" claim in the docs — previously documented-but-unimplemented — was corrected to the real `group` opt-in. Item 7 (GitHub Action) is done and merged; it ships with the `v0.7.0` release (it installs the latest release binary, so it goes live the moment the tag lands — which is the immediate next step). Item 5's git-metadata pass also picked up follow-on hardening (content-scoped `git log`, parse overlapped with markdown parsing, graceful when `git` is absent).
 
 ### v0.8 — "The Wedge" (features that win our two audiences) · ~6–8 weeks
 *Goal: give Dart/Flutter authors and AI-era teams a reason to pick Stardust specifically, not just tolerate it.*

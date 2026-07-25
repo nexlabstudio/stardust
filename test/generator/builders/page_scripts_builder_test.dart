@@ -30,6 +30,30 @@ void main() {
     });
   });
 
+  group('synced + persisted tabs script', () {
+    final js = PageScriptsBuilder(config: const StardustConfig(name: 'T')).buildAppJs();
+
+    test('drives tabs and code-groups through one handler', () {
+      expect(js, contains(".querySelectorAll('.tabs, .code-group')"));
+    });
+
+    test('switches every other block in the same group, by label', () {
+      expect(js, contains('dataset.tabGroup'));
+      expect(js, contains('dataset.tabLabel'));
+      expect(js, contains('if (c !== container) selectByLabel(c, label)'));
+    });
+
+    test('leaves ungrouped blocks independent', () {
+      expect(js, contains('if (!group) return;'));
+    });
+
+    test('persists and restores the choice per group via localStorage', () {
+      expect(js, contains('localStorage.setItem(storeKey + group, label)'));
+      expect(js, contains('localStorage.getItem(storeKey + group)'));
+      expect(js, contains("const storeKey = 'stardust:tabs:'"));
+    });
+  });
+
   group('search modal (raw pagefind api)', () {
     const searchOn = SearchConfig(enabled: true, hotkey: 's');
     const config = StardustConfig(name: 'T', url: 'https://example.com/docs', search: searchOn);
