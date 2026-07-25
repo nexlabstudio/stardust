@@ -55,13 +55,23 @@ class GitMetadataCollector {
   /// The repository root and its per-file history (keyed by root-relative path),
   /// or null when git is unavailable or the tree isn't a repository. The root is
   /// resolved with `rev-parse` so callers can match files regardless of `cwd`.
-  Future<({String root, Map<String, GitFileMeta> files})?> collect() async {
+  ///
+  /// [scope] limits the history walk to a pathspec (e.g. the content directory)
+  /// so the log stays proportional to the docs rather than the whole repository;
+  /// emitted paths remain root-relative regardless.
+  Future<({String root, Map<String, GitFileMeta> files})?> collect({String? scope}) async {
     final top = await Process.run('git', ['rev-parse', '--show-toplevel'], workingDirectory: workingDirectory);
     if (top.exitCode != 0) return null;
 
     final log = await Process.run(
       'git',
-      ['log', '--no-merges', '--format=:%aI%x09%an', '--name-only'],
+      [
+        'log',
+        '--no-merges',
+        '--format=:%aI%x09%an',
+        '--name-only',
+        if (scope case final scope?) ...['--', scope]
+      ],
       workingDirectory: workingDirectory,
     );
     if (log.exitCode != 0) return null;

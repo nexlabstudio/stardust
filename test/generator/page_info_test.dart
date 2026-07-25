@@ -70,6 +70,32 @@ void main() {
       }
     });
 
+    test('scope limits the history walk to a pathspec', () async {
+      final repo = await Directory.systemTemp.createTemp('stardust-gitscope-');
+      Future<void> git(List<String> args) async {
+        final r = await Process.run('git', args, workingDirectory: repo.path);
+        if (r.exitCode != 0) throw StateError('git ${args.join(' ')}: ${r.stderr}');
+      }
+
+      try {
+        await git(['init', '-q']);
+        await git(['config', 'user.email', 't@t.com']);
+        await git(['config', 'user.name', 'Tester']);
+        await Directory(p.join(repo.path, 'docs')).create();
+        await File(p.join(repo.path, 'docs', 'doc.md')).writeAsString('# Doc');
+        await File(p.join(repo.path, 'code.dart')).writeAsString('void main() {}');
+        await git(['add', '-A']);
+        await git(['commit', '-qm', 'init']);
+
+        final result = await GitMetadataCollector(workingDirectory: repo.path).collect(scope: 'docs');
+
+        expect(result?.files.keys, contains('docs/doc.md'));
+        expect(result?.files.keys, isNot(contains('code.dart')));
+      } finally {
+        await repo.delete(recursive: true);
+      }
+    });
+
     test('returns null outside a git repository', () async {
       final dir = await Directory.systemTemp.createTemp('stardust-nogit-');
       try {

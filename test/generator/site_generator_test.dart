@@ -944,5 +944,5 @@ class _StubGitCollector extends GitMetadataCollector {
   final ({String root, Map<String, GitFileMeta> files})? result;
 
   @override
-  Future<({String root, Map<String, GitFileMeta> files})?> collect() async => result;
+  Future<({String root, Map<String, GitFileMeta> files})?> collect({String? scope}) async => result;
 }

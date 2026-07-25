@@ -101,11 +101,11 @@ class SiteGenerator {
   }
 
   /// Per-page git history keyed by source path, or null when the feature is off
-  /// or the tree isn't a repository. Probes each page against the full-history
-  /// file map (typically far larger than the page set), not the reverse.
+  /// or the tree isn't a repository. The log is scoped to the content directory
+  /// and each page is probed against that map, not the reverse.
   Future<Map<String, GitFileMeta>?> _collectGitMetadata(List<Page> pages) async {
     if (!config.pageInfo.needsGit) return null;
-    if (await gitMetadataCollector.collect() case final git?) {
+    if (await gitMetadataCollector.collect(scope: config.content.dir) case final git?) {
       return {
         for (final page in pages)
           if (git.files[p.relative(page.sourcePath, from: git.root).replaceAll('\\', '/')] case final meta?)
