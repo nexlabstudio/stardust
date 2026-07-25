@@ -496,6 +496,28 @@
         }
       }
     },
+    "pageInfo": {
+      "type": "object",
+      "description": "Per-page metadata shown near the article",
+      "additionalProperties": false,
+      "properties": {
+        "readingTime": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show estimated reading time"
+        },
+        "lastUpdated": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the last-updated date from git"
+        },
+        "contributors": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show contributors from git"
+        }
+      }
+    },
     "footer": {
       "type": "object",
       "description": "Footer configuration",

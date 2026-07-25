@@ -46,6 +46,26 @@ class ContentConfig {
       );
 }
 
+/// Per-page metadata shown near the article: reading time and git history.
+class PageInfoConfig {
+  final bool readingTime;
+  final bool lastUpdated;
+  final bool contributors;
+
+  const PageInfoConfig({this.readingTime = false, this.lastUpdated = false, this.contributors = false});
+
+  factory PageInfoConfig.fromYaml(Map? yaml) => switch (yaml) {
+        final Map yaml => PageInfoConfig(
+            readingTime: yaml['readingTime'] as bool? ?? false,
+            lastUpdated: yaml['lastUpdated'] as bool? ?? false,
+            contributors: yaml['contributors'] as bool? ?? false,
+          ),
+        _ => const PageInfoConfig(),
+      };
+
+  bool get needsGit => lastUpdated || contributors;
+}
+
 class HeaderConfig {
   final bool showName;
   final bool showSearch;

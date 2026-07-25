@@ -1,6 +1,7 @@
 import 'package:stardust/src/config/config.dart';
 import 'package:stardust/src/content/markdown_parser.dart';
 import 'package:stardust/src/generator/page_builder.dart';
+import 'package:stardust/src/generator/page_info.dart';
 import 'package:stardust/src/models/page.dart';
 import 'package:test/test.dart';
 
@@ -11,6 +12,51 @@ void main() {
 
     setUp(() {
       builder = PageBuilder(config: testConfig);
+    });
+
+    group('page metadata', () {
+      const page = Page(
+        path: '/guide',
+        sourcePath: 'docs/guide.md',
+        title: 'Guide',
+        content: '<p>one two three</p>',
+      );
+
+      test('renders reading time, last updated, and contributors when enabled', () {
+        const config = StardustConfig(
+          name: 'T',
+          pageInfo: PageInfoConfig(readingTime: true, lastUpdated: true, contributors: true),
+        );
+        final builder = PageBuilder(config: config)
+          ..gitMetadata = {
+            'docs/guide.md': GitFileMeta(lastModified: DateTime.utc(2026, 7, 24), authors: const ['Alice', 'Bob']),
+          };
+
+        final html = builder.build(page, sidebar: []);
+
+        expect(html, contains('class="page-meta"'));
+        expect(html, contains('1 min read'));
+        expect(html, contains('Last updated 2026-07-24'));
+        expect(html, contains('Alice, Bob'));
+      });
+
+      test('renders no meta block when nothing is enabled', () {
+        expect(PageBuilder(config: const StardustConfig(name: 'T')).build(page, sidebar: []),
+            isNot(contains('page-meta')));
+      });
+
+      test('escapes contributor names', () {
+        const config = StardustConfig(name: 'T', pageInfo: PageInfoConfig(contributors: true));
+        final builder = PageBuilder(config: config)
+          ..gitMetadata = {
+            'docs/guide.md': GitFileMeta(lastModified: DateTime.utc(2026), authors: const ['<script>evil']),
+          };
+
+        final html = builder.build(page, sidebar: []);
+
+        expect(html, contains('&lt;script&gt;evil'));
+        expect(html, isNot(contains('<script>evil')));
+      });
     });
 
     group('splash layout', () {

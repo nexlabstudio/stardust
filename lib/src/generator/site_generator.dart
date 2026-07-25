@@ -19,6 +19,7 @@ import '../utils/html_utils.dart';
 import '../utils/logger.dart';
 import 'og_image_generator.dart';
 import 'page_builder.dart';
+import 'page_info.dart';
 import 'redirect_generator.dart';
 import 'robots_generator.dart';
 import 'url_resolver.dart';
@@ -30,11 +31,13 @@ class SiteGenerator {
   final FileSystem fileSystem;
   final ContentParser contentParser;
   final PageBuilder pageBuilder;
+  final GitMetadataCollector gitMetadataCollector;
 
   SiteGenerator({
     required this.config,
     required this.outputDir,
     this.logger = const Logger(),
+    this.gitMetadataCollector = const GitMetadataCollector(),
     FileSystem? fileSystem,
     ContentParser? contentParser,
     PageBuilder? pageBuilder,
@@ -53,12 +56,15 @@ class SiteGenerator {
     await fileSystem.writeFile(p.join(outputDir, '.nojekyll'), '');
 
     final contentDir = p.join(Directory.current.path, config.content.dir);
+    final pendingGit = _startGitCollect();
     final files = await _findMarkdownFiles(contentDir);
 
     logger.log('📄 Found ${files.length} markdown files');
 
     final pages = await _parsePages(files, contentDir);
     final pagesWithNav = _addNavigation(pages);
+
+    pageBuilder.gitMetadata = _mapGitMetadata(await pendingGit, pagesWithNav);
 
     for (final chunk in chunked(pagesWithNav, Platform.numberOfProcessors)) {
       await Future.wait(chunk.map((page) async {
@@ -94,6 +100,22 @@ class SiteGenerator {
 
     return count;
   }
+
+  /// Started before parsing so the git subprocess overlaps it; null when git
+  /// metadata isn't needed.
+  Future<GitHistory?> _startGitCollect() =>
+      config.pageInfo.needsGit ? gitMetadataCollector.collect(scope: config.content.dir) : Future.value(null);
+
+  /// Probes each page against the history map (far larger than the page set),
+  /// not the reverse.
+  Map<String, GitFileMeta>? _mapGitMetadata(GitHistory? git, List<Page> pages) => switch (git) {
+        null => null,
+        (:final root, :final files) => {
+            for (final page in pages)
+              if (files[p.relative(page.sourcePath, from: root).replaceAll('\\', '/')] case final meta?)
+                page.sourcePath: meta,
+          },
+      };
 
   /// Write the shared stylesheet and script once; pages link them by content hash.
   Future<void> _writeSharedAssets() async {

@@ -79,6 +79,21 @@ void main() {
       });
     });
 
+    group('pageInfo parsing', () {
+      test('defaults everything off', () {
+        const info = PageInfoConfig();
+        expect([info.readingTime, info.lastUpdated, info.contributors, info.needsGit], everyElement(isFalse));
+      });
+
+      test('reads toggles and flags git need', () {
+        final info = PageInfoConfig.fromYaml({'readingTime': true, 'lastUpdated': true});
+        expect(info.readingTime, isTrue);
+        expect(info.lastUpdated, isTrue);
+        expect(info.contributors, isFalse);
+        expect(info.needsGit, isTrue);
+      });
+    });
+
     group('theme v1 parsing', () {
       test('parses token overrides, keeping only safe names', () {
         final theme = ThemeConfig.fromYaml({

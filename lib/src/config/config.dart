@@ -39,6 +39,7 @@ class StardustConfig {
   final SocialConfig social;
   final HeaderConfig header;
   final FooterConfig footer;
+  final PageInfoConfig pageInfo;
   final VersionsConfig? versions;
   final I18nConfig? i18n;
   final IntegrationsConfig integrations;
@@ -81,6 +82,7 @@ class StardustConfig {
     this.social = const SocialConfig(),
     this.header = const HeaderConfig(),
     this.footer = const FooterConfig(),
+    this.pageInfo = const PageInfoConfig(),
     this.versions,
     this.i18n,
     this.integrations = const IntegrationsConfig(),
@@ -146,6 +148,7 @@ class StardustConfig {
         social: social,
         header: header,
         footer: footer,
+        pageInfo: pageInfo,
         versions: versions,
         i18n: i18n,
         integrations: integrations,
@@ -188,6 +191,7 @@ class StardustConfig {
         social: social,
         header: header,
         footer: footer,
+        pageInfo: pageInfo,
         versions: versions,
         i18n: i18n,
         integrations: integrations,
@@ -232,6 +236,7 @@ class StardustConfig {
         social: social,
         header: header,
         footer: footer,
+        pageInfo: pageInfo,
         versions: versions,
         i18n: i18n,
         integrations: integrations,

@@ -134,6 +134,8 @@ class I18nStrings {
   final String searchUnavailable;
   final String localeSelect;
   final String localeUntranslated;
+  final String readingTime;
+  final String lastUpdated;
 
   const I18nStrings({
     this.navPrevious = '← Previous',
@@ -154,6 +156,8 @@ class I18nStrings {
     this.searchUnavailable = 'Search is unavailable',
     this.localeSelect = 'Select language',
     this.localeUntranslated = 'This page has not been translated yet.',
+    this.readingTime = '%s min read',
+    this.lastUpdated = 'Last updated %s',
   });
 
   static const _keyMap = {
@@ -175,6 +179,8 @@ class I18nStrings {
     'search.unavailable': 'searchUnavailable',
     'locale.select': 'localeSelect',
     'locale.untranslated': 'localeUntranslated',
+    'page.readingTime': 'readingTime',
+    'page.lastUpdated': 'lastUpdated',
   };
 
   factory I18nStrings.fromYaml(Map? yaml) {
@@ -207,6 +213,8 @@ class I18nStrings {
       searchUnavailable: overrides['searchUnavailable'] ?? 'Search is unavailable',
       localeSelect: overrides['localeSelect'] ?? 'Select language',
       localeUntranslated: overrides['localeUntranslated'] ?? 'This page has not been translated yet.',
+      readingTime: overrides['readingTime'] ?? '%s min read',
+      lastUpdated: overrides['lastUpdated'] ?? 'Last updated %s',
     );
   }
 }

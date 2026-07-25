@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:stardust/src/config/config.dart';
 import 'package:stardust/src/core/file_system.dart';
+import 'package:stardust/src/generator/page_info.dart';
 import 'package:stardust/src/generator/site_generator.dart';
 import 'package:stardust/src/utils/exceptions.dart';
 import 'package:stardust/src/utils/logger.dart';
@@ -129,6 +130,58 @@ Follow these steps.
         // Verify output files
         expect(File(p.join(outputDir, 'index.html')).existsSync(), isTrue);
         expect(File(p.join(outputDir, 'guide', 'index.html')).existsSync(), isTrue);
+      });
+
+      test('renders collected git metadata when pageInfo needs git', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home\n\nBody.');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+          pageInfo: const PageInfoConfig(lastUpdated: true, contributors: true),
+        );
+
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          gitMetadataCollector: _StubGitCollector((
+            root: contentDir,
+            files: {
+              'index.md': GitFileMeta(
+                lastModified: DateTime(2026, 1, 15),
+                authors: const ['Ada Lovelace', 'Grace Hopper'],
+              ),
+            },
+          )),
+        );
+
+        await generator.generate();
+
+        final html = File(p.join(outputDir, 'index.html')).readAsStringSync();
+        expect(html, contains('class="page-meta"'));
+        expect(html, contains('2026-01-15'));
+        expect(html, contains('Ada Lovelace, Grace Hopper'));
+      });
+
+      test('leaves pages unannotated when the collector finds no repository', () async {
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home\n\nBody.');
+
+        final config = StardustConfig(
+          name: 'Test',
+          content: ContentConfig(dir: contentDir),
+          pageInfo: const PageInfoConfig(lastUpdated: true, contributors: true),
+        );
+
+        final generator = SiteGenerator(
+          config: config,
+          outputDir: outputDir,
+          gitMetadataCollector: _StubGitCollector(null),
+        );
+
+        await generator.generate();
+
+        final html = File(p.join(outputDir, 'index.html')).readAsStringSync();
+        expect(html, isNot(contains('class="page-meta"')));
       });
 
       test('skips draft pages', () async {
@@ -883,4 +936,13 @@ class CountingFileSystem extends LocalFileSystem {
     if (path.endsWith('.md')) contentReads++;
     return super.readFile(path);
   }
+}
+
+class _StubGitCollector extends GitMetadataCollector {
+  _StubGitCollector(this.result);
+
+  final GitHistory? result;
+
+  @override
+  Future<GitHistory?> collect({String? scope}) async => result;
 }

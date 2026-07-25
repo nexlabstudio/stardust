@@ -30,6 +30,7 @@
 | Real i18n | One `stardust build` → all locales routed under `/es/`; translations by subdirectory (`docs/es/`) **or** suffix (`guide.es.md`); untranslated pages fall back to the default with a notice; locale-preserving switcher, per-locale `lang`/`dir`/sidebar/search/hreflang. Composes with versioning (`/v1/es/`, both switchers preserve the other axis) |
 | Landing/splash page | `layout: splash` → sidebar-less full-width page with a frontmatter-driven hero (title, tagline, CTA buttons, image) + `<Button>` component; our own homepage uses it |
 | Theming v1 | Config-driven design tokens (`theme.tokens`/`tokensDark`), `footer.poweredBy: false`, HTML slots for header/footer/sidebar. Not full override/eject — see [THEMING_SPEC.md](THEMING_SPEC.md) for v2 |
+| Page metadata | Reading time + last-updated + contributors from a single `git log` pass (repo-root resolved via `rev-parse`, so monorepo-safe); `pageInfo` toggles; live on our own docs |
 
 ### ⚠️ Have on paper — partial, broken, or documented-but-unimplemented
 | Feature | Reality |
@@ -49,7 +50,6 @@
 - **Cross-version search** (Rspress searches across versions; ours is per-version only)
 - **Incremental / cached builds** (Docusaurus, Hugo)
 - Synced + persisted tabs ("choose npm once, everywhere") (Docusaurus, MkDocs Material)
-- **Last-updated from git**, contributors, reading time (MkDocs Material, Docusaurus)
 - `llms-full.txt`, per-page `.md` export, "copy page as Markdown", MCP-friendly output (Mintlify, Fumadocs)
 - **API playground** ("try it" on OpenAPI pages) (Mintlify, Redocly)
 - Image pipeline: resize/optimize, lazy-load, zoom is there but no processing (Docusaurus/Starlight via ecosystem)
@@ -155,7 +155,7 @@
 
 > **Status (2026-07-24)**: items 1–3 shipped; **all three exit-criteria matrix rows have flipped** ("link checking", "versioned builds", "i18n"). Item 2 went beyond the spec (git-tag sourcing, per-version sidebars, full SEO layer). Item 3 delivered both translation layouts (subdirectory **and** `guide.es.md` suffix), untranslated fallback + notice, per-locale `lang`/`dir`/sidebar/search/hreflang, **and the versioning × i18n composition** (`/v1/es/`, both switchers preserve the other axis) — which also flips the "Versioning + i18n without CI gymnastics" row. A supporting refactor made the generator read content through the `FileSystem` abstraction, paying down the "site_generator glob" debt. Remaining i18n-adjacent gaps (out of item 3's scope): cut-a-version command, cross-version search, and version-prefixed hreflang on old (noindex) versions.
 >
-> **Also shipped**: item 8 (landing/splash page — `layout: splash` + hero + `<Button>`, now live on our own homepage) and item 6 (Theming v1 — config tokens, `footer.poweredBy: false`, HTML slots). Both exit criteria are now met: the three matrix rows flipped, *and* a Stardust site can present a product homepage. Full theming (partial/template override + `eject` + component templates) is deferred to a v0.8 "Theming v2" item, spec'd in [THEMING_SPEC.md](THEMING_SPEC.md). **Still open in v0.7: items 4 (synced tabs), 5 (git metadata), 7 (GitHub Action)** — all S.
+> **Also shipped**: item 8 (landing/splash page — `layout: splash` + hero + `<Button>`, now live on our own homepage) and item 6 (Theming v1 — config tokens, `footer.poweredBy: false`, HTML slots). Both exit criteria are now met: the three matrix rows flipped, *and* a Stardust site can present a product homepage. Full theming (partial/template override + `eject` + component templates) is deferred to a v0.8 "Theming v2" item, spec'd in [THEMING_SPEC.md](THEMING_SPEC.md). Item 5 (git metadata) also shipped — reading time + last-updated + contributors from one `git log` pass (`rev-parse`-resolved root, so it's monorepo-safe), plus the note that page-level `og:image`/frontmatter overrides already existed. **Still open in v0.7: items 4 (synced tabs) and 7 (GitHub Action)** — both S.
 
 ### v0.8 — "The Wedge" (features that win our two audiences) · ~6–8 weeks
 *Goal: give Dart/Flutter authors and AI-era teams a reason to pick Stardust specifically, not just tolerate it.*
