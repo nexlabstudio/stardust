@@ -31,11 +31,13 @@ class SiteGenerator {
   final FileSystem fileSystem;
   final ContentParser contentParser;
   final PageBuilder pageBuilder;
+  final GitMetadataCollector gitMetadataCollector;
 
   SiteGenerator({
     required this.config,
     required this.outputDir,
     this.logger = const Logger(),
+    this.gitMetadataCollector = const GitMetadataCollector(),
     FileSystem? fileSystem,
     ContentParser? contentParser,
     PageBuilder? pageBuilder,
@@ -62,7 +64,7 @@ class SiteGenerator {
     final pagesWithNav = _addNavigation(pages);
 
     if (config.pageInfo.needsGit) {
-      if (await const GitMetadataCollector().collect() case final git?) {
+      if (await gitMetadataCollector.collect() case final git?) {
         pageBuilder.gitMetadata = {
           for (final page in pagesWithNav)
             if (git.files[p.relative(page.sourcePath, from: git.root).replaceAll('\\', '/')] case final meta?)
