@@ -7,6 +7,7 @@ import '../version.dart';
 import 'commands/build_command.dart';
 import 'commands/check_command.dart';
 import 'commands/clean_command.dart';
+import 'commands/dartdoc_command.dart';
 import 'commands/dev_command.dart';
 import 'commands/init_command.dart';
 import 'commands/new_command.dart';
@@ -28,6 +29,7 @@ class StardustCliRunner extends CommandRunner<int> {
     addCommand(NewCommand());
     addCommand(CleanCommand());
     addCommand(OpenApiCommand());
+    addCommand(DartdocCommand());
 
     argParser.addFlag(
       'version',

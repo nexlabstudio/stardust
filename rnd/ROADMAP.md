@@ -35,6 +35,7 @@
 | LLM-friendly output | `llms.txt` index + `llms-full.txt` full content + per-page `.md` twin + "Copy page as Markdown" button; `llm: false` frontmatter opts a page out |
 | Official GitHub Action | Composite action: checksum-verified install, `stardust check` + build, outputs the built dir; PR-preview recipes for Netlify/Vercel/Cloudflare Pages. Ships with the `v0.7.0` release |
 | DartPad embeds | `<DartPad id="…">` runnable Dart/Flutter snippets from a gist — lazy-loaded `dartpad.dev/?id=…&theme=…` iframe (v0.8 item 3) |
+| dartdoc integration | `stardust dartdoc` runs `dart doc` and co-hosts the API reference under `/api/` with a Stardust top-bar; content tagged `data-pagefind-body` so the site search returns API symbols (unified search). Bodies stay dartdoc-styled (v0.8 item 2, phase 1) |
 
 ### ⚠️ Have on paper — partial, broken, or documented-but-unimplemented
 | Feature | Reality |
@@ -172,7 +173,9 @@
 
 **Exit criteria**: a Flutter package can replace docs.page + dartdoc with one `stardust` command; a Claude/Cursor user can connect to any Stardust site's docs in two clicks without the site owner running a service.
 
-> **Status (2026-07-25)**: v0.8 opened with item 3 (**DartPad embeds**) — `<DartPad>` added to the existing `EmbedBuilder` alongside Zapp, rendering a lazy-loaded `dartpad.dev/?id=…&theme=…` iframe from a gist, with query-escaped inputs. Uses DartPad's *current* gist-embed URL (the older `embed-*.html` pages are deprecated per the official embedding guide; mode is auto-detected). Items 1, 2, 4–7 remain.
+> **Status (2026-07-25)**: v0.8 opened with item 3 (**DartPad embeds**) — `<DartPad>` added to the existing `EmbedBuilder` alongside Zapp, rendering a lazy-loaded `dartpad.dev/?id=…&theme=…` iframe from a gist, with query-escaped inputs. Uses DartPad's *current* gist-embed URL (the older `embed-*.html` pages are deprecated per the official embedding guide; mode is auto-detected).
+>
+> Then item 2 (**dartdoc integration**, phase 1) — `stardust dartdoc` runs `dart doc`, injects a self-contained Stardust top-bar and `data-pagefind-body` into each page via a single HTML post-pass (no scraping, no `dartdoc_options.yaml` intrusion), and writes to `public/api/`. The normal build copies it to `/api/` and Pagefind indexes it, so the site's search returns API symbols — **unified search verified end-to-end** (9 fragments incl. API pages on a fixture). Bodies stay dartdoc-styled; full native styling + auto-nav are deferred follow-ups. **Approach chosen because dartdoc has no clean machine-readable content export or stable library API** (verified against the official guide) — co-hosting dartdoc's real output is the robust path. Items 1, 4–7 remain.
 
 ### v1.0 — "Platform" (commit to stability) · when the above is real
 - **Compatibility promise**: stable config schema (migrations for breaking changes), stable CSS tokens, stable component syntax.
