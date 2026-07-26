@@ -64,6 +64,13 @@ void main() {
       expect((await server.handle(_req('DELETE'))).statusCode, 405);
     });
 
+    test('any other method (e.g. PUT) is 405', () async {
+      final server = await _http();
+      final res = await server.handle(_req('PUT'));
+      expect(res.statusCode, 405);
+      expect(res.headers['allow'], 'POST');
+    });
+
     test('a wrong path is 404', () async {
       final server = await _http();
       expect((await server.handle(_req('POST', path: '/'))).statusCode, 404);

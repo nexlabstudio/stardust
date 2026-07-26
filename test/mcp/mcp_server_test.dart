@@ -1,11 +1,53 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:stardust/src/core/file_system.dart';
 import 'package:stardust/src/mcp/docs_source.dart';
 import 'package:stardust/src/mcp/mcp_server.dart';
 import 'package:test/test.dart';
 
 import '../mocks/mock_file_system.dart';
+
+/// Wraps a [MockFileSystem] but throws on `readFile` for paths ending in
+/// [throwFor] — so a manifest can load yet a page body read blows up.
+class _ReadThrowsFileSystem implements FileSystem {
+  final MockFileSystem inner;
+  final String throwFor;
+
+  _ReadThrowsFileSystem(this.inner, this.throwFor);
+
+  @override
+  Future<String> readFile(String path) async {
+    if (path.replaceAll('\\', '/').endsWith(throwFor)) throw const FileSystemException('boom');
+    return inner.readFile(path);
+  }
+
+  @override
+  Future<bool> fileExists(String path) => inner.fileExists(path);
+  @override
+  Future<bool> directoryExists(String path) => inner.directoryExists(path);
+  @override
+  Future<Uint8List> readFileBytes(String path) => inner.readFileBytes(path);
+  @override
+  Future<void> writeFile(String path, String content) => inner.writeFile(path, content);
+  @override
+  Future<void> writeFileBytes(String path, Uint8List bytes) => inner.writeFileBytes(path, bytes);
+  @override
+  Future<void> copyFile(String source, String destination) => inner.copyFile(source, destination);
+  @override
+  Stream<FileSystemEntity> listDirectory(String path, {bool recursive = false}) =>
+      inner.listDirectory(path, recursive: recursive);
+  @override
+  Future<DateTime> lastModified(String path) => inner.lastModified(path);
+  @override
+  Future<void> createDirectory(String path, {bool recursive = false}) =>
+      inner.createDirectory(path, recursive: recursive);
+  @override
+  Future<void> deleteDirectory(String path, {bool recursive = false}) =>
+      inner.deleteDirectory(path, recursive: recursive);
+}
 
 Future<McpServer> _server() async {
   final fs = MockFileSystem()
@@ -174,6 +216,41 @@ void main() {
         },
       });
       expect((res['result'] as Map)['isError'], isTrue);
+    });
+
+    test('tools/call read_page with an empty path is a tool error', () async {
+      final server = await _server();
+      final res = await _call(server, {
+        'jsonrpc': '2.0',
+        'id': 4,
+        'method': 'tools/call',
+        'params': {
+          'name': 'read_page',
+          'arguments': {'path': ''}
+        },
+      });
+      expect((res['result'] as Map)['isError'], isTrue);
+    });
+
+    test('an unexpected error while serving a tool surfaces as JSON-RPC -32603', () async {
+      // Manifest loads fine, but reading the page body throws — exercising the
+      // internal-error fallback.
+      final fs = MockFileSystem()
+        ..addFile('site/llms.json', '{"name":"X","pages":[{"path":"/boom","title":"Boom","md":"/boom.md"}]}')
+        ..addFile('site/boom.md', 'body');
+      final source = await DocsSource.load('site', fileSystem: _ReadThrowsFileSystem(fs, 'boom.md'));
+      final server = McpServer(source, name: 'X');
+
+      final res = await _call(server, {
+        'jsonrpc': '2.0',
+        'id': 4,
+        'method': 'tools/call',
+        'params': {
+          'name': 'read_page',
+          'arguments': {'path': '/boom'}
+        },
+      });
+      expect((res['error'] as Map)['code'], -32603);
     });
   });
 
