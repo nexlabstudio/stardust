@@ -34,14 +34,17 @@ void main() {
       expect(out, contains('<body class="light"><div class="sd-apibar">BAR</div>'));
     });
 
-    test('tags dartdoc <main> for pagefind', () {
-      final out = DartdocGenerator.injectChrome('<body><main>content</main></body>', bar);
+    test('tags dartdoc content column (not the sidebar-wrapping <main>)', () {
+      const page = '<body><main><div id="dartdoc-sidebar-left">nav</div>'
+          '<div id="dartdoc-main-content">content</div></main></body>';
+      final out = DartdocGenerator.injectChrome(page, bar);
 
-      expect(out, contains('<main data-pagefind-body>content</main>'));
+      expect(out, contains('id="dartdoc-main-content" data-pagefind-body'));
+      expect(out, isNot(contains('<main data-pagefind-body')));
     });
 
-    test('no-ops the pagefind tag on pages without <main>', () {
-      final out = DartdocGenerator.injectChrome('<body><div>no main</div></body>', bar);
+    test('no-ops the pagefind tag on pages without the content column', () {
+      final out = DartdocGenerator.injectChrome('<body><div>search page</div></body>', bar);
 
       expect(out, isNot(contains('data-pagefind-body')));
       expect(out, contains('BAR'));
@@ -77,7 +80,7 @@ void main() {
         expect(classPage.existsSync(), isTrue);
         final html = classPage.readAsStringSync();
         expect(html, contains('class="sd-apibar"'));
-        expect(html, contains('<main data-pagefind-body>'));
+        expect(html, contains('id="dartdoc-main-content" data-pagefind-body'));
       } finally {
         await pkg.delete(recursive: true);
         await out.delete(recursive: true);

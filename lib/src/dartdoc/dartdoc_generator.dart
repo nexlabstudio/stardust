@@ -62,12 +62,14 @@ class DartdocGenerator {
     }
   }
 
-  /// Inserts [topBar] right after the `<body>` tag and tags dartdoc's `<main>`
-  /// content region with `data-pagefind-body`. Both edits are no-ops when the
-  /// target isn't present (e.g. dartdoc's search/404 pages).
+  /// Inserts [topBar] right after the `<body>` tag and marks dartdoc's content
+  /// column (`#dartdoc-main-content`) with `data-pagefind-body` so search
+  /// indexes the API prose only — dartdoc's `<main>` also wraps the left/right
+  /// nav sidebars, which would otherwise pollute every page's search entry.
+  /// Both edits are no-ops when the target isn't present (search/404 pages).
   static String injectChrome(String html, String topBar) {
     final withBar = html.replaceFirstMapped(RegExp('<body[^>]*>'), (m) => '${m[0]}$topBar');
-    return withBar.replaceFirst('<main>', '<main data-pagefind-body>');
+    return withBar.replaceFirst('id="dartdoc-main-content"', 'id="dartdoc-main-content" data-pagefind-body');
   }
 
   /// A self-contained (scoped-CSS) Stardust top-bar linking back to the docs
