@@ -84,6 +84,8 @@ sidebar:
         label: Dark Mode
       - slug: features/openapi
         label: OpenAPI Import
+      - slug: features/dartdoc
+        label: Dart API Docs
       - slug: features/llm-output
         label: LLM-Friendly Output
       - slug: features/redirects
