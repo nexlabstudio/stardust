@@ -8,20 +8,50 @@ import 'package:test/test.dart';
 
 void main() {
   group('DartdocGenerator.buildTopBar', () {
-    test('renders the site name and a back-to-docs link', () {
-      final bar = DartdocGenerator.buildTopBar('My Docs', 'https://example.com');
+    test('renders name, API badge, back-to-docs link, and adapts to dark theme', () {
+      final bar = DartdocGenerator.buildTopBar(name: 'My Docs', homeUrl: '/docs/', primaryColor: '#6366f1');
 
       expect(bar, contains('class="sd-apibar"'));
-      expect(bar, contains('My Docs · API reference'));
-      expect(bar, contains('href="https://example.com">← Back to docs'));
+      expect(bar, contains('My Docs'));
+      expect(bar, contains('sd-apibar__badge'));
+      expect(bar, contains('href="/docs/"'));
+      expect(bar, contains('← Back to docs'));
+      expect(bar, contains('.dark-theme .sd-apibar')); // theme-adaptive
+    });
+
+    test('uses the site primary color as the accent', () {
+      final bar = DartdocGenerator.buildTopBar(name: 'X', homeUrl: '/', primaryColor: '#ff3366');
+
+      expect(bar, contains('background:#ff3366'));
+    });
+
+    test('rejects a hostile primary color, falling back to the default accent', () {
+      final bar = DartdocGenerator.buildTopBar(name: 'X', homeUrl: '/', primaryColor: 'red;}</style><script>');
+
+      expect(bar, isNot(contains('<script>')));
+      expect(bar, isNot(contains('red;}')));
+      expect(bar, contains('background:#6366f1')); // fell back to the default
+    });
+
+    test('renders light and dark logo variants when both differ', () {
+      final bar = DartdocGenerator.buildTopBar(
+        name: 'X',
+        homeUrl: '/',
+        primaryColor: '#000',
+        logoLight: '/l.svg',
+        logoDark: '/d.svg',
+      );
+
+      expect(bar, contains('class="sd-logo-light" src="/l.svg"'));
+      expect(bar, contains('class="sd-logo-dark" src="/d.svg"'));
     });
 
     test('escapes the name and url', () {
-      final bar = DartdocGenerator.buildTopBar('A & B <x>', 'https://e.com/"');
+      final bar = DartdocGenerator.buildTopBar(name: 'A & B <x>', homeUrl: '/"', primaryColor: '#000');
 
       expect(bar, contains('A &amp; B &lt;x&gt;'));
       expect(bar, isNot(contains('A & B <x>')));
-      expect(bar, contains('https://e.com/&quot;'));
+      expect(bar, contains('href="/&quot;"'));
     });
   });
 
@@ -44,10 +74,19 @@ void main() {
   group('DartdocGenerator.injectChrome', () {
     const bar = '<div class="sd-apibar">BAR</div>';
 
-    test('inserts the top-bar right after <body> (with attributes)', () {
+    test('injects the top-bar and theme-sync after <body> (with attributes)', () {
       final out = DartdocGenerator.injectChrome('<html><body class="light">X</body>', bar);
 
-      expect(out, contains('<body class="light"><div class="sd-apibar">BAR</div>'));
+      expect(out, contains('<div class="sd-apibar">BAR</div>'));
+      expect(out.indexOf('<div class="sd-apibar">'), greaterThan(out.indexOf('<body')));
+    });
+
+    test('injects a two-way theme-sync script (site theme <-> dartdoc)', () {
+      final out = DartdocGenerator.injectChrome('<body></body>', bar);
+
+      expect(out, contains('localStorage.getItem("theme")')); // reads the site key
+      expect(out, contains('colorTheme')); // writes dartdoc's key
+      expect(out, contains('MutationObserver')); // mirrors dartdoc's toggle back
     });
 
     test('tags dartdoc content column (not the sidebar-wrapping <main>)', () {
