@@ -90,6 +90,7 @@ class SiteGenerator {
     if (config.build.llms.enabled) {
       await _generateLlms(pagesWithNav);
       await _generateLlmsFull(pagesWithNav);
+      await _generateManifest(pagesWithNav);
     }
 
     if (config.seo.ogImage == null && !config.devMode) {
@@ -509,6 +510,33 @@ class SiteGenerator {
 
     await fileSystem.writeFile(p.join(outputDir, 'llms-full.txt'), buffer.toString());
     logger.log('🤖 Generated llms-full.txt');
+  }
+
+  /// A machine-readable page index (`llms.json`) — the static manifest remote
+  /// agents can consume without a server, and the input `stardust mcp` reads to
+  /// serve a built site. Each `md` points at the verbatim source `_writePageMarkdown`
+  /// emits, so tools can fetch clean markdown per page.
+  Future<void> _generateManifest(List<Page> pages) async {
+    final urls = UrlResolver(config);
+    final manifest = <String, Object?>{
+      'name': config.name,
+      if (config.description case final desc?) 'description': desc,
+      if (config.url case final url?) 'url': url,
+      'generator': 'stardust',
+      'pages': [
+        for (final page in pages.where((page) => page.frontmatter['llm'] != false))
+          {
+            'path': page.path,
+            'title': page.title,
+            if (page.description case final desc?) 'description': desc,
+            if (urls.absolute(page.path) case final abs?) 'url': abs,
+            'md': page.path == '/' ? '/index.md' : '${page.path}.md',
+          },
+      ],
+    };
+    await fileSystem.writeFile(
+        p.join(outputDir, 'llms.json'), '${const JsonEncoder.withIndent('  ').convert(manifest)}\n');
+    logger.log('🤖 Generated llms.json');
   }
 
   Future<void> _generateRedirects(List<Page> pages) async {

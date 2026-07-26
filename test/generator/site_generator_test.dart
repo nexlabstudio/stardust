@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -882,6 +883,56 @@ title: Home
         expect(html, contains('data-md-path="./index.md"'));
         final secretHtml = File(p.join(outputDir, 'secret', 'index.html')).readAsStringSync();
         expect(secretHtml, isNot(contains('copy-page-button')));
+      } finally {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('writes llms.json manifest with per-page md pointers, excluding llm: false', () async {
+      final tempDir = await Directory.systemTemp.createTemp('stardust_manifest');
+      try {
+        final contentDir = p.join(tempDir.path, 'content');
+        await Directory(contentDir).create();
+        await File(p.join(contentDir, 'index.md')).writeAsString('---\ntitle: Home\ndescription: Landing.\n---\n\nHi.');
+        await File(p.join(contentDir, 'guide.md')).writeAsString('---\ntitle: Guide\n---\n\nBody.');
+        await File(p.join(contentDir, 'secret.md')).writeAsString('---\ntitle: Secret\nllm: false\n---\n\nHidden.');
+
+        final outputDir = p.join(tempDir.path, 'out');
+        final config = StardustConfig(name: 'T', url: 'https://x.dev', content: ContentConfig(dir: contentDir));
+        await SiteGenerator(config: config, outputDir: outputDir, logger: const Logger()).generate();
+
+        final manifest = jsonDecode(File(p.join(outputDir, 'llms.json')).readAsStringSync()) as Map;
+        expect(manifest['name'], 'T');
+        expect(manifest['generator'], 'stardust');
+        final pages = (manifest['pages'] as List).cast<Map>();
+        final byPath = {for (final page in pages) page['path']: page};
+        expect(byPath.keys, containsAll(<String>['/', '/guide']));
+        expect(byPath.containsKey('/secret'), isFalse, reason: 'llm: false page excluded');
+        expect(byPath['/']?['md'], '/index.md');
+        expect(byPath['/guide']?['md'], '/guide.md');
+        expect(byPath['/']?['url'], 'https://x.dev/');
+        expect(byPath['/']?['description'], 'Landing.');
+      } finally {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('omits llms.json when build.llms is disabled', () async {
+      final tempDir = await Directory.systemTemp.createTemp('stardust_manifest_off');
+      try {
+        final contentDir = p.join(tempDir.path, 'content');
+        await Directory(contentDir).create();
+        await File(p.join(contentDir, 'index.md')).writeAsString('# Home');
+
+        final outputDir = p.join(tempDir.path, 'out');
+        final config = StardustConfig(
+          name: 'T',
+          content: ContentConfig(dir: contentDir),
+          build: const BuildConfig(llms: LlmsConfig(enabled: false)),
+        );
+        await SiteGenerator(config: config, outputDir: outputDir, logger: const Logger()).generate();
+
+        expect(File(p.join(outputDir, 'llms.json')).existsSync(), isFalse);
       } finally {
         await tempDir.delete(recursive: true);
       }
