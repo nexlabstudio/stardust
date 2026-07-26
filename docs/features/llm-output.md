@@ -70,6 +70,34 @@ https://example.com/guide.md   → its markdown source
 Readers get the same thing through the **Copy page as Markdown** button at the
 top of each page — one click to paste a page into an AI chat.
 
+## Machine-Readable Manifest (llms.json)
+
+Alongside `llms.txt`, Stardust writes `llms.json` — a structured index of every
+page with its `path`, `title`, `description`, absolute `url`, and the `md` path
+to its raw markdown:
+
+```json
+{
+  "name": "My Project",
+  "description": "…",
+  "url": "https://example.com",
+  "generator": "stardust",
+  "pages": [
+    { "path": "/guide", "title": "Guide", "description": "…",
+      "url": "https://example.com/guide", "md": "/guide.md" }
+  ]
+}
+```
+
+Where `llms.txt` is written for a model to read, `llms.json` is written for a
+program to parse: a remote agent can fetch it, enumerate pages, and pull exactly
+the `.md` files it needs — consuming the whole site with no server to run. It is
+also what powers the [MCP Server](/features/mcp): `stardust mcp` serves a built
+site to Claude, Cursor, and other AI clients straight from this manifest.
+
+Pages with `llm: false` are excluded here too. The manifest is written whenever
+`build.llms` is enabled (the default).
+
 ## Use Cases
 
 ### AI Chatbots

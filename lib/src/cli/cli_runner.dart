@@ -10,6 +10,7 @@ import 'commands/clean_command.dart';
 import 'commands/dartdoc_command.dart';
 import 'commands/dev_command.dart';
 import 'commands/init_command.dart';
+import 'commands/mcp_command.dart';
 import 'commands/new_command.dart';
 import 'commands/openapi_command.dart';
 import 'commands/serve_command.dart';
@@ -30,6 +31,7 @@ class StardustCliRunner extends CommandRunner<int> {
     addCommand(CleanCommand());
     addCommand(OpenApiCommand());
     addCommand(DartdocCommand());
+    addCommand(McpCommand());
 
     argParser.addFlag(
       'version',
