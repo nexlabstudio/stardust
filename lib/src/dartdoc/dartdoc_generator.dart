@@ -43,7 +43,10 @@ class DartdocGenerator {
         throw ContentException('`dart doc` failed. Run `dart pub get` in the package first.\n${result.stderr}');
       }
 
-      final topBar = buildTopBar(config.name, config.url ?? '/');
+      if (await fileSystem.directoryExists(outputDir)) {
+        await fileSystem.deleteDirectory(outputDir, recursive: true);
+      }
+      final topBar = buildTopBar(config.name, homeHref(config));
       var pages = 0;
       await for (final entity in fileSystem.listDirectory(tmp.path, recursive: true)) {
         if (entity is! File) continue;
@@ -71,6 +74,11 @@ class DartdocGenerator {
     final withBar = html.replaceFirstMapped(RegExp('<body[^>]*>'), (m) => '${m[0]}$topBar');
     return withBar.replaceFirst('id="dartdoc-main-content"', 'id="dartdoc-main-content" data-pagefind-body');
   }
+
+  /// Root-relative docs home for the "Back to docs" link — respects a subpath
+  /// deploy (`build.basePath` or a path in `url`) and stays host-relative so it
+  /// works in local preview and production alike.
+  static String homeHref(StardustConfig config) => config.basePath.isEmpty ? '/' : '${config.basePath}/';
 
   /// A self-contained (scoped-CSS) Stardust top-bar linking back to the docs
   /// home, safe to inject into dartdoc's independently-styled pages.

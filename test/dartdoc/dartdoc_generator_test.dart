@@ -25,6 +25,22 @@ void main() {
     });
   });
 
+  group('DartdocGenerator.homeHref', () {
+    test('is / for a root deploy', () {
+      expect(DartdocGenerator.homeHref(const StardustConfig(name: 'X')), '/');
+    });
+
+    test('respects a subpath from build.basePath', () {
+      const config = StardustConfig(name: 'X', build: BuildConfig(basePath: '/docs'));
+      expect(DartdocGenerator.homeHref(config), '/docs/');
+    });
+
+    test('respects a subpath extracted from url', () {
+      const config = StardustConfig(name: 'X', url: 'https://acme.github.io/pkg');
+      expect(DartdocGenerator.homeHref(config), '/pkg/');
+    });
+  });
+
   group('DartdocGenerator.injectChrome', () {
     const bar = '<div class="sd-apibar">BAR</div>';
 
@@ -67,6 +83,9 @@ void main() {
             'lib/fixture_pkg.dart', '/// A greeter.\nclass Greeter {\n  /// Greet.\n  String greet() => "hi";\n}\n');
         await Process.run('dart', ['pub', 'get'], workingDirectory: pkg.path);
 
+        final stale = File(p.join(out.path, 'stale.html'));
+        await stale.writeAsString('from a previous run');
+
         const config = StardustConfig(name: 'Fixture', url: 'https://x.dev');
         final pages = await DartdocGenerator(
           packagePath: pkg.path,
@@ -76,6 +95,7 @@ void main() {
         ).generate();
 
         expect(pages, greaterThan(0));
+        expect(stale.existsSync(), isFalse, reason: 'output dir should be cleared before writing');
         final classPage = File(p.join(out.path, 'fixture_pkg', 'Greeter-class.html'));
         expect(classPage.existsSync(), isTrue);
         final html = classPage.readAsStringSync();
