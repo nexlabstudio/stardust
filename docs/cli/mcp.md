@@ -35,14 +35,29 @@ stardust mcp
 - **`read_page`** tool — the full markdown of a page by its path.
 - **Resources** — one `text/markdown` resource per page.
 
+## Serve over HTTP
+
+By default the server speaks the **stdio** transport (clients launch it as a subprocess). Pass `--http` to serve a live **Streamable HTTP** `/mcp` endpoint instead — for self-hosters who run the binary as a service:
+
+```bash
+stardust mcp dist --http --port 8080
+# → Endpoint: http://localhost:8080/mcp
+```
+
+It binds to `localhost` and validates the `Origin` header (DNS-rebinding guard); loopback origins and non-browser clients are always allowed, other browser origins need `--allow-origin`. See [MCP Server](/features/mcp) for details.
+
 ## Options
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `[dir]` | `build.outDir` (else `dist`) | Built site directory to serve |
 | `-c`, `--config` | `stardust.yaml` | Config file, used only to resolve the output dir when `[dir]` is omitted |
+| `--http` | off | Serve Streamable HTTP (a live `/mcp` endpoint) instead of stdio |
+| `-p`, `--port` | `8080` | Port for `--http` |
+| `--host` | `localhost` | Bind host for `--http` |
+| `--allow-origin` | — | Allowed browser `Origin` for `--http` (repeatable; `*` for any) |
 
 ## Notes
 
-- Communication is JSON-RPC on **stdin/stdout**; all logs go to **stderr**, keeping stdout a clean protocol channel.
-- The server is **read-only** and holds no state between runs — clients launch it as a subprocess.
+- In stdio mode, communication is JSON-RPC on **stdin/stdout** and all logs go to **stderr**, keeping stdout a clean protocol channel. In `--http` mode, requests come over `POST /mcp`.
+- The server is **read-only** and holds no state between runs.

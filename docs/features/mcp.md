@@ -52,12 +52,33 @@ MCP clients launch the server as a subprocess. Point yours at the `stardust` bin
 
 Restart the client and your docs appear as a connected server — search and read your guides without leaving the chat.
 
+## Serve over HTTP (self-hosting)
+
+Hosted docs platforms expose a live `https://yoursite/mcp` endpoint because they run a server for you. If **you** run a server — a VPS, on-prem box, or air-gapped host — `--http` gives you the same thing:
+
+```bash
+stardust mcp dist --http --port 8080
+# → Endpoint: http://localhost:8080/mcp
+```
+
+This is the MCP [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports): a single `/mcp` endpoint answering JSON-RPC over `POST`. Point any MCP client that accepts a URL at `http://your-host:8080/mcp`.
+
+<Warning>
+A **pure static host** (GitHub Pages, Netlify, a plain CDN) can't serve `--http` — a live endpoint needs a running process. Those deployments use the static [`llms.json` + `.md` files](/features/llm-output) instead (see below). `--http` is for when you actually run the binary as a service.
+</Warning>
+
+**Security.** The server binds to `localhost` by default and validates the `Origin` header to block [DNS-rebinding](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#security-warning) attacks: loopback origins and non-browser clients (which send no `Origin`) are always allowed; other browser origins must be listed with `--allow-origin`. To expose it beyond localhost, set `--host 0.0.0.0` and add each browser origin (`--allow-origin https://app.example.com`, or `--allow-origin '*'` to accept any), ideally behind your own TLS/auth proxy. The server is read-only and stateless.
+
 ## Options
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `[dir]` | `build.outDir` (else `dist`) | The built site directory to serve |
 | `-c`, `--config` | `stardust.yaml` | Config file, used only to resolve the output dir when `[dir]` is omitted |
+| `--http` | off | Serve Streamable HTTP (a live `/mcp` endpoint) instead of stdio |
+| `-p`, `--port` | `8080` | Port for `--http` |
+| `--host` | `localhost` | Bind host for `--http` |
+| `--allow-origin` | — | Allowed browser `Origin` for `--http` (repeatable; `*` for any) |
 
 ## Consume without a server
 
