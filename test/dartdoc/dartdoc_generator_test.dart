@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:stardust/src/config/config.dart';
 import 'package:stardust/src/dartdoc/dartdoc_generator.dart';
+import 'package:stardust/src/utils/exceptions.dart';
 import 'package:stardust/src/utils/logger.dart';
 import 'package:test/test.dart';
 
@@ -31,6 +32,13 @@ void main() {
       expect(bar, isNot(contains('<script>')));
       expect(bar, isNot(contains('red;}')));
       expect(bar, contains('background:#6366f1')); // fell back to the default
+    });
+
+    test('renders a single logo image when a light logo is given without a distinct dark one', () {
+      final bar = DartdocGenerator.buildTopBar(name: 'X', homeUrl: '/', primaryColor: '#000', logoLight: '/logo.svg');
+
+      expect(bar, contains('<img src="/logo.svg" alt="">'));
+      expect(bar, isNot(contains('class="sd-logo-light"')));
     });
 
     test('renders light and dark logo variants when both differ', () {
@@ -106,6 +114,40 @@ void main() {
     });
   });
 
+  group('DartdocGenerator.generate error handling', () {
+    test('throws a ContentException when dart doc cannot be launched', () async {
+      final out = await Directory.systemTemp.createTemp('stardust-dd-err-');
+      try {
+        final generator = DartdocGenerator(
+          packagePath: '/no/such/package/path/zzz', // missing working dir -> ProcessException
+          outputDir: out.path,
+          config: const StardustConfig(name: 'X'),
+          logger: Logger(onLog: (_) {}),
+        );
+        await expectLater(generator.generate(), throwsA(isA<ContentException>()));
+      } finally {
+        await out.delete(recursive: true);
+      }
+    });
+
+    test('throws a ContentException when dart doc exits non-zero', () async {
+      final pkg = await Directory.systemTemp.createTemp('stardust-dd-nopub-'); // exists, no pubspec
+      final out = await Directory.systemTemp.createTemp('stardust-dd-err2-');
+      try {
+        final generator = DartdocGenerator(
+          packagePath: pkg.path,
+          outputDir: out.path,
+          config: const StardustConfig(name: 'X'),
+          logger: Logger(onLog: (_) {}),
+        );
+        await expectLater(generator.generate(), throwsA(isA<ContentException>()));
+      } finally {
+        await pkg.delete(recursive: true);
+        await out.delete(recursive: true);
+      }
+    }, timeout: const Timeout(Duration(minutes: 1)));
+  });
+
   group('DartdocGenerator.generate (real dart doc)', () {
     test('produces API pages with the Stardust top-bar and pagefind body', () async {
       final pkg = await Directory.systemTemp.createTemp('stardust-dd-');
@@ -125,7 +167,7 @@ void main() {
         final stale = File(p.join(out.path, 'stale.html'));
         await stale.writeAsString('from a previous run');
 
-        const config = StardustConfig(name: 'Fixture', url: 'https://x.dev');
+        const config = StardustConfig(name: 'Fixture', url: 'https://x.dev', logo: LogoConfig(single: '/logo.svg'));
         final pages = await DartdocGenerator(
           packagePath: pkg.path,
           outputDir: out.path,
