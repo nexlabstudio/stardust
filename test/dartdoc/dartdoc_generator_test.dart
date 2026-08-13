@@ -61,6 +61,21 @@ void main() {
       expect(bar, isNot(contains('A & B <x>')));
       expect(bar, contains('href="/&quot;"'));
     });
+
+    test('uses and escapes localized API and back-to-docs labels', () {
+      final bar = DartdocGenerator.buildTopBar(
+        name: 'X',
+        homeUrl: '/',
+        primaryColor: '#000',
+        apiLabel: 'API <reference> & "guide"',
+        backToDocs: "Retour aux docs & l'accueil <ici>",
+      );
+
+      expect(bar, contains('API &lt;reference&gt; &amp; &quot;guide&quot;'));
+      expect(bar, contains('Retour aux docs &amp; l&#39;accueil &lt;ici&gt;'));
+      expect(bar, isNot(contains('API <reference>')));
+      expect(bar, isNot(contains("l'accueil <ici>")));
+    });
   });
 
   group('DartdocGenerator.homeHref', () {
@@ -167,7 +182,17 @@ void main() {
         final stale = File(p.join(out.path, 'stale.html'));
         await stale.writeAsString('from a previous run');
 
-        const config = StardustConfig(name: 'Fixture', url: 'https://x.dev', logo: LogoConfig(single: '/logo.svg'));
+        const config = StardustConfig(
+          name: 'Fixture',
+          url: 'https://x.dev',
+          logo: LogoConfig(single: '/logo.svg'),
+          i18n: I18nConfig(
+            strings: I18nStrings(
+              dartdocApi: 'Référence & API',
+              dartdocBackToDocs: 'Retour <aux docs>',
+            ),
+          ),
+        );
         final pages = await DartdocGenerator(
           packagePath: pkg.path,
           outputDir: out.path,
@@ -181,6 +206,9 @@ void main() {
         expect(classPage.existsSync(), isTrue);
         final html = classPage.readAsStringSync();
         expect(html, contains('class="sd-apibar"'));
+        expect(html, contains('Référence &amp; API'));
+        expect(html, contains('Retour &lt;aux docs&gt;'));
+        expect(html, isNot(contains('← Back to docs')));
         expect(html, contains('id="dartdoc-main-content" data-pagefind-body'));
       } finally {
         await pkg.delete(recursive: true);

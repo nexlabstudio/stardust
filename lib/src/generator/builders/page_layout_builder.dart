@@ -86,7 +86,7 @@ class PageLayoutBuilder {
               <circle cx="11" cy="11" r="8"/>
               <path d="M21 21l-4.35-4.35"/>
             </svg>
-            <span>${encodeHtml(config.search.placeholder)}</span>
+            <span>${encodeHtml(config.searchPlaceholder)}</span>
             <kbd>${encodeHtml(config.search.hotkey)}</kbd>
           </button>
           ''' : ''}
@@ -399,7 +399,7 @@ class PageLayoutBuilder {
 
     return '''
       <aside class="toc">
-        <div class="toc-title">${encodeHtml(config.toc.title)}</div>
+        <div class="toc-title">${encodeHtml(config.tocTitle)}</div>
         <ul class="toc-list">
           $links
         </ul>

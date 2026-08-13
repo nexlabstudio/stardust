@@ -79,6 +79,56 @@ void main() {
       });
     });
 
+    group('i18nStrings', () {
+      final i18n = I18nConfig.fromYaml({
+        'defaultLocale': 'en',
+        'strings': {
+          'nav.next': 'Shared next',
+          'toc.title': 'Shared contents',
+          'code.copy': 'Shared copy',
+        },
+        'locales': [
+          {
+            'code': 'en',
+            'label': 'English',
+            'path': '/',
+            'strings': {'nav.previous': 'Default previous'},
+          },
+          {
+            'code': 'fr',
+            'label': 'Français',
+            'path': '/fr/',
+            'strings': {
+              'nav.next': 'Suivant',
+              'search.placeholder': 'Rechercher',
+            },
+          },
+        ],
+      });
+
+      test('uses the default locale strings when no locale is active', () {
+        final config = StardustConfig(name: 'Docs', i18n: i18n);
+
+        expect(config.i18nStrings.navPrevious, equals('Default previous'));
+        expect(config.i18nStrings.navNext, equals('Shared next'));
+        expect(config.i18nStrings.codeCopy, equals('Shared copy'));
+      });
+
+      test('uses active locale overrides with shared string fallbacks', () {
+        final config = StardustConfig(name: 'Docs', i18n: i18n);
+        final localized = config.withLocale(
+          i18n.locales[1],
+          contentDir: 'docs/fr',
+          localeBasePath: '/fr',
+        );
+
+        expect(localized.i18nStrings.navNext, equals('Suivant'));
+        expect(localized.i18nStrings.searchPlaceholder, equals('Rechercher'));
+        expect(localized.i18nStrings.tocTitle, equals('Shared contents'));
+        expect(localized.i18nStrings.codeCopy, equals('Shared copy'));
+      });
+    });
+
     group('pageInfo parsing', () {
       test('defaults everything off', () {
         const info = PageInfoConfig();
@@ -624,6 +674,30 @@ void main() {
       expect(config.locales[0].code, equals('en'));
       expect(config.locales[1].label, equals('Spanish'));
     });
+
+    test('fromYaml parses locale strings with shared fallbacks', () {
+      final config = I18nConfig.fromYaml({
+        'defaultLocale': 'en',
+        'strings': {
+          'footer.poweredBy': 'Made with',
+          'code.copy': 'Copy snippet',
+        },
+        'locales': [
+          {'code': 'en', 'label': 'English', 'path': '/'},
+          {
+            'code': 'es',
+            'label': 'Español',
+            'path': '/es/',
+            'strings': {'footer.poweredBy': 'Creado con'},
+          },
+        ],
+      });
+
+      expect(config.locales[0].strings, isNull);
+      expect(config.locales[1].strings, isNotNull);
+      expect(config.locales[1].strings!.footerPoweredBy, equals('Creado con'));
+      expect(config.locales[1].strings!.codeCopy, equals('Copy snippet'));
+    });
   });
 
   group('I18nStrings.fromYaml', () {
@@ -669,6 +743,70 @@ void main() {
       expect(strings.searchClear, equals('Clear search'));
       expect(strings.searchMore, equals('Load more results'));
       expect(strings.searchUnavailable, equals('Search is unavailable'));
+    });
+
+    test('parses the search, toc, code, page, and dartdoc strings', () {
+      final strings = I18nStrings.fromYaml({
+        'search.placeholder': 'Find anything',
+        'toc.title': 'In this article',
+        'code.copy': 'Copy snippet',
+        'code.copyLabel': 'Copy this code',
+        'code.copied': 'Copied successfully',
+        'code.copyFailed': 'Could not copy',
+        'page.copyMarkdown': 'Copy Markdown',
+        'dartdoc.api': 'Reference',
+        'dartdoc.backToDocs': '← Documentation',
+      });
+
+      expect(strings.searchPlaceholder, equals('Find anything'));
+      expect(strings.tocTitle, equals('In this article'));
+      expect(strings.codeCopy, equals('Copy snippet'));
+      expect(strings.codeCopyLabel, equals('Copy this code'));
+      expect(strings.codeCopied, equals('Copied successfully'));
+      expect(strings.codeCopyFailed, equals('Could not copy'));
+      expect(strings.pageCopyMarkdown, equals('Copy Markdown'));
+      expect(strings.dartdocApi, equals('Reference'));
+      expect(strings.dartdocBackToDocs, equals('← Documentation'));
+    });
+
+    test('inherits omitted values from an explicit fallback', () {
+      const fallback = I18nStrings(
+        navNext: 'Shared next',
+        searchPlaceholder: 'Shared search',
+        codeCopy: 'Shared copy',
+      );
+      final strings = I18nStrings.fromYaml(
+        {
+          'nav.previous': 'Locale previous',
+          'toc.title': 'Locale contents',
+        },
+        fallback: fallback,
+      );
+
+      expect(strings.navPrevious, equals('Locale previous'));
+      expect(strings.navNext, equals('Shared next'));
+      expect(strings.searchPlaceholder, equals('Shared search'));
+      expect(strings.tocTitle, equals('Locale contents'));
+      expect(strings.codeCopy, equals('Shared copy'));
+    });
+
+    test('new nullable legacy-setting overrides default to null', () {
+      const strings = I18nStrings();
+
+      expect(strings.searchPlaceholder, isNull);
+      expect(strings.tocTitle, isNull);
+    });
+
+    test('new standalone UI strings have English defaults', () {
+      const strings = I18nStrings();
+
+      expect(strings.codeCopy, equals('Copy'));
+      expect(strings.codeCopyLabel, equals('Copy code'));
+      expect(strings.codeCopied, equals('Copied!'));
+      expect(strings.codeCopyFailed, equals('Copy failed'));
+      expect(strings.pageCopyMarkdown, equals('Copy page as Markdown'));
+      expect(strings.dartdocApi, equals('API'));
+      expect(strings.dartdocBackToDocs, equals('← Back to docs'));
     });
   });
 }

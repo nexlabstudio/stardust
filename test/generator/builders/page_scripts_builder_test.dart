@@ -54,6 +54,34 @@ void main() {
     });
   });
 
+  group('localized runtime strings', () {
+    const config = StardustConfig(
+      name: 'T',
+      i18n: I18nConfig(
+        strings: I18nStrings(
+          codeCopied: 'Copie terminée !',
+          codeCopyFailed: 'Échec de la copie',
+        ),
+      ),
+    );
+    final js = PageScriptsBuilder(config: config).buildAppJs();
+
+    test('uses localized copy success and failure feedback', () {
+      expect(js, contains("const CODE_COPIED = 'Copie terminée !'"));
+      expect(js, contains("const CODE_COPY_FAILED = 'Échec de la copie'"));
+      expect(js, contains('button.textContent = CODE_COPIED'));
+      expect(js, contains('button.textContent = CODE_COPY_FAILED'));
+      expect(js, isNot(contains("const CODE_COPIED = 'Copied!'")));
+      expect(js, isNot(contains("const CODE_COPY_FAILED = 'Copy failed'")));
+    });
+
+    test('image zoom inherits the clicked image alt text', () {
+      expect(js, contains("const sourceImage = wrapper.querySelector('img');"));
+      expect(js, contains("zoomed.alt = sourceImage ? sourceImage.alt : '';"));
+      expect(js, isNot(contains('Zoomed image')));
+    });
+  });
+
   group('search modal (raw pagefind api)', () {
     const searchOn = SearchConfig(enabled: true, hotkey: 's');
     const config = StardustConfig(name: 'T', url: 'https://example.com/docs', search: searchOn);
@@ -95,6 +123,21 @@ void main() {
     test('shows a message when the index cannot load', () {
       expect(modal, contains('loadError'));
       expect(modal, contains('UNAVAILABLE'));
+    });
+
+    test('shows the localized searching status while results load', () {
+      const localizedConfig = StardustConfig(
+        name: 'T',
+        search: searchOn,
+        i18n: I18nConfig(
+          strings: I18nStrings(searchSearching: 'Recherche en cours...'),
+        ),
+      );
+      final localizedModal = PageScriptsBuilder(config: localizedConfig).buildSearchModal('.');
+
+      expect(localizedModal, contains("const SEARCHING = 'Recherche en cours...'"));
+      expect(localizedModal, contains('statusEl.textContent = SEARCHING'));
+      expect(localizedModal, isNot(contains("const SEARCHING = 'Searching...'")));
     });
 
     test('sanitizes result excerpts to only allow <mark> highlights', () {

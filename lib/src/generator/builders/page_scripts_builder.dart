@@ -25,9 +25,14 @@ ${buildAppJs()}
 ''';
 
   /// The site's shared JavaScript, written once per build to assets/app.js.
-  String buildAppJs() => '''
+  String buildAppJs() {
+    final i18n = config.i18nStrings;
+    return '''
     const themeToggle = document.getElementById('theme-toggle');
     const html = document.documentElement;
+    const CODE_COPY = '${encodeJsString(i18n.codeCopy)}';
+    const CODE_COPIED = '${encodeJsString(i18n.codeCopied)}';
+    const CODE_COPY_FAILED = '${encodeJsString(i18n.codeCopyFailed)}';
 
     function getTheme() {
       return localStorage.getItem('theme') || '${encodeJsString(config.theme.darkMode.defaultMode)}';
@@ -57,9 +62,9 @@ ${buildAppJs()}
         try {
           const response = await fetch(button.dataset.mdPath);
           await navigator.clipboard.writeText(await response.text());
-          button.textContent = 'Copied!';
+          button.textContent = CODE_COPIED;
         } catch (e) {
-          button.textContent = 'Copy failed';
+          button.textContent = CODE_COPY_FAILED;
         }
         setTimeout(() => button.textContent = label, 2000);
       });
@@ -68,9 +73,13 @@ ${buildAppJs()}
     document.querySelectorAll('.copy-button').forEach(button => {
       button.addEventListener('click', async () => {
         const code = button.closest('.code-block').querySelector('code').textContent;
-        await navigator.clipboard.writeText(code);
-        button.textContent = 'Copied!';
-        setTimeout(() => button.textContent = 'Copy', 2000);
+        try {
+          await navigator.clipboard.writeText(code);
+          button.textContent = CODE_COPIED;
+        } catch (e) {
+          button.textContent = CODE_COPY_FAILED;
+        }
+        setTimeout(() => button.textContent = CODE_COPY, 2000);
       });
     });
 
@@ -267,7 +276,8 @@ ${buildAppJs()}
           overlay.textContent = '';
           const zoomed = document.createElement('img');
           zoomed.src = src;
-          zoomed.alt = 'Zoomed image';
+          const sourceImage = wrapper.querySelector('img');
+          zoomed.alt = sourceImage ? sourceImage.alt : '';
           overlay.appendChild(zoomed);
           overlay.classList.add('active');
           document.body.style.overflow = 'hidden';
@@ -304,6 +314,7 @@ ${buildAppJs()}
     })();
 
 ''';
+  }
 
   String _mermaidIntegrity() {
     if (config.components.mermaidScriptUrl != ComponentsConfig.defaultMermaidScriptUrl) return '';
@@ -320,19 +331,19 @@ ${buildAppJs()}
 
     final i18n = config.i18nStrings;
     return '''
-  <dialog id="search-modal" class="search-modal" aria-label="${encodeHtmlAttribute(config.search.placeholder)}">
+  <dialog id="search-modal" class="search-modal" aria-label="${encodeHtmlAttribute(config.searchPlaceholder)}">
     <div class="search-container">
       <div class="sd-search">
         <div class="sd-search__box">
           <span class="sd-search__icon">${getLucideIcon('search', '18')}</span>
           <input class="sd-search__input" type="text" autocomplete="off" spellcheck="false"
                  role="searchbox" aria-controls="sd-search__results" aria-activedescendant=""
-                 placeholder="${encodeHtmlAttribute(config.search.placeholder)}">
+                 placeholder="${encodeHtmlAttribute(config.searchPlaceholder)}">
           <button class="sd-search__clear" type="button" aria-label="${encodeHtmlAttribute(i18n.searchClear)}" hidden>${getLucideIcon('x', '18')}</button>
         </div>
         <div class="sd-search__status" role="status" aria-live="polite"></div>
-        <ul id="sd-search__results" class="sd-search__results" role="listbox" aria-label="${encodeHtmlAttribute(config.search.placeholder)}"></ul>
-        <button class="sd-search__more" type="button" hidden>${encodeHtmlAttribute(i18n.searchMore)}</button>
+        <ul id="sd-search__results" class="sd-search__results" role="listbox" aria-label="${encodeHtmlAttribute(config.searchPlaceholder)}"></ul>
+        <button class="sd-search__more" type="button" hidden>${encodeHtml(i18n.searchMore)}</button>
       </div>
     </div>
   </dialog>
@@ -354,6 +365,7 @@ ${buildAppJs()}
       const NO_RESULTS = '${encodeJsString(i18n.searchNoResults)}';
       const ONE_RESULT = '${encodeJsString(i18n.searchOneResult)}';
       const MANY_RESULTS = '${encodeJsString(i18n.searchManyResults)}';
+      const SEARCHING = '${encodeJsString(i18n.searchSearching)}';
       const UNAVAILABLE = '${encodeJsString(i18n.searchUnavailable)}';
 
       let pagefind = null;
@@ -462,6 +474,7 @@ ${buildAppJs()}
       async function runSearch(term) {
         const myToken = ++token;
         if (!term) { clearResults(); return; }
+        statusEl.textContent = SEARCHING;
         await ensurePagefind();
         if (myToken !== token) return;
         if (loadError) { statusEl.textContent = UNAVAILABLE; return; }

@@ -1479,6 +1479,40 @@ void main() {
         expect(result, contains('Weiter →'));
       });
 
+      test('uses the i18n search placeholder in the header', () {
+        const config = StardustConfig(
+          name: 'Test',
+          search: SearchConfig(placeholder: 'Legacy search placeholder'),
+          i18n: I18nConfig(
+            strings: I18nStrings(searchPlaceholder: 'Dokumentation durchsuchen'),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildHeader();
+
+        expect(result, contains('<span>Dokumentation durchsuchen</span>'));
+        expect(result, isNot(contains('Legacy search placeholder')));
+      });
+
+      test('uses the i18n table of contents title', () {
+        const config = StardustConfig(
+          name: 'Test',
+          toc: TocConfig(title: 'Legacy TOC title'),
+          i18n: I18nConfig(
+            strings: I18nStrings(tocTitle: 'Auf dieser Seite'),
+          ),
+        );
+        final b = PageLayoutBuilder(config: config);
+
+        final result = b.buildToc(const [
+          TocEntry(level: 2, text: 'Einführung', id: 'intro'),
+        ]);
+
+        expect(result, contains('<div class="toc-title">Auf dieser Seite</div>'));
+        expect(result, isNot(contains('Legacy TOC title')));
+      });
+
       test('uses i18n strings for footer powered by', () {
         const config = StardustConfig(
           name: 'Test',

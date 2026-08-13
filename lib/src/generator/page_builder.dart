@@ -92,7 +92,7 @@ class PageBuilder {
     final copyPageButton = config.build.llms.enabled && page.frontmatter['llm'] != false
         ? '''
         <div class="page-actions">
-          <button class="copy-page-button" data-md-path="$basePath/$markdownTwin">Copy page as Markdown</button>
+          <button class="copy-page-button" data-md-path="$basePath/$markdownTwin">${encodeHtml(config.i18nStrings.pageCopyMarkdown)}</button>
         </div>'''
         : '';
 

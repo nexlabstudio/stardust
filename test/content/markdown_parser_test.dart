@@ -290,6 +290,31 @@ print('hello');
         expect(result.html, contains('copy-button'));
       });
 
+      test('uses localized copy button text and aria-label', () {
+        const customConfig = StardustConfig(
+          name: 'Test',
+          i18n: I18nConfig(
+            strings: I18nStrings(
+              codeCopy: 'Copier',
+              codeCopyLabel: 'Copier le code',
+            ),
+          ),
+        );
+        final customParser = MarkdownParser(config: customConfig);
+        const content = '''
+```dart
+print('hello');
+```
+''';
+
+        final result = customParser.parse(content);
+
+        expect(
+          result.html,
+          contains('<button class="copy-button" aria-label="Copier le code">Copier</button>'),
+        );
+      });
+
       test('excludes copy button when disabled', () {
         const customConfig = StardustConfig(
           name: 'Test',

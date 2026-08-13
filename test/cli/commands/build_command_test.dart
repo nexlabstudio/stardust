@@ -407,6 +407,35 @@ void main() {
       expect(fileSystem.fileAt(p.join('out', 'es', 'index.html')), contains('Guías'));
     });
 
+    test('applies per-locale UI strings with shared fallbacks', () async {
+      await File(configPath).writeAsString('name: Test\n'
+          'content:\n  dir: $docsDir\n'
+          'i18n:\n'
+          '  enabled: true\n'
+          '  defaultLocale: en\n'
+          '  strings:\n'
+          '    footer.poweredBy: Shared footer\n'
+          '  locales:\n'
+          '    - {code: en, label: English, path: /}\n'
+          '    - code: es\n'
+          '      label: Español\n'
+          '      path: /es/\n'
+          '      strings:\n'
+          '        search.placeholder: Buscar documentación\n'
+          '        menu.toggle: Abrir menú\n');
+
+      expect(await runner.run(['build', '-c', configPath, '-o', 'out', '--skip-search']), 0, reason: errors.join('\n'));
+
+      final english = fileSystem.fileAt(p.join('out', 'index.html'));
+      final spanish = fileSystem.fileAt(p.join('out', 'es', 'index.html'));
+      expect(english, contains('Search docs...'));
+      expect(english, isNot(contains('Buscar documentación')));
+      expect(spanish, contains('Buscar documentación'));
+      expect(spanish, contains('aria-label="Abrir menú"'));
+      expect(english, contains('Shared footer'));
+      expect(spanish, contains('Shared footer'));
+    });
+
     test('resolves locale-suffixed sibling files without leaking them', () async {
       fileSystem.addFile(p.join(docsDir, 'guide.md'), '# Guide EN');
       fileSystem.addFile(p.join(docsDir, 'guide.es.md'), '# Guía ES');

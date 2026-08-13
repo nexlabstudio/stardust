@@ -260,6 +260,37 @@ void main() {
         expect(config.integrations.analytics!.google, equals('GA-123'));
       });
 
+      test('parses shared and locale-specific i18n strings', () {
+        final config = ConfigLoader.parse({
+          'name': 'Test',
+          'i18n': {
+            'defaultLocale': 'en',
+            'strings': {
+              'search.placeholder': 'Search everything',
+              'code.copy': 'Copy snippet',
+            },
+            'locales': [
+              {'code': 'en', 'label': 'English', 'path': '/'},
+              {
+                'code': 'fr',
+                'label': 'Français',
+                'path': '/fr/',
+                'strings': {
+                  'search.placeholder': 'Tout rechercher',
+                  'dartdoc.backToDocs': '← Retour aux guides',
+                },
+              },
+            ],
+          },
+        });
+
+        final i18n = config.i18n!;
+        expect(i18n.strings.searchPlaceholder, equals('Search everything'));
+        expect(i18n.locales[1].strings!.searchPlaceholder, equals('Tout rechercher'));
+        expect(i18n.locales[1].strings!.codeCopy, equals('Copy snippet'));
+        expect(i18n.locales[1].strings!.dartdocBackToDocs, equals('← Retour aux guides'));
+      });
+
       test('uses defaults for missing optional fields', () {
         final config = ConfigLoader.parse({'name': 'Test'});
 

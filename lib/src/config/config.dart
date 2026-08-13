@@ -95,7 +95,28 @@ class StardustConfig {
     this.untranslatedPaths,
   });
 
-  I18nStrings get i18nStrings => i18n?.strings ?? const I18nStrings();
+  /// UI strings for the current locale. Locale-specific values win over the
+  /// shared i18n strings; before a locale build is selected, the configured
+  /// default locale is used.
+  I18nStrings get i18nStrings {
+    final i18nConfig = i18n;
+    if (i18nConfig == null) return const I18nStrings();
+
+    final selectedCode = activeLocale?.code ?? i18nConfig.defaultLocale;
+    final selectedStrings = activeLocale?.strings ??
+        i18nConfig.locales
+            .where((locale) => locale.code == selectedCode)
+            .map((locale) => locale.strings)
+            .whereType<I18nStrings>()
+            .firstOrNull;
+    return selectedStrings ?? i18nConfig.strings;
+  }
+
+  /// Locale override, then the existing search configuration.
+  String get searchPlaceholder => i18nStrings.searchPlaceholder ?? search.placeholder;
+
+  /// Locale override, then the existing table-of-contents configuration.
+  String get tocTitle => i18nStrings.tocTitle ?? toc.title;
 
   String get lang => activeLocale?.code ?? i18n?.defaultLocale ?? 'en';
 

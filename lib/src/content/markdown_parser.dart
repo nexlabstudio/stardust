@@ -244,8 +244,11 @@ class MarkdownParser implements ContentParser {
           final highlighted = highlight.parse(code, language: language);
           final highlightedHtml = _renderHighlight(highlighted.nodes ?? []);
 
-          final copyButton =
-              config.code.copyButton ? '<button class="copy-button" aria-label="Copy code">Copy</button>' : '';
+          final strings = config.i18nStrings;
+          final copyButton = config.code.copyButton
+              ? '<button class="copy-button" aria-label="${encodeHtmlAttribute(strings.codeCopyLabel)}">'
+                  '${encodeHtml(strings.codeCopy)}</button>'
+              : '';
 
           final lineNumbers =
               config.code.lineNumbers ? '<div class="line-numbers">${_generateLineNumbers(code)}</div>' : '';
