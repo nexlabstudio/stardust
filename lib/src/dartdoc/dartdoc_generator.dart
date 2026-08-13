@@ -52,6 +52,8 @@ class DartdocGenerator {
         primaryColor: config.theme.colors.primary,
         logoLight: _prefixAsset(config.logo?.effectiveLight, config.basePath),
         logoDark: _prefixAsset(config.logo?.effectiveDark, config.basePath),
+        apiLabel: config.i18nStrings.dartdocApi,
+        backToDocs: config.i18nStrings.dartdocBackToDocs,
       );
       var pages = 0;
       await for (final entity in fileSystem.listDirectory(tmp.path, recursive: true)) {
@@ -114,6 +116,8 @@ class DartdocGenerator {
     required String primaryColor,
     String? logoLight,
     String? logoDark,
+    String apiLabel = 'API',
+    String backToDocs = '← Back to docs',
   }) {
     final accent = _safeColor(primaryColor, '#6366f1');
     final home = encodeHtmlAttribute(homeUrl);
@@ -132,8 +136,8 @@ class DartdocGenerator {
         '.sd-logo-dark{display:none}.dark-theme .sd-logo-light{display:none}.dark-theme .sd-logo-dark{display:block}'
         '</style>'
         '<a class="sd-apibar__brand" href="$home">${_logoImages(logoLight, logoDark)}'
-        '<span>${encodeHtml(name)}</span><span class="sd-apibar__badge">API</span></a>'
-        '<a class="sd-apibar__home" href="$home">← Back to docs</a>'
+        '<span>${encodeHtml(name)}</span><span class="sd-apibar__badge">${encodeHtml(apiLabel)}</span></a>'
+        '<a class="sd-apibar__home" href="$home">${encodeHtml(backToDocs)}</a>'
         '</div>';
   }
 

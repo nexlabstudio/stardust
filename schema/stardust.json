@@ -681,6 +681,9 @@
                 "items": {
                   "$ref": "#/$defs/sidebarGroup"
                 }
+              },
+              "strings": {
+                "$ref": "#/$defs/i18nStrings"
               }
             },
             "required": [
@@ -691,11 +694,7 @@
           }
         },
         "strings": {
-          "type": "object",
-          "description": "Override UI strings for localization",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "$ref": "#/$defs/i18nStrings"
         }
       }
     },
@@ -1157,6 +1156,158 @@
         },
         "color": {
           "type": "string"
+        }
+      }
+    },
+    "i18nStrings": {
+      "type": "object",
+      "description": "UI string overrides. At i18n.strings these are shared fallbacks; strings on a locale override them for that locale.",
+      "additionalProperties": false,
+      "properties": {
+        "nav.previous": {
+          "type": "string",
+          "default": "← Previous",
+          "description": "Label above the previous page title"
+        },
+        "nav.next": {
+          "type": "string",
+          "default": "Next →",
+          "description": "Label above the next page title"
+        },
+        "toc.title": {
+          "type": "string",
+          "default": "On this page",
+          "description": "Locale override for the table of contents heading; falls back to toc.title"
+        },
+        "footer.poweredBy": {
+          "type": "string",
+          "default": "Powered by",
+          "description": "Powered-by label in the footer"
+        },
+        "theme.toggle": {
+          "type": "string",
+          "default": "Toggle dark mode",
+          "description": "Accessible label for the theme toggle"
+        },
+        "menu.toggle": {
+          "type": "string",
+          "default": "Toggle menu",
+          "description": "Accessible label for the mobile menu toggle"
+        },
+        "menu.close": {
+          "type": "string",
+          "default": "Close menu",
+          "description": "Accessible label for the sidebar close button"
+        },
+        "announcement.dismiss": {
+          "type": "string",
+          "default": "Dismiss announcement",
+          "description": "Accessible label for the announcement dismiss button"
+        },
+        "version.select": {
+          "type": "string",
+          "default": "Select version",
+          "description": "Accessible label for the version selector"
+        },
+        "version.dismiss": {
+          "type": "string",
+          "default": "Dismiss banner",
+          "description": "Accessible label for the version banner dismiss button"
+        },
+        "search.placeholder": {
+          "type": "string",
+          "default": "Search docs...",
+          "description": "Locale override for the search trigger, dialog, and input label; falls back to search.placeholder"
+        },
+        "search.noResults": {
+          "type": "string",
+          "default": "No results found for \"%s\"",
+          "description": "No-results message; %s is replaced by the query"
+        },
+        "search.oneResult": {
+          "type": "string",
+          "default": "1 result",
+          "description": "Single-result count"
+        },
+        "search.manyResults": {
+          "type": "string",
+          "default": "%s results",
+          "description": "Multiple-result count; %s is replaced by the count"
+        },
+        "search.searching": {
+          "type": "string",
+          "default": "Searching...",
+          "description": "Search loading status"
+        },
+        "search.clear": {
+          "type": "string",
+          "default": "Clear search",
+          "description": "Accessible label for the clear-search button"
+        },
+        "search.more": {
+          "type": "string",
+          "default": "Load more results",
+          "description": "Label for the load-more-results button"
+        },
+        "search.unavailable": {
+          "type": "string",
+          "default": "Search is unavailable",
+          "description": "Status shown when the search index cannot be loaded"
+        },
+        "code.copy": {
+          "type": "string",
+          "default": "Copy",
+          "description": "Visible label for a code block's copy button"
+        },
+        "code.copyLabel": {
+          "type": "string",
+          "default": "Copy code",
+          "description": "Accessible label for a code block's copy button"
+        },
+        "code.copied": {
+          "type": "string",
+          "default": "Copied!",
+          "description": "Copy success feedback"
+        },
+        "code.copyFailed": {
+          "type": "string",
+          "default": "Copy failed",
+          "description": "Copy failure feedback"
+        },
+        "locale.select": {
+          "type": "string",
+          "default": "Select language",
+          "description": "Accessible label for the locale selector"
+        },
+        "locale.untranslated": {
+          "type": "string",
+          "default": "This page has not been translated yet.",
+          "description": "Notice on pages that fall back to the default locale"
+        },
+        "page.copyMarkdown": {
+          "type": "string",
+          "default": "Copy page as Markdown",
+          "description": "Label for the copy-page-as-Markdown button"
+        },
+        "page.readingTime": {
+          "type": "string",
+          "default": "%s min read",
+          "description": "Reading-time label; %s is replaced by the number of minutes"
+        },
+        "page.lastUpdated": {
+          "type": "string",
+          "default": "Last updated %s",
+          "description": "Last-updated label; %s is replaced by the date"
+        },
+        "dartdoc.api": {
+          "type": "string",
+          "default": "API",
+          "description": "Badge in the Stardust bar on generated dartdoc pages"
+        },
+        "dartdoc.backToDocs": {
+          "type": "string",
+          "default": "← Back to docs",
+          "description": "Link back to the documentation from generated dartdoc pages"
         }
       }
     }

@@ -172,6 +172,32 @@ void main() {
         expect(html, contains('class="prose"'));
       });
 
+      test('uses the localized copy-page Markdown label', () {
+        const config = StardustConfig(
+          name: 'Test',
+          build: BuildConfig(llms: LlmsConfig(enabled: true)),
+          i18n: I18nConfig(
+            strings: I18nStrings(pageCopyMarkdown: 'Copier la page en Markdown'),
+          ),
+        );
+        const page = Page(
+          path: '/guide',
+          sourcePath: 'content/guide.md',
+          title: 'Guide',
+          content: '<p>Content</p>',
+        );
+
+        final html = PageBuilder(config: config).build(page, sidebar: []);
+
+        expect(
+          html,
+          contains(
+            '<button class="copy-page-button" data-md-path="../guide.md">Copier la page en Markdown</button>',
+          ),
+        );
+        expect(html, isNot(contains('>Copy page as Markdown</button>')));
+      });
+
       test('includes meta viewport', () {
         const page = Page(
           path: '/test',

@@ -71,15 +71,20 @@ class I18nConfig {
     this.strings = const I18nStrings(),
   });
 
-  factory I18nConfig.fromYaml(Map? yaml) => switch (yaml) {
-        final Map yaml => I18nConfig(
-            enabled: yaml['enabled'] as bool? ?? false,
-            defaultLocale: yaml['defaultLocale'] as String? ?? 'en',
-            locales: (yaml['locales'] as List?)?.map((e) => LocaleConfig.fromYaml(e as Map)).toList() ?? [],
-            strings: I18nStrings.fromYaml(yaml['strings'] as Map?),
-          ),
-        _ => const I18nConfig(),
-      };
+  factory I18nConfig.fromYaml(Map? yaml) {
+    if (yaml == null) return const I18nConfig();
+
+    final strings = I18nStrings.fromYaml(yaml['strings'] as Map?);
+    return I18nConfig(
+      enabled: yaml['enabled'] as bool? ?? false,
+      defaultLocale: yaml['defaultLocale'] as String? ?? 'en',
+      locales: (yaml['locales'] as List?)
+              ?.map((entry) => LocaleConfig.fromYaml(entry as Map, stringFallback: strings))
+              .toList() ??
+          [],
+      strings: strings,
+    );
+  }
 }
 
 class LocaleConfig {
@@ -96,6 +101,10 @@ class LocaleConfig {
   /// titles and page labels. Defaults to the shared sidebar.
   final List<SidebarGroup>? sidebar;
 
+  /// UI string overrides for this locale. Values omitted from YAML inherit the
+  /// shared [I18nConfig.strings] values.
+  final I18nStrings? strings;
+
   const LocaleConfig({
     required this.code,
     required this.label,
@@ -103,21 +112,32 @@ class LocaleConfig {
     required this.path,
     this.source,
     this.sidebar,
+    this.strings,
   });
 
-  factory LocaleConfig.fromYaml(Map yaml) => LocaleConfig(
+  factory LocaleConfig.fromYaml(
+    Map yaml, {
+    I18nStrings stringFallback = const I18nStrings(),
+  }) =>
+      LocaleConfig(
         code: yaml['code'] as String,
         label: yaml['label'] as String,
         dir: yaml['dir'] as String? ?? 'ltr',
         path: yaml['path'] as String,
         source: yaml['source'] as String?,
         sidebar: (yaml['sidebar'] as List?)?.map((e) => SidebarGroup.fromYaml(e as Map)).toList(),
+        strings: switch (yaml['strings']) {
+          final Map strings => I18nStrings.fromYaml(strings, fallback: stringFallback),
+          _ => null,
+        },
       );
 }
 
 class I18nStrings {
+  final String? searchPlaceholder;
   final String navPrevious;
   final String navNext;
+  final String? tocTitle;
   final String footerPoweredBy;
   final String themeToggle;
   final String menuToggle;
@@ -132,14 +152,23 @@ class I18nStrings {
   final String searchClear;
   final String searchMore;
   final String searchUnavailable;
+  final String codeCopy;
+  final String codeCopyLabel;
+  final String codeCopied;
+  final String codeCopyFailed;
   final String localeSelect;
   final String localeUntranslated;
+  final String pageCopyMarkdown;
   final String readingTime;
   final String lastUpdated;
+  final String dartdocApi;
+  final String dartdocBackToDocs;
 
   const I18nStrings({
+    this.searchPlaceholder,
     this.navPrevious = '← Previous',
     this.navNext = 'Next →',
+    this.tocTitle,
     this.footerPoweredBy = 'Powered by',
     this.themeToggle = 'Toggle dark mode',
     this.menuToggle = 'Toggle menu',
@@ -154,15 +183,24 @@ class I18nStrings {
     this.searchClear = 'Clear search',
     this.searchMore = 'Load more results',
     this.searchUnavailable = 'Search is unavailable',
+    this.codeCopy = 'Copy',
+    this.codeCopyLabel = 'Copy code',
+    this.codeCopied = 'Copied!',
+    this.codeCopyFailed = 'Copy failed',
     this.localeSelect = 'Select language',
     this.localeUntranslated = 'This page has not been translated yet.',
+    this.pageCopyMarkdown = 'Copy page as Markdown',
     this.readingTime = '%s min read',
     this.lastUpdated = 'Last updated %s',
+    this.dartdocApi = 'API',
+    this.dartdocBackToDocs = '← Back to docs',
   });
 
   static const _keyMap = {
+    'search.placeholder': 'searchPlaceholder',
     'nav.previous': 'navPrevious',
     'nav.next': 'navNext',
+    'toc.title': 'tocTitle',
     'footer.poweredBy': 'footerPoweredBy',
     'theme.toggle': 'themeToggle',
     'menu.toggle': 'menuToggle',
@@ -177,14 +215,24 @@ class I18nStrings {
     'search.clear': 'searchClear',
     'search.more': 'searchMore',
     'search.unavailable': 'searchUnavailable',
+    'code.copy': 'codeCopy',
+    'code.copyLabel': 'codeCopyLabel',
+    'code.copied': 'codeCopied',
+    'code.copyFailed': 'codeCopyFailed',
     'locale.select': 'localeSelect',
     'locale.untranslated': 'localeUntranslated',
+    'page.copyMarkdown': 'pageCopyMarkdown',
     'page.readingTime': 'readingTime',
     'page.lastUpdated': 'lastUpdated',
+    'dartdoc.api': 'dartdocApi',
+    'dartdoc.backToDocs': 'dartdocBackToDocs',
   };
 
-  factory I18nStrings.fromYaml(Map? yaml) {
-    if (yaml == null || yaml.isEmpty) return const I18nStrings();
+  factory I18nStrings.fromYaml(
+    Map? yaml, {
+    I18nStrings fallback = const I18nStrings(),
+  }) {
+    if (yaml == null || yaml.isEmpty) return fallback;
 
     final overrides = <String, String>{};
     for (final entry in yaml.entries) {
@@ -195,26 +243,35 @@ class I18nStrings {
     }
 
     return I18nStrings(
-      navPrevious: overrides['navPrevious'] ?? '← Previous',
-      navNext: overrides['navNext'] ?? 'Next →',
-      footerPoweredBy: overrides['footerPoweredBy'] ?? 'Powered by',
-      themeToggle: overrides['themeToggle'] ?? 'Toggle dark mode',
-      menuToggle: overrides['menuToggle'] ?? 'Toggle menu',
-      menuClose: overrides['menuClose'] ?? 'Close menu',
-      announcementDismiss: overrides['announcementDismiss'] ?? 'Dismiss announcement',
-      versionSelect: overrides['versionSelect'] ?? 'Select version',
-      versionDismiss: overrides['versionDismiss'] ?? 'Dismiss banner',
-      searchNoResults: overrides['searchNoResults'] ?? 'No results found for "%s"',
-      searchOneResult: overrides['searchOneResult'] ?? '1 result',
-      searchManyResults: overrides['searchManyResults'] ?? '%s results',
-      searchSearching: overrides['searchSearching'] ?? 'Searching...',
-      searchClear: overrides['searchClear'] ?? 'Clear search',
-      searchMore: overrides['searchMore'] ?? 'Load more results',
-      searchUnavailable: overrides['searchUnavailable'] ?? 'Search is unavailable',
-      localeSelect: overrides['localeSelect'] ?? 'Select language',
-      localeUntranslated: overrides['localeUntranslated'] ?? 'This page has not been translated yet.',
-      readingTime: overrides['readingTime'] ?? '%s min read',
-      lastUpdated: overrides['lastUpdated'] ?? 'Last updated %s',
+      searchPlaceholder: overrides['searchPlaceholder'] ?? fallback.searchPlaceholder,
+      navPrevious: overrides['navPrevious'] ?? fallback.navPrevious,
+      navNext: overrides['navNext'] ?? fallback.navNext,
+      tocTitle: overrides['tocTitle'] ?? fallback.tocTitle,
+      footerPoweredBy: overrides['footerPoweredBy'] ?? fallback.footerPoweredBy,
+      themeToggle: overrides['themeToggle'] ?? fallback.themeToggle,
+      menuToggle: overrides['menuToggle'] ?? fallback.menuToggle,
+      menuClose: overrides['menuClose'] ?? fallback.menuClose,
+      announcementDismiss: overrides['announcementDismiss'] ?? fallback.announcementDismiss,
+      versionSelect: overrides['versionSelect'] ?? fallback.versionSelect,
+      versionDismiss: overrides['versionDismiss'] ?? fallback.versionDismiss,
+      searchNoResults: overrides['searchNoResults'] ?? fallback.searchNoResults,
+      searchOneResult: overrides['searchOneResult'] ?? fallback.searchOneResult,
+      searchManyResults: overrides['searchManyResults'] ?? fallback.searchManyResults,
+      searchSearching: overrides['searchSearching'] ?? fallback.searchSearching,
+      searchClear: overrides['searchClear'] ?? fallback.searchClear,
+      searchMore: overrides['searchMore'] ?? fallback.searchMore,
+      searchUnavailable: overrides['searchUnavailable'] ?? fallback.searchUnavailable,
+      codeCopy: overrides['codeCopy'] ?? fallback.codeCopy,
+      codeCopyLabel: overrides['codeCopyLabel'] ?? fallback.codeCopyLabel,
+      codeCopied: overrides['codeCopied'] ?? fallback.codeCopied,
+      codeCopyFailed: overrides['codeCopyFailed'] ?? fallback.codeCopyFailed,
+      localeSelect: overrides['localeSelect'] ?? fallback.localeSelect,
+      localeUntranslated: overrides['localeUntranslated'] ?? fallback.localeUntranslated,
+      pageCopyMarkdown: overrides['pageCopyMarkdown'] ?? fallback.pageCopyMarkdown,
+      readingTime: overrides['readingTime'] ?? fallback.readingTime,
+      lastUpdated: overrides['lastUpdated'] ?? fallback.lastUpdated,
+      dartdocApi: overrides['dartdocApi'] ?? fallback.dartdocApi,
+      dartdocBackToDocs: overrides['dartdocBackToDocs'] ?? fallback.dartdocBackToDocs,
     );
   }
 }
